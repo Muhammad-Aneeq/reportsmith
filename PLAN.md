@@ -16,20 +16,47 @@
 
 ---
 
-## THE CENTRAL ADAPTATION · composition against contracts, not against code
+## THE CENTRAL ADAPTATION · vendor the real code, build the rest here
 
-The brief says *"It COMPOSES sibling projects: reuse, never rebuild"* and names three things to reuse. Phase 0 went and looked. What is actually on disk decides the shape of this build:
+> **Corrected 2026-09-22.** The first pass of this section was written against a stale read of the
+> sibling directories and claimed SpendSort and StatementLens were spec-only. **They are not.**
+> Both are real, working repos. The re-inspection and what it changed is logged in PROGRESS.md
+> under *P0 · correction*; the superseded decisions are struck through in the DECISIONS LOG rather
+> than deleted.
 
-| To reuse | Brief says it is at | What is actually there | Consequence |
-|---|---|---|---|
-| **ledgerfab** | `./backend_seed_ledgerfab/` | **absent** — this repo held only two spec files. Five copies exist across the portfolio; `../ledgerlab/backend/ledgerfab/` is upstream (the others carry a `VENDORED.md` naming it) | **Vendor it**, portfolio convention, with provenance — **D-002** |
-| **numcheck**, *"the numeric cross-check from `../statementlens`"* | `../statementlens/backend/numcheck/` | **absent** — `../statementlens/` contains `spec_00` and `spec_12` and nothing else. `grep -ri 'numcheck\|figure_ref\|cross_check'` across all 14 portfolio repos returns **only spec text** | **Originates here**, written to spec 12 F5 and shaped to be *lifted* into StatementLens unchanged — **D-004** |
-| **SpendSort export schema** | `../spendsort/` | **absent** — spec files only, and spec 11 never prints the export's column header | **Documented-schema fixtures**, generated from the same ledgerfab period so the numbers tie out — **D-005**, **D-006** |
-| **StatementLens computations schema** | `../statementlens/` | as above; spec 12 §6 gives table columns but no export envelope | as above — **D-005**, **D-006** |
+The brief says *"It COMPOSES sibling projects: reuse, never rebuild"*. Phase 0 went and looked — twice. What is actually on disk:
 
-So "compose, never rebuild" is honoured as **composition against a documented contract**: every sibling is reached through a `SourceAdapter` with a declared `SCHEMA_VERSION`, validated on read, fixture-tested — and the live-integration task for each is a real, named, **BLOCKED** task (BLOCKERS **B3**, **B4**) rather than a quietly-dropped one. When a sibling ships, the change is a reader swap behind an unchanged interface.
+| To reuse | Status on disk | Consequence |
+|---|---|---|
+| **ledgerfab** | not at `./backend_seed_ledgerfab/`; five portfolio copies, `../ledgerlab/backend/ledgerfab/` upstream | **Vendor it** with provenance — **D-002** |
+| **`ledgerfab.statements`** — the multi-period statement emitter | ✅ **built and working** in `../statementlens/backend/ledgerfab/statements/`. Its own README: *"Written to be reused. Nothing here imports from `statementlens`, so lifting this directory into the shared engine is a directory move."* | **Vendor it too.** This is the single biggest find of Phase 0 — see below — **D-017** |
+| **SpendSort export** | ✅ **complete repo**, `FINAL_REPORT.md` and all. A real 15-column export in `backend/app/services/export.py`, and shipped `examples/month_01…`, `month_02…` intake files | Adapter built against the **real schema**, fixture-tested against a **really-generated export** — the brief's preferred branch — **D-005** |
+| **StatementLens computations (P4) + flags (P5)** | ⚠️ **not built yet** — StatementLens is through P3 of P11 | ReportSmith computes what it needs **in-repo**, emitting the shape StatementLens's own PLAN defines — **D-018** |
+| **numcheck** | ⚠️ **not built yet** — StatementLens P6, designed in detail, unwritten. Their brief: *"must be built as a REUSABLE package… project 13 will import this pattern"* | **Originates here**, matching their P6 design so adoption is a directory move — **D-004** |
 
-**This is not merely a workaround; it is the feature under test.** Spec 13 F2 requires that a *"missing/failed binding → section renders as an explicit GAP (never silently omitted), listed in a gaps panel."* Two genuinely-unavailable siblings mean the GAP path and the waiver flow are exercised by the *default* template on the *default* run, not by a contrived test fixture.
+**The repo is self-contained.** Per the standing instruction — *"create everything needed for ReportSmith in this repo"* — nothing here imports across a sibling path at runtime. Reuse means **vendored code with provenance** and **schemas read from real sibling source**, never a path dependency that would make this repo unclonable (**D-017**).
+
+### What the statement emitter changes
+
+The first plan made the default pack spend- and payables-shaped, because raw ledgerfab books only the purchase cycle — no revenue. The emitter retires that constraint. Verified by running it in Phase 0:
+
+```python
+emit_statements("squeeze", seed=42, periods=3, grain="month")
+# periods: Period(id='2024-01' …), '2024-02', '2024-03'   ← monthly grain, native
+# revenue      3,631,007.40      net_income  -104,377.55
+# total_assets 19,391,654.47     Decimal throughout, statement_hash stable
+# ground_truth.anomalies: margin_compression · ar_days_balloon · inventory_build
+```
+
+Three consequences, each of which deletes a workaround:
+
+1. **The Monthly Management Pack gets real financials** — P&L, balance sheet and cash flow, with `assets = liabilities + equity` guaranteed by construction (the emitter derives statements from a trial balance rather than authoring them). **D-007 is retired.**
+2. **`make month2` needs no hack.** The emitter has a native `grain="month"` and period ids `2024-01`, `2024-02`. The earlier plan overrode ledgerfab's profile window to fake a month. **D-009 is simplified.**
+3. **Money is already `Decimal`** at the source, and `statement_hash` gives the data-snapshot hash the archive needs for free.
+
+### The GAP path is still exercised — deliberately
+
+Spec 13 F2 requires that a *"missing/failed binding → section renders as an explicit GAP (never silently omitted), listed in a gaps panel"*, and F5 requires unresolved gaps to block issuance unless waived. With the siblings working, that path has to be proven on purpose rather than by accident: `test_no_silent_omission.py` drives twelve adversarial adapter behaviours, and the default template ships one section bound to a dataset that is deliberately unavailable in the demo profile, so the gaps panel and the waiver flow are live on the default run.
 
 ---
 
@@ -158,6 +185,9 @@ reportsmith/
 │
 ├── backend/
 │   ├── pyproject.toml                       [P1] uv · ruff · mypy · pytest markers (live, integration)
+│   ├── ledgerfab/                           [P1] VENDORED — engine from ../ledgerlab + statements/ from ../statementlens
+│   │   ├── VENDORED.md                          provenance for BOTH halves + every local change (D-017)
+│   │   └── statements/                          ★ the multi-period P&L/BS/CF emitter, monthly grain, Decimal
 │   ├── app/
 │   │   ├── main.py  settings.py  db.py  models.py     [P1] FastAPI, pydantic-settings, SQLAlchemy (spec 13 §6 tables)
 │   │   ├── api/  templates.py packs.py sections.py signoff.py archive.py diff.py   [P1,P2,P5,P7]
@@ -170,18 +200,23 @@ reportsmith/
 │   │   │   ├── base.py                      [P2] SourceAdapter protocol · BindingResult = Bound | Gap · GapReason
 │   │   │   ├── selector.py                  [P2] the closed declarative grammar → Frame
 │   │   │   ├── frame.py                     [P2] typed frame (columns, dtypes, Decimal money)
-│   │   │   ├── ledgerfab_adapter.py         [P2] datasets: gl_expense_lines · period_metrics · exceptions · invoices · counterparties
-│   │   │   ├── spendsort_adapter.py         [P2] reads the spec-11 export CSV — fixture-backed, live BLOCKED (B3)
-│   │   │   └── statementlens_adapter.py     [P2] reads spec-12 computations + flags JSON — fixture-backed, live BLOCKED (B4)
+│   │   │   ├── ledgerfab_adapter.py         [P2] pnl/bs/cf_lines (vendored emitter) + gl_expense_lines · exceptions · invoices
+│   │   │   ├── spendsort_adapter.py         [P2] the REAL 15-col export: utf-8-sig, strip `'` prefix, slice by date
+│   │   │   └── statementlens_adapter.py     [P2] computations + flags; in-repo today, live P4/P5 later (B4)
+│   │   ├── analysis/                        [P2] ratios + YAML flag rules, to StatementLens's P4/P5 shapes (D-018)
+│   │   │   ├── formula.py  engine.py            Computation(formula_id, period, value, status, inputs)
+│   │   │   └── flags/rules/*.yaml  engine.py    Flag(rule_id, period, severity, evidence); closed predicate DSL
 │   │   ├── assemble/
 │   │   │   ├── engine.py                    [P3] template order → sections; cover + contents generated (F3)
 │   │   │   ├── tables.py  kpis.py  flags.py [P3] deterministic renderers
 │   │   │   └── hashes.py                    [P3] structure_hash · value_digest · snapshot_hash
-│   │   ├── numcheck/                        ★ [P4] ORIGIN HERE — shaped to be lifted into StatementLens (D-004)
-│   │   │   ├── ORIGIN.md                        why it lives here, and the lift procedure
-│   │   │   ├── extract.py                       numeric tokens from prose (currency, %, parens-negatives, separators)
-│   │   │   ├── check.py                         tokens × figure_refs → Verdict(ok | mismatches)
-│   │   │   └── harness.py                       the shared numeric-fidelity metric (spec 12 §10 / spec 13 §10)
+│   │   └── (numcheck is NOT under app/ — it is a standalone package, below)
+│   ├── numcheck/                            ★ [P4] ORIGIN HERE — standalone; lifts into StatementLens P6 (D-004)
+│   │   ├── ORIGIN.md  pyproject.toml  README.md  tests/     own everything; zero ReportSmith imports
+│   │   ├── models.py                            FigureRef · NumericToken · TokenVerdict · CheckResult
+│   │   ├── tokenize.py  match.py  exempt.py     spans + precision · exact Decimal, no tolerance · closed 2-entry list
+│   │   ├── verify.py  surgery.py                verdict per token · abbreviation-aware sentence surgery
+│   │   └── harness.py                           the shared numeric-fidelity metric (spec 12 §10 / spec 13 §10)
 │   │   ├── narrate/
 │   │   │   ├── graph.py                     [P4] LangGraph: plan → draft → numcheck → [retry once] → lint → finalize
 │   │   │   ├── composer.py                  [P4] Composer protocol · MockComposer(faulty=…) · OpenAIComposer (live)
@@ -242,9 +277,9 @@ Spec 13 §13 gives four weeks: W1 template model + adapters + assembly · W2 com
 Spec 13 F1: *"Template model (YAML, versioned): sections[{id, title, type[table|kpi_grid|narrative|flags], binding, tone_rules, required}] + pack-level style rules… Ships with a default Monthly Management Pack template."*
 
 - [ ] `backend/pyproject.toml` (uv, ruff, mypy, pytest markers `live` + `integration`), `Makefile`, `make.ps1`, `.gitignore`, `LICENSE`
-- [ ] Vendor `../ledgerlab/backend/ledgerfab/` → `backend/ledgerfab/` + **`VENDORED.md`** (provenance, every local change, why-not-the-other-copies); run its own determinism tests here before building on it
-- [ ] `app/money.py` — the single `Decimal` rounding rule
-- [ ] `app/periods.py` — `Period("2025-01")` → ledgerfab profile override + seed (**D-009**)
+- [ ] Vendor **both** halves and write one **`VENDORED.md`** covering them: `../ledgerlab/backend/ledgerfab/` (the engine) and `../statementlens/backend/ledgerfab/statements/` (the multi-period statement emitter — **D-017**). Provenance, every local change, why-not-the-other-copies. **Run their own test suites here before building on them** — the emitter ships `test_emitter_invariants/determinism/periods/export/anomalies`, and those passing in *this* repo is what makes the vendored copy trustworthy
+- [ ] `app/money.py` — the single `Decimal` rounding rule (the emitter is already `Decimal`; this covers raw-ledgerfab floats and SpendSort's CSV strings)
+- [ ] `app/periods.py` — periods come from `emit_statements(..., grain="month")`; adopt the emitter's own `Period.id` (`2024-01`) verbatim (**D-009**)
 - [ ] `app/template/schema.py` — closed Pydantic v2 model, `extra="forbid"`, 4 section types, selector grammar, style rules
 - [ ] `app/template/store.py` — YAML store, `(id, version)` immutable once referenced, validation errors that point at the YAML line
 - [ ] `app/template/default/monthly_management_pack.yaml` — all four types; the two sibling-bound sections that become the GAP demo
@@ -265,12 +300,13 @@ Spec 13 F2: *"pluggable SourceAdapters: ledgerfab world (direct), SpendSort expo
 - [ ] `adapters/frame.py` — typed frame; money columns are `Decimal`, converted once at the boundary (**D-010**)
 - [ ] `adapters/base.py` — `SourceAdapter` protocol (`catalog()`, `fetch(select, period)`, `SCHEMA_VERSION`); `BindingResult = Bound | Gap`; `GapReason ∈ {adapter_unavailable, binding_failed, empty_result, schema_mismatch, unknown_dataset}`
 - [ ] `adapters/selector.py` — the closed grammar → frame ops; total ordering with tiebreaks
-- [ ] `adapters/ledgerfab_adapter.py` — publishes `gl_expense_lines`, `period_metrics`, `exceptions`, `invoices`, `counterparties`
-- [ ] `fixtures/gen_fixtures.py` — derive the two sibling fixtures **from the same ledgerfab period** so the spendsort category total reconciles to the ledgerfab spend total (**D-006**)
-- [ ] `adapters/spendsort_adapter.py` — spec 11 F6 CSV, `SCHEMA_VERSION="spendsort/v1(spec11-derived)"`, Pydantic-validated per row
-- [ ] `adapters/statementlens_adapter.py` — spec 12 §6/§7 JSON, `SCHEMA_VERSION="statementlens/v1(spec12-derived)"`
-- [ ] `docs/ADAPTER_CONTRACTS.md` — what each publishes, which spec clause the fixture is derived from, what changes when the sibling ships
-- [ ] **BLOCKED** · swap fixture readers for live sibling exports (BLOCKERS **B3**, **B4**)
+- [ ] `adapters/ledgerfab_adapter.py` — publishes `pnl_lines`, `bs_lines`, `cf_lines` (from the vendored emitter, monthly grain) plus `gl_expense_lines`, `exceptions`, `invoices`, `counterparties` from the base engine
+- [ ] `app/analysis/` — the ratio pack and the YAML flag rules, **in-repo, to StatementLens's P4/P5 shapes** (**D-018**): `Computation(formula_id, period, value, status[ok|undefined|caveat], inputs)`, `Flag(rule_id, period, severity, evidence)`. A zero denominator is `undefined` with the zero input named — never `0`, never NaN, never a raised exception; an undefined metric never fires a flag
+- [ ] `fixtures/gen_fixtures.py` — run SpendSort to produce a **real** export for the same period and commit it (**D-005**, **D-017**)
+- [ ] `adapters/spendsort_adapter.py` — the real 15-column schema; `utf-8-sig`; **strip the anti-injection `'` prefix**; slice by `date` since the export carries no period column; `SCHEMA_VERSION="spendsort/v1(export.py COLUMNS @2026-09-22)"`; Pydantic-validated per row
+- [ ] `adapters/statementlens_adapter.py` — reads the in-repo analysis output today, the live P4/P5 endpoints later; `SCHEMA_VERSION="statementlens/v1(spec12+their-PLAN-P4/P5 shape)"`
+- [ ] `docs/ADAPTER_CONTRACTS.md` — what each publishes, where each schema was read from, exactly what changes when upstream ships
+- [ ] **BLOCKED** · repoint the statementlens adapter at live P4/P5 once StatementLens reaches them (BLOCKERS **B4**)
 
 **Acceptance:** spec 13 F2 satisfied — every template section yields a section object; a missing adapter yields a `Gap` with a reason and a human-readable detail; the gaps panel payload lists them; **no adapter failure can raise out of the assembler**. The spendsort fixture's category total equals the ledgerfab expense total for the period, to the cent.
 **Test plan:** `test_adapters.py` (catalog contracts, schema validation, per-row rejection); `test_gaps.py` (each `GapReason` reachable); `test_no_silent_omission.py` (12 adversarial adapter behaviours — raises, returns `None`, returns wrong columns, returns wrong dtypes, hangs-then-fails, returns empty — section count invariant holds for all); `test_fixture_reconciliation.py`.
@@ -298,7 +334,8 @@ Spec 13 F3: *"tables/KPIs computed deterministically from bindings; … pack ass
 
 Spec 13 F4: *"input = that section's bound data + tone rules ONLY; structured output with figure_refs; numeric cross-check identical to StatementLens (reuse the module); style linter enforces tone rules deterministically where possible (rounding, taboo phrases) with violations auto-fixed or flagged."*
 
-- [ ] `numcheck/extract.py` · `check.py` · `harness.py` · **`ORIGIN.md`** (why origin-here, and the lift procedure into StatementLens — **D-004**)
+- [ ] `backend/numcheck/` as a **standalone package** — own `pyproject.toml`, own `README.md`, own `tests/`, `pydantic` as the only third-party surface, **zero ReportSmith imports**; CI runs its tests with the backend not installed. Modules match StatementLens P6 one-for-one so adoption is a directory move: `models.py` (`FigureRef`, `NumericToken`, `TokenVerdict`, `CheckResult`) · `tokenize.py` (spans + declared precision; currency, separators, `k`/`m`/`bn`, parenthesised negatives, percentages, `1.4x`) · `match.py` (units agree **and** the ref rounded to the token's own precision equals the token — exact `Decimal`, **no tolerance knob**) · `exempt.py` (the **closed** two-entry list, its exact contents asserted by a test) · `verify.py` · `surgery.py` (decimal- and abbreviation-aware sentence splitting + `drop_failing_sentences`) · **`ORIGIN.md`** (**D-004**)
+- [ ] `numcheck/harness.py` — the shared numeric-fidelity metric (spec 12 §10 / spec 13 §10)
 - [ ] `narrate/composer.py` — `Composer` protocol; `MockComposer` (deterministic, and a `faulty=True` mode that emits a wrong number — **D-014**); `OpenAIComposer` behind `live`
 - [ ] `narrate/prompts.py` — versioned by `(template_id, template_version, section_id)` (spec 13 §8)
 - [ ] `narrate/lint.py` — rounding, currency rendering, banned phrases, sentence length; **formatting-only auto-fix**
@@ -340,9 +377,19 @@ Spec 13 §9: Templates · Pack Run · Review · Sign-off · Archive shelf · Mon
 - [ ] **Archive shelf** — issued packs, hash, open PDF
 - [ ] **Month-diff** — structure vs numbers, side by side
 
-**Acceptance:** *definition of done* — `make dev` → default template renders in the editor → run a period → statuses + gaps → review → approve → sign → archive → diff. `/aurora` renders every component.
-**Test plan:** `aurora.test.tsx`; component tests for the diff view and the sign-off checklist's disabled states; a Playwright-or-equivalent smoke over the happy path if the runtime allows, else a documented manual script in `docs/GOVERNANCE.md`.
-**Risks:** *screen count vs remaining time* → build order is Pack Run → Review → Sign-off first (they carry the governance story); Templates editor and Month-diff last; anything unfinished is marked **BLOCKED** rather than half-shipped.
+**The UI is held to a "modern and pleasant" bar as an acceptance criterion, not a polish pass (D-019).** This repo's screenshots carry the portfolio's governance argument — the Review screen *is* the pitch — so the bar is explicit and checkable:
+
+- [ ] aurora tokens throughout (`#0B1E3B` / `#10B981`, frosted surfaces, Space Grotesk / Inter); **no ad-hoc colours or one-off spacing**
+- [ ] **every** screen has real loading, empty and error states — no spinner-forever, no dead blank page, no raw JSON dump, no unstyled `<table>`
+- [ ] the AI-draft-vs-current diff is a **proper** diff: word-level highlighting, not two paragraphs side by side
+- [ ] gaps and approval state are legible **at a glance** — colour plus an icon plus text, never colour alone (which is also the accessibility floor)
+- [ ] keyboard-navigable review flow (approve / next / edit), visible focus rings, `prefers-reduced-motion` respected
+- [ ] responsive down to a 1280px laptop; light **and** dark both deliberate, not one inherited by accident
+- [ ] transitions are quick and purposeful — state changes animate, nothing decorative
+
+**Acceptance:** *definition of done* — `make dev` → default template renders in the editor → run a period → statuses + gaps → review → approve → sign → archive → diff. `/aurora` renders every component. Plus the seven bullets above, checked screen by screen and recorded in PROGRESS.md.
+**Test plan:** `aurora.test.tsx`; component tests for the diff view and the sign-off checklist's disabled states; an axe-core pass for contrast and focus order; a Playwright-or-equivalent smoke over the happy path if the runtime allows, else a documented manual script in `docs/GOVERNANCE.md`. Screenshots of all six screens committed for the README.
+**Risks:** *screen count vs remaining time* → build order is Pack Run → Review → Sign-off first (they carry the governance story); Templates editor and Month-diff last; anything unfinished is marked **BLOCKED** rather than half-shipped. *"Modern" drifting into decorative* → the bar above is a list of behaviours, not a mood; each item is individually checkable.
 
 ---
 
@@ -378,8 +425,10 @@ Spec 13 F7 and §10.
 | Dependency | Needed for | Status | Fallback if unavailable |
 |---|---|---|---|
 | **`ledgerfab` seed** | live monthly data | ⚠️ **not at `./backend_seed_ledgerfab/`** — BLOCKERS **B2**; vendored from `../ledgerlab` (**D-002**) | Resolved by vendoring. Verified working in P0 before anything was planned on it |
-| **`../spendsort` export** | category-breakdown sections | 🚫 **spec-only, nothing runnable** — BLOCKERS **B3** | **Documented-schema fixture** (below). Live task marked **BLOCKED** |
-| **`../statementlens` computations + `backend/numcheck/`** | ratio/flag sections; the numeric cross-check | 🚫 **spec-only, nothing runnable** — BLOCKERS **B4** | **Documented-schema fixture** for the data; **numcheck originates here** and is shaped to be lifted upstream (**D-004**) |
+| **`ledgerfab.statements` emitter** | the pack's actual P&L / BS / CF, at monthly grain | ✅ **built and verified running** in `../statementlens`; vendored in (**D-017**) | None needed. Its own README designates it for reuse |
+| **`../spendsort` export** | category-breakdown sections | ✅ **complete repo, runnable** — real 15-column schema in `services/export.py` | Generate a real export, commit it under `fixtures/` (**D-005**). No blocker |
+| **`../statementlens` computations (P4) + flags (P5)** | ratio and flag sections | ⚠️ **not built upstream yet** — BLOCKERS **B4** | Computed **in-repo** to the upstream shape (**D-018**); the adapter's reader is the only thing that changes when they land |
+| **`numcheck`** | the numeric cross-check — the headline gate | ⚠️ **not built upstream yet** (StatementLens P6) — BLOCKERS **B4** | **Originates here** as a standalone package, module-for-module matching their P6 design (**D-004**) |
 | `reportlab` | archive PDF | ✅ proven in `../InvoiceOps` (`pyproject.toml:23`) | Markdown-only archive; PDF recorded as an artefact gap, issuance still proceeds |
 | `langgraph` / `langchain-openai` | the composer (spec 00 F) | ✅ used across the portfolio | Composer graph is a small state machine; a hand-rolled fallback keeps mock mode working with zero LLM deps |
 | OpenAI API key | `live` narratives only | ⚠️ optional by design | **Mock is the default.** CI runs `-m "not live"`; the judge runs from a committed response cache |
@@ -389,15 +438,21 @@ Spec 13 F7 and §10.
 
 ### The sibling-schema fixture strategy (required by the brief; this is it)
 
-The brief allows either path: *"fixture-test against real sample exports you generate from them if runnable, else from their documented schemas: log which in DECISIONS LOG."*
+The brief allows either path: *"fixture-test against real sample exports you generate from them if runnable, else from their documented schemas: log which in DECISIONS LOG."* **Corrected 2026-09-22** — the answer differs per sibling, so both branches are in use and each is logged:
 
-**Both siblings are unrunnable.** `../spendsort/` and `../statementlens/` each contain exactly two files — `spec_00_shared_foundations.md` and their own spec — and no `backend/`, no `numcheck/`, no export code. So: **documented schemas**, logged as **D-005**. Specifically:
+**SpendSort → the preferred branch: real generated exports (D-005).** SpendSort is a complete, runnable repo. The schema is read from `backend/app/services/export.py`'s `COLUMNS` tuple — 15 columns: `date, vendor_raw, vendor_norm, amount, currency, account, account_name, confidence, source, reason, status, learned, coa_valid, cost_usd, memo` — and an export is **really generated** by running SpendSort, then committed under `fixtures/spendsort/` so this repo stays clonable and CI never reaches across a path (**D-017**). Three quirks the adapter must handle, all discovered by reading the real code rather than the spec, all bound for SIBLING_NOTES:
+- **UTF-8 *with BOM*** (`utf-8-sig`) — read with the wrong codec and the first column name carries a `﻿`.
+- **Anti-formula-injection apostrophes are in the data.** Text cells beginning `= + - @` are prefixed with `'` on export. A vendor called `-EDF Energy` arrives as `'-EDF Energy`; the adapter must strip that prefix or every such vendor renders wrong in the pack.
+- **No period column and no `schema_version`.** The export is every transaction, so ReportSmith slices by `date` and cannot detect a schema change from the file itself.
 
-1. **The schema is read out of the spec and pinned in code.** SpendSort: spec 11 §6 (`transactions`, `categorizations`, `vendor_memory`) + F6 (*"categorized CSV with per-line {account, confidence, source, reason}"*). StatementLens: spec 12 §6 (`computations(formula_id, period, value, inputs_json)`, `flags(rule_id, period, severity, evidence_json)`) + §7's endpoints. Each adapter carries a `SCHEMA_VERSION` naming its provenance — e.g. `"spendsort/v1(spec11-derived)"` — so the string itself admits it is derived, not observed.
-2. **The fixtures are generated from the same ledgerfab period, not hand-written** (`fixtures/gen_fixtures.py`). A hand-written fixture proves the parser works; a *derived* one proves the pack **reconciles**: the SpendSort category total must equal the ledgerfab expense total for that period, to the cent, asserted by `test_fixture_reconciliation.py`. It also means `make month2` regenerates coherent sibling data for period 2 for free.
-3. **Every read is validated, and a mismatch is a GAP.** Rows/objects go through Pydantic; a schema mismatch yields `GapReason.schema_mismatch` with the offending field named. So when the real sibling ships and disagrees with the spec, ReportSmith shows a labelled gap in the gaps panel — which is exactly the F2 behaviour under test — rather than crashing or, worse, silently mis-parsing.
-4. **The live swap is a named, BLOCKED task**, not an aspiration: one per sibling (B3, B4), each a reader swap behind an unchanged `SourceAdapter` interface, with the fixture retained as the regression test.
-5. **Friction found while doing this is recorded** in `FINAL_REPORT.md` → **SIBLING_NOTES**, as the brief requires — the first three entries already exist: spec 11 never prints the export CSV's header row or says whether a period column exists; spec 12 defines table columns but no export *envelope* (no `schema_version`, no period-set metadata); and neither spec states its money type or rounding, which is the single most consequential omission for a repo whose headline gate is numeric fidelity.
+**StatementLens computations/flags → built in-repo to the upstream shape (D-018).** Not a fixture-vs-real choice: P4 and P5 are simply not written upstream yet. ReportSmith computes them in `backend/app/analysis/`, emitting the shapes StatementLens's own PLAN pins, so the eventual swap touches only the adapter's reader.
+
+**Common to both:**
+1. Each adapter carries a `SCHEMA_VERSION` that admits its own provenance — `"spendsort/v1(export.py COLUMNS @2026-09-22)"`, `"statementlens/v1(spec12+their-PLAN-P4/P5 shape)"`.
+2. **Fixtures are derived from the same period as the pack, never hand-written** (`fixtures/gen_fixtures.py`) — so `test_fixture_reconciliation.py` can assert the SpendSort category total equals the period's expense total to the cent, and period 2's data comes free.
+3. **Every read is validated, and a mismatch is a GAP, not a crash.** Rows go through Pydantic; a mismatch yields `GapReason.schema_mismatch` naming the offending field. When a sibling changes shape, ReportSmith shows a labelled gap — the F2 behaviour under test — instead of silently mis-parsing.
+4. **The live swaps are named tasks** (B4), each a reader change behind an unchanged `SourceAdapter`, with the fixture retained as the regression test.
+5. **Friction is recorded** in `FINAL_REPORT.md` → **SIBLING_NOTES**: the three SpendSort export quirks above; StatementLens having no export *envelope* (no `schema_version`, no period-set metadata) for a pair of endpoints a sibling is expected to consume; and — the one worth raising loudest — **`numcheck` being scheduled at P6 of a project that two downstream repos depend on**, which is why it is being written here instead.
 
 ---
 
@@ -405,22 +460,27 @@ The brief allows either path: *"fixture-test against real sample exports you gen
 
 | # | Decision | Reasoning |
 |---|---|---|
-| **D-001** | "Compose, never rebuild" is honoured as **composition against a documented contract** — versioned `SourceAdapter`s with fixtures — rather than as an import of code that does not exist | Two of the three named siblings are spec-only (verified in P0). The alternative readings are worse: rebuilding SpendSort/StatementLens here would violate the brief outright, and pretending the dependency is satisfied would ship a fake. The adapter interface makes the eventual swap a reader change, and the GAP path means the missing sibling is *visible in the product* rather than hidden. |
+> **Entries marked ~~superseded~~ were written against a stale read of the sibling repos and are kept, struck through, with what replaced them.** Deleting them would hide a wrong call that shaped a day of planning.
+
+| **D-001** | "Compose, never rebuild" is honoured as **vendored code + schemas read from real sibling source**, behind versioned `SourceAdapter`s | ~~Two of the three named siblings are spec-only~~ — **wrong, corrected 2026-09-22**: both are real. The principle survives the correction but its content improves: reuse now means vendoring `ledgerfab` and the working `ledgerfab.statements` emitter, and reading SpendSort's actual export schema out of its actual code, rather than composing against prose. What genuinely does not exist yet (numcheck, StatementLens P4/P5) is built here — **D-004**, **D-018**. |
 | **D-002** | `ledgerfab` **vendored** into `backend/ledgerfab/`, from `../ledgerlab/backend/ledgerfab/`, not imported | The stated seed path `./backend_seed_ledgerfab/` does not exist (**B2**). Of the five portfolio copies, `ledgerlab`'s is upstream — `finagent-evals`, `finsight` and `InvoiceOps` all carry a `VENDORED.md` naming it, and it is the strict superset. A path dependency on a sibling repo would make this repo unclonable. `VENDORED.md` records provenance and every local change. |
 | **D-003** | aurora implemented locally under `frontend/src/components/aurora/` | No published `aurora-ui` package exists; all ten sibling repos carry a local copy. Consistent with spec 00 A2's intent that *"one import line in any project yields the shared look"*. |
-| **D-004** | **`numcheck` originates in this repo** (`backend/app/numcheck/`), written to spec 12 F5, with an `ORIGIN.md` describing the lift into StatementLens | The brief says *"import or vendor it"*; there is nothing to import or vendor — no implementation exists anywhere in the portfolio (grep for `numcheck`/`figure_ref`/`cross_check` hits spec prose only). Since spec 13 §10 calls it *"a shared harness with Spec 12"*, the honest move is to build it as a **standalone package with no ReportSmith imports**, so StatementLens can take it as a directory move rather than a rewrite — the same one-way-dependency discipline the vendored ledgerfab already follows. |
-| **D-005** | Sibling adapters are built against **documented schemas**, not generated sample exports | The brief's own conditional: *"if runnable, else from their documented schemas."* Neither sibling is runnable. Recorded here as the brief requires. |
-| **D-006** | The sibling fixtures are **derived from the same ledgerfab period**, not hand-written | A hand-written fixture only proves the parser runs. A derived one proves the assembled pack *reconciles* — SpendSort's category total must equal ledgerfab's expense total to the cent — which is the property that will still matter after the real sibling replaces the fixture. It also makes period 2's sibling data free. |
-| **D-007** | The default Monthly Management Pack is **spend- and payables-shaped** | Measured, not assumed: ledgerfab's CoA declares `4000 Revenue` and `1100 AR`, but the GL books only `{2000, 5000, 6000, 6100, 6200, 6300}` — the purchase cycle. A pack headlining revenue would headline a structural zero. |
+| **D-004** | **`numcheck` originates in this repo** (`backend/numcheck/`) as a standalone package — own `pyproject.toml`, own tests, `pydantic` as its only third-party surface, **no ReportSmith imports** — with an `ORIGIN.md` lift procedure. Its module layout matches StatementLens P6 exactly: `models · tokenize · match · exempt · verify · surgery` | The brief says *"import or vendor it"*; StatementLens is at P3 of P11 and P6 is where numcheck lives, so there is still nothing to import. Confirmed with the user 2026-09-22: build it here, shaped for lifting upstream. Matching their P6 module split and its two hard rules — a **closed** two-entry exemption list, and **no tolerance knob** (precision comes from the token the model itself wrote) — is what makes adoption a directory move instead of a merge. Spec 13 §10 calls it *"a shared harness with Spec 12"*; that can only stay true if there is exactly one implementation. |
+| **D-005** | The **SpendSort** adapter is built against the **real export schema**, read from `../spendsort/backend/app/services/export.py`, and fixture-tested against an export **really generated** by running SpendSort | ~~Neither sibling is runnable.~~ — **wrong, corrected 2026-09-22**. SpendSort is a complete repo. This takes the brief's *preferred* branch: *"fixture-test against real sample exports you generate from them if runnable."* The schema is the 15 columns `COLUMNS` declares, not a guess from spec 11 prose. The generated export is committed under `fixtures/` so the repo stays self-contained (**D-017**). |
+| **D-006** | Fixtures are **derived from the same period** as the pack, never hand-written | A hand-written fixture only proves the parser runs. A derived one proves the assembled pack *reconciles* — SpendSort's category total must equal the period's expense total to the cent — which is the property that still matters once the data is live. It also makes period 2's data free. |
+| **D-007** | ~~The default Monthly Management Pack is **spend- and payables-shaped**~~ — **SUPERSEDED by D-017** | The reasoning was sound for the data I thought existed: raw ledgerfab books only the purchase cycle, so a revenue KPI would have been a structural zero. It is moot now — the vendored `ledgerfab.statements` emitter produces real P&L, balance sheet and cash flow at monthly grain. The pack is a genuine management pack. Kept here because "check what the data actually contains before designing the artefact around it" was the right instinct even though the first answer was wrong. |
 | **D-008** | Bindings use a **closed declarative selector grammar** (`where/group_by/aggregate/order_by/limit`), never an expression language | Three properties fall out at once: golden-file determinism (no arbitrary code path), safety (a template is user input; `eval` in a YAML file is a remote-code-execution hole), and schema-validatability (the Templates screen can point at the offending line). Spec 13 §14 names YAML complexity creep as risk #1 and prescribes *"hard v1 scope"*; this is where the fence goes. |
-| **D-009** | A period is a **calendar month**, produced by overriding ledgerfab's profile window; period 1 = `2025-01`, period 2 = `2025-02` | ledgerfab generates one company-period spanning a quarter by default and has no month concept. Verified in P0 that overriding `period_start`/`period_end` confines every generated date to the window and changes `dataset_hash`, so the two periods are genuinely different data with identical structure — which is precisely what F7's diff demo needs. |
-| **D-010** | Money is `Decimal`, converted once at the adapter boundary via `Decimal(str(x))`, quantised in `money.py` | ledgerfab hands out `float`. Float sums drift below the cent, which would make golden files and the numeric-fidelity gate flaky for a reason that has nothing to do with what they test. One conversion point means one place to be wrong. |
+| **D-009** | A period is a **calendar month**, taken from the emitter's native `grain="month"`; period ids are the emitter's own (`2024-01`, `2024-02`, …) | ~~Produced by overriding ledgerfab's profile window~~ — **simplified 2026-09-22**. `emit_statements(profile, seed, periods=N, grain="month")` returns `Period(id='2024-01', label='Jan 2024', start, end, index, grain)` directly, so the month concept is upstream's and not this repo's invention. Adopting the emitter's period id verbatim also means a ReportSmith period and a StatementLens period are the same string, which is what makes the two repos' figures joinable at all. |
+| **D-010** | Money is `Decimal` end to end; the one conversion point is raw-ledgerfab data, via `Decimal(str(x))`, quantised in `money.py` | The statement emitter already emits `Decimal`, so the statement path needs no conversion at all. Raw ledgerfab (invoices, exceptions, counterparties) still hands out `float`, and SpendSort's CSV hands out formatted strings — both cross the boundary in exactly one place. Float sums drift below the cent, which would make golden files and the numeric-fidelity gate flaky for a reason unrelated to what they test. |
 | **D-011** | Only `narrative` sections are human-editable | A table is a deterministic function of (data, template). Editing a cell would break the golden-file contract and reduce the archive hash to a claim about nothing. Disagreement with a table is a *template* change — versioned, re-runnable, and visible in the month-diff. The Review screen states this where the edit affordance would otherwise sit. |
 | **D-012** | Editing an approved section **revokes** its approval | Otherwise the sign-off guard "all sections approved" can be true of text that nobody approved — which would make the central governance claim of the product false in the one case where it matters. |
 | **D-013** | `signoff` performs sign-and-issue in one endpoint (spec 13 §7's surface is unchanged), but `issue/states.py` models `signed → issued` as a **separate guarded transition** | The spec's API surface lists no `issue` endpoint, so adding one would be a gratuitous divergence. Keeping the edge in the state machine is what lets `test_state_machine.py` assert that issuance cannot be reached from `in_review` — the property the brief actually cares about. |
 | **D-014** | `MockComposer` ships a **`faulty=True`** mode that deliberately emits an unverifiable number | A mock that always satisfies numcheck makes a 100% fidelity gate vacuous — it would be green on an empty check. The faulty mode is a required test: the gate must be *observed failing* before it is trusted when green. |
 | **D-015** | Narrative pipeline order is `draft → numcheck → [retry once] → lint → numcheck re-verify → finalize` | Spec 13 §8's *"deterministic linter first, LLM style adherence second"* orders the linter before the **judge**, not before the cross-check. The linter auto-fixes formatting, and formatting touches how figures are *rendered* — so the cross-check has to run again afterwards, or a fix could invalidate the guarantee it just established. |
 | **D-016** | `structure_hash` and `value_digest` are **two** hashes over disjoint inputs | F7's claim is "identical structure, changed numbers". One combined hash can only say "different". Two hashes make the claim falsifiable — and make the month-diff view a rendering of a tested fact rather than a visual impression. |
+| **D-017** | **The repo is self-contained.** `ledgerfab` *and* `ledgerfab.statements` are vendored in; SpendSort's generated export is committed under `fixtures/`; nothing imports across a sibling path at runtime | The user's standing instruction — *"create everything needed for ReportSmith in this repo"* — and the portfolio's own reason for vendoring: a path dependency on `../statementlens` would make this repo unclonable, and would make ReportSmith's CI depend on a sibling's working tree. The emitter is explicitly built for this (*"lifting this directory into the shared engine is a directory move"*). `VENDORED.md` records provenance and every local change, so re-vendoring stays a copy rather than a merge. |
+| **D-018** | The ratios and flags that StatementLens P4/P5 will eventually own are **computed in-repo**, in `backend/app/analysis/`, emitting the exact shapes StatementLens's own PLAN defines — `Computation(formula_id, period, value, status[ok\|undefined\|caveat], inputs)` and `Flag(rule_id, period, severity, evidence)` | They do not exist yet upstream, and the pack needs them. Writing them to the upstream shape rather than an ad-hoc one means the `statementlens` adapter's reader is the *only* thing that changes when P4/P5 land — the assembler, the templates, the golden files and the narrative prompts all stay put. Two rules are inherited verbatim because they are load-bearing: a zero denominator yields `status="undefined"` with the zero input named — **never `0`, never NaN, never an exception** — and an undefined metric never fires a flag. |
+| **D-019** | The UI is held to a **modern, pleasant** standard as an acceptance criterion, not a finishing touch: aurora tokens, real empty/loading/error states on every screen, keyboard-navigable review, responsive down to a laptop, and light/dark both correct | The user asked for it directly, and this is the repo whose screenshots carry the portfolio's governance story — the Review screen *is* the product argument. A functional-but-ugly sign-off screen would undersell the one thing spec 13 §14 says to lead with. Concretely gated in P6: no screen ships with a raw JSON dump, an unstyled table, or a dead-end blank state. |
 
 ---
 

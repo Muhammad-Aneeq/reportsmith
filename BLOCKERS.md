@@ -9,9 +9,10 @@
 |---|---|---|---|---|
 | **B1** | No `make` on this Windows box | low | none — cosmetic | `make.ps1` mirrors every target; the `Makefile` stays authoritative and is what CI runs |
 | **B2** | ledgerfab seed absent from `./backend_seed_ledgerfab/` | medium | none — resolved | Vendored from `../ledgerlab/backend/ledgerfab/` (PLAN **D-002**); verified working before anything was planned on it |
-| **B3** | `../spendsort` is spec-only — no runnable export | medium | live SpendSort binding **BLOCKED**; the section still renders, as a GAP or from a fixture | Adapter built against spec 11 §6/F6; fixture derived from the same ledgerfab period (PLAN **D-005**, **D-006**) |
-| **B4** | `../statementlens` is spec-only — no computations export, **and no `backend/numcheck/`** | high | numcheck cannot be imported or vendored; live StatementLens binding **BLOCKED** | numcheck **originates here**, shaped for lifting upstream (PLAN **D-004**); data adapter fixture-backed as B3 |
+| ~~**B3**~~ | ~~`../spendsort` is spec-only~~ | — | **WITHDRAWN 2026-09-22 — this was never true.** See B0 | SpendSort is a complete, runnable repo; the adapter uses its real export schema (PLAN **D-005**) |
+| **B4** | StatementLens has **not yet reached P4 (computations), P5 (flags) or P6 (`numcheck`)** — it is through P3 of P11 | medium | none to the definition of done; both are built in-repo | numcheck **originates here**, module-for-module matching their P6 design (PLAN **D-004**); ratios/flags computed in-repo to their P4/P5 shapes (PLAN **D-018**) |
 | **B5** | No published `aurora-ui` package | low | none | Local `frontend/src/components/aurora/` — the convention in all ten sibling repos (PLAN **D-003**) |
+| **B0** | **A stale directory read made P0 assert both siblings were spec-only** | — | corrected before any code was written | Root cause and correction below |
 
 ---
 
@@ -42,29 +43,43 @@ Two consequences were designed in rather than discovered later: monthly periods 
 
 ---
 
-## B3 · `../spendsort` is spec-only
+## B0 · A stale directory read made P0 assert both siblings were spec-only
 
-**Found:** P0. `../spendsort/` contains exactly two files: `spec_00_shared_foundations.md` and `spec_11_spendsort.md`. There is no `backend/`, no export code, no sample export.
+**What happened:** P0's inspection of `../spendsort/` and `../statementlens/` returned two spec files each and nothing else. That was recorded as fact and three decisions were built on it (**D-001**, **D-005**, **D-007**). The user corrected it. Re-inspection found both repos complete or substantially built — SpendSort with a `FINAL_REPORT.md`, StatementLens through P3 of P11 — and the spec files no longer at the root at all, because each repo had since moved them into its own `docs/`.
 
-**Cost:** the brief's preferred path — *"fixture-test against real sample exports you generate from them if runnable"* — is unavailable. The live SpendSort binding cannot be tested against reality.
+**Root cause:** the listing was taken before those repos were populated and was never re-checked. Every later claim inherited its staleness. Phase 0's other external reads were verified by *executing* them — the ledgerfab seed was run, not assumed — and the two that were not executed are exactly the two that were wrong.
 
-**What was done instead:** the adapter is built against the documented schema (spec 11 §6 tables + F6's *"categorized CSV with per-line {account, confidence, source, reason}"*), carries `SCHEMA_VERSION = "spendsort/v1(spec11-derived)"` — a string that admits its own provenance — and is fixture-tested against a fixture **derived from the same ledgerfab period**, so the pack's category total must reconcile to the ledgerfab expense total to the cent (PLAN **D-006**).
+**What it cost:** nothing shipped, because the correction landed before any application code. It cost a day of planning aimed at the wrong constraints, and it produced a plan that under-delivered: it had the default pack avoiding revenue entirely (**D-007**) when a working multi-period statement emitter was sitting in `../statementlens`.
 
-**BLOCKED task:** *replace the fixture reader with the live SpendSort export.* A reader swap behind an unchanged `SourceAdapter` interface; the fixture is retained as the regression test. Unblocks when SpendSort ships an export.
+**What changed as a result:**
 
-**Not hidden from the user:** with no fixture configured, the section renders as an explicit GAP in the gaps panel — spec 13 F2's required behaviour, demonstrated by the default template rather than by a contrived test.
+| Was | Is |
+|---|---|
+| SpendSort adapter against guessed spec prose | Against the real 15-column `COLUMNS` in `services/export.py`, fixture-tested against a really-generated export |
+| Pack is spend/payables-only; no revenue | Real P&L, balance sheet and cash flow from the vendored `ledgerfab.statements` emitter |
+| `make month2` fakes months by overriding ledgerfab's profile window | The emitter has native `grain="month"` and period ids `2024-01`, `2024-02` |
+| Money converted from float at the boundary | The emitter is `Decimal` at source; conversion now applies only to raw ledgerfab and the SpendSort CSV |
+
+**The standing correction:** re-check a sibling's tree immediately before depending on it, and prefer *running* it to *listing* it. `fixtures/gen_fixtures.py` does exactly that — it executes SpendSort rather than reading about it.
 
 ---
 
-## B4 · `../statementlens` is spec-only — including the numeric cross-check
+## B4 · StatementLens has not yet reached computations, flags or `numcheck`
 
-**Found:** P0. `../statementlens/` contains exactly two files: `spec_00_shared_foundations.md` and `spec_12_statementlens.md`. The brief names *"the numcheck numeric cross-check from `../statementlens` (import or vendor it)"*; there is nothing to import or vendor. A portfolio-wide grep for `numcheck`, `figure_ref`, `cross_check` and `numeric_fidelity` across all fourteen repos returns **spec prose only** — no implementation exists anywhere.
+**Found:** P0, confirmed on re-inspection 2026-09-22. StatementLens is a real repo, through **P3 of P11**. Built and working: the vendored engine, the **statement emitter** (`backend/ledgerfab/statements/` — multi-period P&L/BS/CF, double-entry derived, seeded anomalies, `statement_hash`), intake, alignment, persistence and an API skeleton. **Not yet built:** P4 computations, P5 flags, **P6 `numcheck/`**.
 
-**Severity is high** because this is not a data dependency: spec 13 F4 makes the cross-check the mechanism behind the headline claim, and spec 13 §10 gates CI on it.
+So the brief's *"the numcheck numeric cross-check from `../statementlens` (import or vendor it)"* still has no referent — not because the project is absent, but because that package is three phases out. StatementLens's own PLAN designs it in full and its brief says *"must be built as a REUSABLE package (backend/numcheck/) with its own tests: **project 13 will import this pattern**."*
 
-**What was done instead:** `numcheck` **originates in this repo**, written to spec 12 F5's rule (*"any numeric token in the narrative must match a figure_ref value… mismatches fail the draft, one retry, else that sentence is dropped"*), as a standalone package with **no ReportSmith imports**, so StatementLens can adopt it as a directory move rather than a rewrite. `backend/app/numcheck/ORIGIN.md` records this and the lift procedure (PLAN **D-004**).
+**Decided with the user (2026-09-22):** build it **here**, shaped for lifting upstream.
 
-**BLOCKED tasks:** (a) *replace the StatementLens computations fixture with the live export*; (b) *reconcile `numcheck` with StatementLens's own implementation once it exists* — if they diverge, spec 13 §10's *"shared harness with Spec 12"* is no longer true, and one of the two has to move.
+**What was done:**
+
+- **`numcheck`** originates in `backend/numcheck/` as a standalone package — own `pyproject.toml`, own tests, `pydantic` as the only third-party surface, zero ReportSmith imports, CI running its tests with the backend uninstalled. Modules match StatementLens P6 one-for-one (`models · tokenize · match · exempt · verify · surgery`), including its two hard rules: a **closed** two-entry exemption list, and **no tolerance knob**. `ORIGIN.md` records the lift procedure (PLAN **D-004**).
+- **Ratios and flags** are computed in `backend/app/analysis/`, emitting the exact shapes StatementLens's PLAN pins for P4/P5, so the swap when they land touches only the adapter's reader (PLAN **D-018**).
+
+**Effect on the definition of done: none.** Both are built here; the pack assembles, narrates and gates on real numbers.
+
+**Open tasks (not blocking):** (a) repoint the statementlens adapter at live P4/P5 when they exist; (b) **reconcile `numcheck` with StatementLens's implementation when it arrives** — if the two diverge, spec 13 §10's *"shared harness with Spec 12"* stops being true and one of them has to move. Offering this one upstream is the intended resolution and is flagged in SIBLING_NOTES.
 
 ---
 

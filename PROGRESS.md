@@ -28,3 +28,25 @@
 **Acceptance:** PLAN.md carries the constraint→mechanism→test table, the locked template model, the full file map, per-phase spec-quoted acceptance criteria and test plans, the external-dependency table with the sibling-schema fixture strategy spelled out, and a 16-entry decisions log. **No application code exists yet.**
 
 **Next:** P1 — skeleton, vendored ledgerfab with `VENDORED.md`, the closed template schema, the versioned store, the shipped default Monthly Management Pack, and the six spec 13 §6 tables.
+
+---
+
+## P0 · correction — **finding (1) above was wrong**
+
+The user pushed back: *"no spendsort and statementlens has code working."* They were right.
+
+**Both siblings are real repos.** SpendSort is complete — backend, LangGraph categorizer, frontend, evals, `FINAL_REPORT.md`, a demo video, and shipped `examples/month_01…`, `month_02…` files. StatementLens is through **P3 of P11**, with a working statement emitter, intake, alignment and an API. The listing P0 relied on was taken before those trees were populated and was never re-checked; every claim built on it inherited the staleness. Root cause and cost are written up in BLOCKERS **B0**; the wrong decisions are struck through in PLAN.md's log rather than deleted, because a decision that shaped a day of planning should stay visible after it is reversed.
+
+**The instructive part:** P0 verified the ledgerfab seed by *running* it, and that finding held. The two findings that were wrong are precisely the two taken from a directory listing instead of an execution. The standing rule now is to re-check a sibling's tree immediately before depending on it, and to prefer running it over listing it — which is why `fixtures/gen_fixtures.py` executes SpendSort rather than reading about it.
+
+**What the correction gained, beyond accuracy:**
+
+1. **The pack becomes a real management pack.** `../statementlens/backend/ledgerfab/statements/` is a built, working multi-period statement emitter whose own README designates it for reuse: *"lifting this directory into the shared engine is a directory move."* Run here at monthly grain it returns `Period(id='2024-01' …)`, `revenue 3,631,007.40`, `net_income -104,377.55`, `total_assets 19,391,654.47` — `Decimal` throughout, hash-stable, with seeded anomalies and a ground-truth key. It derives all three statements from a trial balance rather than authoring them, so `assets = liabilities + equity` holds by construction. **D-007** — the decision to avoid revenue entirely — is retired.
+2. **`make month2` loses its hack.** The emitter has a native `grain="month"`; the earlier plan faked months by overriding ledgerfab's profile window.
+3. **SpendSort moves to the brief's preferred branch.** Its real export schema is 15 columns in `services/export.py`, not the four spec 11 mentions. Reading the code surfaced three quirks prose never would: UTF-8 **with BOM**, anti-formula-injection `'` prefixes that are *in the data*, and no period column — so the adapter slices by `date`. All three are bound for SIBLING_NOTES.
+
+**What is still genuinely missing:** StatementLens's computations (P4), flags (P5) and **`numcheck` (P6)**. Decided with the user: build `numcheck` here as a standalone package matching their P6 design module-for-module so adoption is a directory move (**D-004**), and compute ratios/flags in-repo to their P4/P5 shapes so the eventual swap touches only a reader (**D-018**). Per the user's instruction, **the repo is self-contained** — vendored code and committed fixtures, never a runtime path dependency on a sibling (**D-017**).
+
+**Also added:** the UI is now held to an explicit *modern and pleasant* bar as a P6 acceptance criterion rather than a polish pass (**D-019**) — real empty/loading/error states on every screen, a word-level draft-vs-current diff, glanceable approval and gap state, keyboard-navigable review, light and dark both deliberate. This repo's screenshots carry the governance argument, so the Review screen is the pitch.
+
+Still no application code. PLAN.md, BLOCKERS.md and this file now say what is actually on disk.
