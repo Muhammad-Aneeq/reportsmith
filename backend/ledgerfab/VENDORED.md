@@ -87,9 +87,46 @@ what makes the copy trustworthy rather than merely present:
 These suites are vendored alongside the code and run in CI, so the copy cannot rot quietly as this
 repo grows around it.
 
+## File manifest
+
+SHA-256 (first 12 hex) of every vendored `.py`. `tests/test_vendored_ledgerfab.py` recomputes these and fails if a file here changed without this table changing with it — which is what keeps "no local changes" a fact rather than an intention.
+
+```
+2FF4617F77CE  __init__.py
+6A1F1C42AEFE  __main__.py
+EE0162A70281  cli.py
+A83120B6BA93  export.py
+8482EA7B8011  generators/__init__.py
+D02D5088CABF  generators/accruals.py
+70484036A6A8  generators/companies.py
+577BA52BB419  generators/counterparties.py
+B759F3B55F1F  generators/gl.py
+A61271AF1F14  generators/invoices.py
+C47CDC51905E  generators/notes.py
+8F768109C7AE  generators/transactions.py
+3AE1D89EC55F  ground_truth.py
+8E028F14161C  hashing.py
+85E6AC2232C0  messiness.py
+B28571D36909  models.py
+5E91F731FF63  profiles.py
+5ACB0CD5F3B4  rng.py
+E53D1F3BB5EF  statements/__init__.py
+A78EFB6B7441  statements/anomalies.py
+80B9A813228A  statements/chart.py
+70EDBACF78EB  statements/derive.py
+A0FE308E9C03  statements/export.py
+E7BF5786985A  statements/hashing.py
+7CE1B347ECD5  statements/models.py
+6541351958F3  statements/money.py
+2E519D658741  statements/plan.py
+272B51494139  statements/postings.py
+2FD219BDDFEF  statements/profiles.py
+```
+
 ## Local changes
 
-**None.** Every file here is byte-identical to `../statementlens/backend/ledgerfab/`.
+**None to the code.** Every `.py` in this directory is byte-identical to
+`../statementlens/backend/ledgerfab/`, and the manifest above is what proves it.
 
 That is deliberate (PLAN.md **D-017**): a zero-width fork means an upstream fix is `cp -r`, never a
 merge. Two adjustments that *could* have been made to vendored files were made on this side of the
@@ -100,8 +137,21 @@ line instead, in `backend/pyproject.toml`:
 - `openpyxl` added to **dev** extras — not runtime — purely so the vendored XLSX export test runs
   unmodified. ReportSmith consumes the emitter in-process and never writes a workbook.
 
-`tests/test_vendored_manifest.py` hashes this directory and fails if anything here is edited
-without this file being updated, so "no local changes" stays a fact rather than an intention.
+### One change to a vendored *test*, and why
+
+`tests/test_vendored_ledgerfab.py::test_vendored_manifest_covers_every_vendored_file` excluded
+`statements/` from the manifest, with the comment *"`statements/` is THIS project's extension, not
+vendored code."* True upstream. **False here** — in this repo both halves are vendored.
+
+Left as written, the exclusion would leave the emitter — the code every figure in the pack comes
+from — outside the drift check, which is the exact opposite of what that test exists to do. So the
+exclusion is removed and the manifest covers all 29 files. The change is marked `LOCAL CHANGE
+(ReportSmith)` in the test itself, so it cannot be mistaken for upstream's intent when this is
+re-vendored.
+
+It is worth noticing *why* this happened: the assumption "statements is ours" is true in exactly one
+repo and false in every repo that reuses it — which is a small argument for the emitter graduating
+into the shared `ledgerfab` rather than living in a consumer. Recorded in SIBLING_NOTES.
 
 ## Contributing changes back
 

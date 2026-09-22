@@ -1,0 +1,1982 @@
+{
+  "period": "2024-08",
+  "sections": [
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "dataset": "period_metrics",
+        "kpis": [
+          {
+            "delta_display": "+1.0%",
+            "delta_pct": "1.0134",
+            "direction": "up",
+            "display": "\u00a33,853,733",
+            "format": "money",
+            "id": "revenue",
+            "label": "Revenue",
+            "metric": "revenue",
+            "missing": false,
+            "prior_display": "\u00a33,815,071",
+            "prior_value": "3815070.61",
+            "sentiment": "good",
+            "value": "3853733.39"
+          },
+          {
+            "delta_display": "-7.9%",
+            "delta_pct": "-7.8853",
+            "direction": "down",
+            "display": "25.7%",
+            "format": "percent",
+            "id": "gross_margin",
+            "label": "Gross margin",
+            "metric": "gross_margin_pct",
+            "missing": false,
+            "prior_display": "27.9%",
+            "prior_value": "27.9000",
+            "sentiment": "bad",
+            "value": "25.7000"
+          },
+          {
+            "delta_display": "-164.4%",
+            "delta_pct": "-164.4231",
+            "direction": "down",
+            "display": "(\u00a3150,951)",
+            "format": "money",
+            "id": "operating_profit",
+            "label": "Operating profit",
+            "metric": "operating_profit",
+            "missing": false,
+            "prior_display": "(\u00a357,087)",
+            "prior_value": "-57087.06",
+            "sentiment": "bad",
+            "value": "-150951.37"
+          },
+          {
+            "delta_display": "-93.8%",
+            "delta_pct": "-93.8282",
+            "direction": "down",
+            "display": "(\u00a3219,639)",
+            "format": "money",
+            "id": "net_income",
+            "label": "Net income",
+            "metric": "net_income",
+            "missing": false,
+            "prior_display": "(\u00a3113,316)",
+            "prior_value": "-113316.34",
+            "sentiment": "bad",
+            "value": "-219638.98"
+          },
+          {
+            "delta_display": "0.0%",
+            "delta_pct": "0.0000",
+            "direction": "flat",
+            "display": "\u00a3750,000",
+            "format": "money",
+            "id": "cash",
+            "label": "Cash",
+            "metric": "cash",
+            "missing": false,
+            "prior_display": "\u00a3750,000",
+            "prior_value": "750000.00",
+            "sentiment": "neutral",
+            "value": "750000.00"
+          },
+          {
+            "delta_display": "+6.8%",
+            "delta_pct": "6.7583",
+            "direction": "up",
+            "display": "\u00a35,580,080",
+            "format": "money",
+            "id": "open_payables",
+            "label": "Open payables",
+            "metric": "accounts_payable",
+            "missing": false,
+            "prior_display": "\u00a35,226,835",
+            "prior_value": "5226834.62",
+            "sentiment": "bad",
+            "value": "5580080.41"
+          },
+          {
+            "delta_display": "+9.9%",
+            "delta_pct": "9.8592",
+            "direction": "up",
+            "display": "71.8 days",
+            "format": "days",
+            "id": "ar_days",
+            "label": "Receivable days",
+            "metric": "receivable_days",
+            "missing": false,
+            "prior_display": "65.3 days",
+            "prior_value": "65.32",
+            "sentiment": "bad",
+            "value": "71.76"
+          },
+          {
+            "delta_display": "-17.6%",
+            "delta_pct": "-17.6471",
+            "direction": "down",
+            "display": "14",
+            "format": "integer",
+            "id": "exceptions",
+            "label": "Payables exceptions",
+            "metric": "exception_count",
+            "missing": false,
+            "prior_display": "17",
+            "prior_value": "17",
+            "sentiment": "good",
+            "value": "14"
+          }
+        ],
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab"
+      },
+      "gaps_json": [],
+      "order_index": 0,
+      "required": true,
+      "section_key": "headline_kpis",
+      "title": "Headline figures",
+      "type": "kpi_grid"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "columns": [
+          {
+            "align": "left",
+            "field": "label",
+            "format": "text",
+            "label": ""
+          },
+          {
+            "align": "right",
+            "field": "amount",
+            "format": "money",
+            "label": "This month"
+          },
+          {
+            "align": "right",
+            "field": "prior_amount",
+            "format": "money",
+            "label": "Prior month"
+          },
+          {
+            "align": "right",
+            "field": "delta_pct",
+            "format": "percent",
+            "label": "Change"
+          }
+        ],
+        "dataset": "pnl_lines",
+        "row_count": 8,
+        "rows": [
+          {
+            "amount": {
+              "display": "\u00a33,853,733",
+              "value": "3853733.39"
+            },
+            "delta_pct": {
+              "display": "1.0%",
+              "value": "1.0134"
+            },
+            "label": {
+              "display": "Revenue",
+              "value": "Revenue"
+            },
+            "prior_amount": {
+              "display": "\u00a33,815,071",
+              "value": "3815070.61"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a32,863,324",
+              "value": "2863323.91"
+            },
+            "delta_pct": {
+              "display": "4.1%",
+              "value": "4.0957"
+            },
+            "label": {
+              "display": "Cost of sales",
+              "value": "Cost of sales"
+            },
+            "prior_amount": {
+              "display": "\u00a32,750,666",
+              "value": "2750665.91"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a3990,409",
+              "value": "990409.48"
+            },
+            "delta_pct": {
+              "display": "-7.0%",
+              "value": "-6.9518"
+            },
+            "label": {
+              "display": "Gross profit",
+              "value": "Gross profit"
+            },
+            "prior_amount": {
+              "display": "\u00a31,064,405",
+              "value": "1064404.70"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a31,141,361",
+              "value": "1141360.85"
+            },
+            "delta_pct": {
+              "display": "1.8%",
+              "value": "1.7717"
+            },
+            "label": {
+              "display": "Total operating expenses",
+              "value": "Total operating expenses"
+            },
+            "prior_amount": {
+              "display": "\u00a31,121,492",
+              "value": "1121491.76"
+            }
+          },
+          {
+            "amount": {
+              "display": "(\u00a3150,951)",
+              "value": "-150951.37"
+            },
+            "delta_pct": {
+              "display": "-164.4%",
+              "value": "-164.4231"
+            },
+            "label": {
+              "display": "Operating profit",
+              "value": "Operating profit"
+            },
+            "prior_amount": {
+              "display": "(\u00a357,087)",
+              "value": "-57087.06"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a368,688",
+              "value": "68687.61"
+            },
+            "delta_pct": {
+              "display": "22.2%",
+              "value": "22.1563"
+            },
+            "label": {
+              "display": "Interest expense",
+              "value": "Interest expense"
+            },
+            "prior_amount": {
+              "display": "\u00a356,229",
+              "value": "56229.28"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a30",
+              "value": "0.00"
+            },
+            "delta_pct": {
+              "display": "n/a",
+              "value": null
+            },
+            "label": {
+              "display": "Tax",
+              "value": "Tax"
+            },
+            "prior_amount": {
+              "display": "\u00a30",
+              "value": "0.00"
+            }
+          },
+          {
+            "amount": {
+              "display": "(\u00a3219,639)",
+              "value": "-219638.98"
+            },
+            "delta_pct": {
+              "display": "-93.8%",
+              "value": "-93.8282"
+            },
+            "label": {
+              "display": "Net income",
+              "value": "Net income"
+            },
+            "prior_amount": {
+              "display": "(\u00a3113,316)",
+              "value": "-113316.34"
+            }
+          }
+        ],
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab",
+        "total": null,
+        "truncated_from": null
+      },
+      "gaps_json": [],
+      "order_index": 1,
+      "required": true,
+      "section_key": "pnl_summary",
+      "title": "Profit and loss",
+      "type": "table"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "dataset": "pnl_lines",
+        "drafted": false,
+        "figure_refs": [
+          {
+            "display": "\u00a33,853,733",
+            "label": "Revenue",
+            "ref_id": "label0.amount",
+            "unit": "money",
+            "value": "3853733.39"
+          },
+          {
+            "display": "\u00a33,815,071",
+            "label": "Revenue (prior month)",
+            "ref_id": "label0.prior_amount",
+            "unit": "money",
+            "value": "3815070.61"
+          },
+          {
+            "display": "\u00a338,663",
+            "label": "Revenue (movement)",
+            "ref_id": "label0.delta",
+            "unit": "money",
+            "value": "38662.78"
+          },
+          {
+            "display": "1.0%",
+            "label": "Revenue (percentage movement)",
+            "ref_id": "label0.delta_pct",
+            "unit": "percent",
+            "value": "1.0134"
+          },
+          {
+            "display": "\u00a32,863,324",
+            "label": "Cost of sales",
+            "ref_id": "label1.amount",
+            "unit": "money",
+            "value": "2863323.91"
+          },
+          {
+            "display": "\u00a32,750,666",
+            "label": "Cost of sales (prior month)",
+            "ref_id": "label1.prior_amount",
+            "unit": "money",
+            "value": "2750665.91"
+          },
+          {
+            "display": "\u00a3112,658",
+            "label": "Cost of sales (movement)",
+            "ref_id": "label1.delta",
+            "unit": "money",
+            "value": "112658.00"
+          },
+          {
+            "display": "4.1%",
+            "label": "Cost of sales (percentage movement)",
+            "ref_id": "label1.delta_pct",
+            "unit": "percent",
+            "value": "4.0957"
+          },
+          {
+            "display": "\u00a3990,409",
+            "label": "Gross profit",
+            "ref_id": "label2.amount",
+            "unit": "money",
+            "value": "990409.48"
+          },
+          {
+            "display": "\u00a31,064,405",
+            "label": "Gross profit (prior month)",
+            "ref_id": "label2.prior_amount",
+            "unit": "money",
+            "value": "1064404.70"
+          },
+          {
+            "display": "(\u00a373,995)",
+            "label": "Gross profit (movement)",
+            "ref_id": "label2.delta",
+            "unit": "money",
+            "value": "-73995.22"
+          },
+          {
+            "display": "-7.0%",
+            "label": "Gross profit (percentage movement)",
+            "ref_id": "label2.delta_pct",
+            "unit": "percent",
+            "value": "-6.9518"
+          },
+          {
+            "display": "\u00a31,141,361",
+            "label": "Total operating expenses",
+            "ref_id": "label3.amount",
+            "unit": "money",
+            "value": "1141360.85"
+          },
+          {
+            "display": "\u00a31,121,492",
+            "label": "Total operating expenses (prior month)",
+            "ref_id": "label3.prior_amount",
+            "unit": "money",
+            "value": "1121491.76"
+          },
+          {
+            "display": "\u00a319,869",
+            "label": "Total operating expenses (movement)",
+            "ref_id": "label3.delta",
+            "unit": "money",
+            "value": "19869.09"
+          },
+          {
+            "display": "1.8%",
+            "label": "Total operating expenses (percentage movement)",
+            "ref_id": "label3.delta_pct",
+            "unit": "percent",
+            "value": "1.7717"
+          },
+          {
+            "display": "(\u00a3150,951)",
+            "label": "Operating profit",
+            "ref_id": "label4.amount",
+            "unit": "money",
+            "value": "-150951.37"
+          },
+          {
+            "display": "(\u00a357,087)",
+            "label": "Operating profit (prior month)",
+            "ref_id": "label4.prior_amount",
+            "unit": "money",
+            "value": "-57087.06"
+          },
+          {
+            "display": "(\u00a393,864)",
+            "label": "Operating profit (movement)",
+            "ref_id": "label4.delta",
+            "unit": "money",
+            "value": "-93864.31"
+          },
+          {
+            "display": "-164.4%",
+            "label": "Operating profit (percentage movement)",
+            "ref_id": "label4.delta_pct",
+            "unit": "percent",
+            "value": "-164.4231"
+          },
+          {
+            "display": "\u00a368,688",
+            "label": "Interest expense",
+            "ref_id": "label5.amount",
+            "unit": "money",
+            "value": "68687.61"
+          },
+          {
+            "display": "\u00a356,229",
+            "label": "Interest expense (prior month)",
+            "ref_id": "label5.prior_amount",
+            "unit": "money",
+            "value": "56229.28"
+          },
+          {
+            "display": "\u00a312,458",
+            "label": "Interest expense (movement)",
+            "ref_id": "label5.delta",
+            "unit": "money",
+            "value": "12458.33"
+          },
+          {
+            "display": "22.2%",
+            "label": "Interest expense (percentage movement)",
+            "ref_id": "label5.delta_pct",
+            "unit": "percent",
+            "value": "22.1563"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Tax",
+            "ref_id": "label6.amount",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Tax (prior month)",
+            "ref_id": "label6.prior_amount",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Tax (movement)",
+            "ref_id": "label6.delta",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "(\u00a3219,639)",
+            "label": "Net income",
+            "ref_id": "label7.amount",
+            "unit": "money",
+            "value": "-219638.98"
+          },
+          {
+            "display": "(\u00a3113,316)",
+            "label": "Net income (prior month)",
+            "ref_id": "label7.prior_amount",
+            "unit": "money",
+            "value": "-113316.34"
+          },
+          {
+            "display": "(\u00a3106,323)",
+            "label": "Net income (movement)",
+            "ref_id": "label7.delta",
+            "unit": "money",
+            "value": "-106322.64"
+          },
+          {
+            "display": "-93.8%",
+            "label": "Net income (percentage movement)",
+            "ref_id": "label7.delta_pct",
+            "unit": "percent",
+            "value": "-93.8282"
+          }
+        ],
+        "max_words": 200,
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab",
+        "text": "",
+        "tone_rules": [
+          "Open with revenue for the month and its movement against the prior month.",
+          "Then cover gross margin and operating profit, in that order.",
+          "State every movement in both absolute and percentage terms.",
+          "Name the line item, never a customer or a vendor.",
+          "Do not offer a cause. These figures do not contain one."
+        ]
+      },
+      "gaps_json": [],
+      "order_index": 2,
+      "required": true,
+      "section_key": "performance_commentary",
+      "title": "Performance commentary",
+      "type": "narrative"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "columns": [
+          {
+            "align": "left",
+            "field": "label",
+            "format": "text",
+            "label": ""
+          },
+          {
+            "align": "right",
+            "field": "amount",
+            "format": "money",
+            "label": "This month"
+          },
+          {
+            "align": "right",
+            "field": "prior_amount",
+            "format": "money",
+            "label": "Prior month"
+          },
+          {
+            "align": "right",
+            "field": "delta_pct",
+            "format": "percent",
+            "label": "Change"
+          }
+        ],
+        "dataset": "bs_lines",
+        "row_count": 11,
+        "rows": [
+          {
+            "amount": {
+              "display": "\u00a3750,000",
+              "value": "750000.00"
+            },
+            "delta_pct": {
+              "display": "0.0%",
+              "value": "0.0000"
+            },
+            "label": {
+              "display": "Cash and cash equivalents",
+              "value": "Cash and cash equivalents"
+            },
+            "prior_amount": {
+              "display": "\u00a3750,000",
+              "value": "750000.00"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a38,920,771",
+              "value": "8920771.23"
+            },
+            "delta_pct": {
+              "display": "11.0%",
+              "value": "10.9725"
+            },
+            "label": {
+              "display": "Accounts receivable",
+              "value": "Accounts receivable"
+            },
+            "prior_amount": {
+              "display": "\u00a38,038,723",
+              "value": "8038722.98"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a39,162,637",
+              "value": "9162636.51"
+            },
+            "delta_pct": {
+              "display": "14.9%",
+              "value": "14.8642"
+            },
+            "label": {
+              "display": "Inventory",
+              "value": "Inventory"
+            },
+            "prior_amount": {
+              "display": "\u00a37,976,931",
+              "value": "7976931.14"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a318,953,719",
+              "value": "18953718.73"
+            },
+            "delta_pct": {
+              "display": "12.2%",
+              "value": "12.2377"
+            },
+            "label": {
+              "display": "Total current assets",
+              "value": "Total current assets"
+            },
+            "prior_amount": {
+              "display": "\u00a316,887,129",
+              "value": "16887128.62"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a33,966,921",
+              "value": "3966920.55"
+            },
+            "delta_pct": {
+              "display": "3.5%",
+              "value": "3.4860"
+            },
+            "label": {
+              "display": "Property, plant & equipment \u2014 net",
+              "value": "Property, plant & equipment \u2014 net"
+            },
+            "prior_amount": {
+              "display": "\u00a33,833,293",
+              "value": "3833293.15"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a322,920,639",
+              "value": "22920639.28"
+            },
+            "delta_pct": {
+              "display": "10.6%",
+              "value": "10.6186"
+            },
+            "label": {
+              "display": "Total assets",
+              "value": "Total assets"
+            },
+            "prior_amount": {
+              "display": "\u00a320,720,422",
+              "value": "20720421.77"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a35,580,080",
+              "value": "5580080.41"
+            },
+            "delta_pct": {
+              "display": "6.8%",
+              "value": "6.7583"
+            },
+            "label": {
+              "display": "Accounts payable",
+              "value": "Accounts payable"
+            },
+            "prior_amount": {
+              "display": "\u00a35,226,835",
+              "value": "5226834.62"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a317,879,944",
+              "value": "17879944.49"
+            },
+            "delta_pct": {
+              "display": "16.4%",
+              "value": "16.4052"
+            },
+            "label": {
+              "display": "Total current liabilities",
+              "value": "Total current liabilities"
+            },
+            "prior_amount": {
+              "display": "\u00a315,360,088",
+              "value": "15360088.00"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a31,800,000",
+              "value": "1800000.00"
+            },
+            "delta_pct": {
+              "display": "-5.3%",
+              "value": "-5.2632"
+            },
+            "label": {
+              "display": "Long-term debt",
+              "value": "Long-term debt"
+            },
+            "prior_amount": {
+              "display": "\u00a31,900,000",
+              "value": "1900000.00"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a319,679,944",
+              "value": "19679944.49"
+            },
+            "delta_pct": {
+              "display": "14.0%",
+              "value": "14.0200"
+            },
+            "label": {
+              "display": "Total liabilities",
+              "value": "Total liabilities"
+            },
+            "prior_amount": {
+              "display": "\u00a317,260,088",
+              "value": "17260088.00"
+            }
+          },
+          {
+            "amount": {
+              "display": "\u00a33,240,695",
+              "value": "3240694.79"
+            },
+            "delta_pct": {
+              "display": "-6.3%",
+              "value": "-6.3473"
+            },
+            "label": {
+              "display": "Total equity",
+              "value": "Total equity"
+            },
+            "prior_amount": {
+              "display": "\u00a33,460,334",
+              "value": "3460333.77"
+            }
+          }
+        ],
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab",
+        "total": null,
+        "truncated_from": null
+      },
+      "gaps_json": [],
+      "order_index": 3,
+      "required": true,
+      "section_key": "balance_sheet_summary",
+      "title": "Balance sheet",
+      "type": "table"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "dataset": "cf_lines",
+        "drafted": false,
+        "figure_refs": [
+          {
+            "display": "(\u00a3219,639)",
+            "label": "Net income",
+            "ref_id": "label0.amount",
+            "unit": "money",
+            "value": "-219638.98"
+          },
+          {
+            "display": "(\u00a3113,316)",
+            "label": "Net income (prior month)",
+            "ref_id": "label0.prior_amount",
+            "unit": "money",
+            "value": "-113316.34"
+          },
+          {
+            "display": "(\u00a3106,323)",
+            "label": "Net income (movement)",
+            "ref_id": "label0.delta",
+            "unit": "money",
+            "value": "-106322.64"
+          },
+          {
+            "display": "-93.8%",
+            "label": "Net income (percentage movement)",
+            "ref_id": "label0.delta_pct",
+            "unit": "percent",
+            "value": "-93.8282"
+          },
+          {
+            "display": "\u00a346,373",
+            "label": "Add back: depreciation",
+            "ref_id": "label1.amount",
+            "unit": "money",
+            "value": "46372.60"
+          },
+          {
+            "display": "\u00a344,844",
+            "label": "Add back: depreciation (prior month)",
+            "ref_id": "label1.prior_amount",
+            "unit": "money",
+            "value": "44843.84"
+          },
+          {
+            "display": "\u00a31,529",
+            "label": "Add back: depreciation (movement)",
+            "ref_id": "label1.delta",
+            "unit": "money",
+            "value": "1528.76"
+          },
+          {
+            "display": "3.4%",
+            "label": "Add back: depreciation (percentage movement)",
+            "ref_id": "label1.delta_pct",
+            "unit": "percent",
+            "value": "3.4091"
+          },
+          {
+            "display": "(\u00a3882,048)",
+            "label": "Change in receivables",
+            "ref_id": "label2.amount",
+            "unit": "money",
+            "value": "-882048.25"
+          },
+          {
+            "display": "(\u00a3761,372)",
+            "label": "Change in receivables (prior month)",
+            "ref_id": "label2.prior_amount",
+            "unit": "money",
+            "value": "-761372.09"
+          },
+          {
+            "display": "(\u00a3120,676)",
+            "label": "Change in receivables (movement)",
+            "ref_id": "label2.delta",
+            "unit": "money",
+            "value": "-120676.16"
+          },
+          {
+            "display": "-15.8%",
+            "label": "Change in receivables (percentage movement)",
+            "ref_id": "label2.delta_pct",
+            "unit": "percent",
+            "value": "-15.8498"
+          },
+          {
+            "display": "(\u00a31,185,705)",
+            "label": "Change in inventory",
+            "ref_id": "label3.amount",
+            "unit": "money",
+            "value": "-1185705.37"
+          },
+          {
+            "display": "(\u00a31,013,589)",
+            "label": "Change in inventory (prior month)",
+            "ref_id": "label3.prior_amount",
+            "unit": "money",
+            "value": "-1013589.03"
+          },
+          {
+            "display": "(\u00a3172,116)",
+            "label": "Change in inventory (movement)",
+            "ref_id": "label3.delta",
+            "unit": "money",
+            "value": "-172116.34"
+          },
+          {
+            "display": "-17.0%",
+            "label": "Change in inventory (percentage movement)",
+            "ref_id": "label3.delta_pct",
+            "unit": "percent",
+            "value": "-16.9809"
+          },
+          {
+            "display": "\u00a3353,246",
+            "label": "Change in payables",
+            "ref_id": "label4.amount",
+            "unit": "money",
+            "value": "353245.79"
+          },
+          {
+            "display": "(\u00a3138,177)",
+            "label": "Change in payables (prior month)",
+            "ref_id": "label4.prior_amount",
+            "unit": "money",
+            "value": "-138177.29"
+          },
+          {
+            "display": "\u00a3491,423",
+            "label": "Change in payables (movement)",
+            "ref_id": "label4.delta",
+            "unit": "money",
+            "value": "491423.08"
+          },
+          {
+            "display": "355.6%",
+            "label": "Change in payables (percentage movement)",
+            "ref_id": "label4.delta_pct",
+            "unit": "percent",
+            "value": "355.6468"
+          },
+          {
+            "display": "(\u00a31,886,611)",
+            "label": "Net cash from operating activities",
+            "ref_id": "label5.amount",
+            "unit": "money",
+            "value": "-1886610.70"
+          },
+          {
+            "display": "(\u00a31,977,158)",
+            "label": "Net cash from operating activities (prior month)",
+            "ref_id": "label5.prior_amount",
+            "unit": "money",
+            "value": "-1977158.24"
+          },
+          {
+            "display": "\u00a390,548",
+            "label": "Net cash from operating activities (movement)",
+            "ref_id": "label5.delta",
+            "unit": "money",
+            "value": "90547.54"
+          },
+          {
+            "display": "4.6%",
+            "label": "Net cash from operating activities (percentage movement)",
+            "ref_id": "label5.delta_pct",
+            "unit": "percent",
+            "value": "4.5797"
+          },
+          {
+            "display": "(\u00a3180,000)",
+            "label": "Purchase of fixed assets",
+            "ref_id": "label6.amount",
+            "unit": "money",
+            "value": "-180000.00"
+          },
+          {
+            "display": "(\u00a3180,000)",
+            "label": "Purchase of fixed assets (prior month)",
+            "ref_id": "label6.prior_amount",
+            "unit": "money",
+            "value": "-180000.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Purchase of fixed assets (movement)",
+            "ref_id": "label6.delta",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "0.0%",
+            "label": "Purchase of fixed assets (percentage movement)",
+            "ref_id": "label6.delta_pct",
+            "unit": "percent",
+            "value": "0.0000"
+          },
+          {
+            "display": "(\u00a3180,000)",
+            "label": "Net cash from investing activities",
+            "ref_id": "label7.amount",
+            "unit": "money",
+            "value": "-180000.00"
+          },
+          {
+            "display": "(\u00a3180,000)",
+            "label": "Net cash from investing activities (prior month)",
+            "ref_id": "label7.prior_amount",
+            "unit": "money",
+            "value": "-180000.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Net cash from investing activities (movement)",
+            "ref_id": "label7.delta",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "0.0%",
+            "label": "Net cash from investing activities (percentage movement)",
+            "ref_id": "label7.delta_pct",
+            "unit": "percent",
+            "value": "0.0000"
+          },
+          {
+            "display": "\u00a32,066,611",
+            "label": "Net cash from financing activities",
+            "ref_id": "label8.amount",
+            "unit": "money",
+            "value": "2066610.70"
+          },
+          {
+            "display": "\u00a32,157,158",
+            "label": "Net cash from financing activities (prior month)",
+            "ref_id": "label8.prior_amount",
+            "unit": "money",
+            "value": "2157158.24"
+          },
+          {
+            "display": "(\u00a390,548)",
+            "label": "Net cash from financing activities (movement)",
+            "ref_id": "label8.delta",
+            "unit": "money",
+            "value": "-90547.54"
+          },
+          {
+            "display": "-4.2%",
+            "label": "Net cash from financing activities (percentage movement)",
+            "ref_id": "label8.delta_pct",
+            "unit": "percent",
+            "value": "-4.1975"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Net change in cash",
+            "ref_id": "label9.amount",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Net change in cash (prior month)",
+            "ref_id": "label9.prior_amount",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Net change in cash (movement)",
+            "ref_id": "label9.delta",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "\u00a3750,000",
+            "label": "Cash at end of period",
+            "ref_id": "label10.amount",
+            "unit": "money",
+            "value": "750000.00"
+          },
+          {
+            "display": "\u00a3750,000",
+            "label": "Cash at end of period (prior month)",
+            "ref_id": "label10.prior_amount",
+            "unit": "money",
+            "value": "750000.00"
+          },
+          {
+            "display": "\u00a30",
+            "label": "Cash at end of period (movement)",
+            "ref_id": "label10.delta",
+            "unit": "money",
+            "value": "0.00"
+          },
+          {
+            "display": "0.0%",
+            "label": "Cash at end of period (percentage movement)",
+            "ref_id": "label10.delta_pct",
+            "unit": "percent",
+            "value": "0.0000"
+          }
+        ],
+        "max_words": 160,
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab",
+        "text": "",
+        "tone_rules": [
+          "Open with the net movement in cash and the closing balance.",
+          "Name the two largest contributors to operating cash flow.",
+          "Distinguish operating, investing and financing movements explicitly.",
+          "Do not describe the cash position as healthy, tight, or any other judgement."
+        ]
+      },
+      "gaps_json": [],
+      "order_index": 4,
+      "required": true,
+      "section_key": "cash_commentary",
+      "title": "Cash commentary",
+      "type": "narrative"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "columns": [
+          {
+            "align": "left",
+            "field": "label",
+            "format": "text",
+            "label": "Ratio"
+          },
+          {
+            "align": "right",
+            "field": "display",
+            "format": "text",
+            "label": "This month"
+          },
+          {
+            "align": "right",
+            "field": "prior_display",
+            "format": "text",
+            "label": "Prior month"
+          },
+          {
+            "align": "left",
+            "field": "status",
+            "format": "text",
+            "label": "Status"
+          }
+        ],
+        "dataset": "ratios",
+        "row_count": 14,
+        "rows": [
+          {
+            "display": {
+              "display": "7.3%",
+              "value": "7.3%"
+            },
+            "label": {
+              "display": "Accruals ratio",
+              "value": "Accruals ratio"
+            },
+            "prior_display": {
+              "display": "9.0%",
+              "value": "9.0%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-0.11",
+              "value": "-0.11"
+            },
+            "label": {
+              "display": "Operating cash flow ratio",
+              "value": "Operating cash flow ratio"
+            },
+            "prior_display": {
+              "display": "-0.13",
+              "value": "-0.13"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "96.0 days",
+              "value": "96.0 days"
+            },
+            "label": {
+              "display": "Inventory days",
+              "value": "Inventory days"
+            },
+            "prior_display": {
+              "display": "87.0 days",
+              "value": "87.0 days"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "58.5 days",
+              "value": "58.5 days"
+            },
+            "label": {
+              "display": "Payable days",
+              "value": "Payable days"
+            },
+            "prior_display": {
+              "display": "57.0 days",
+              "value": "57.0 days"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "69.4 days",
+              "value": "69.4 days"
+            },
+            "label": {
+              "display": "Receivable days",
+              "value": "Receivable days"
+            },
+            "prior_display": {
+              "display": "63.2 days",
+              "value": "63.2 days"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "6.07",
+              "value": "6.07"
+            },
+            "label": {
+              "display": "Debt to equity",
+              "value": "Debt to equity"
+            },
+            "prior_display": {
+              "display": "4.99",
+              "value": "4.99"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-2.20\u00d7",
+              "value": "-2.20\u00d7"
+            },
+            "label": {
+              "display": "Interest cover",
+              "value": "Interest cover"
+            },
+            "prior_display": {
+              "display": "-1.02\u00d7",
+              "value": "-1.02\u00d7"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "1.06",
+              "value": "1.06"
+            },
+            "label": {
+              "display": "Current ratio",
+              "value": "Current ratio"
+            },
+            "prior_display": {
+              "display": "1.10",
+              "value": "1.10"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "0.55",
+              "value": "0.55"
+            },
+            "label": {
+              "display": "Quick ratio",
+              "value": "Quick ratio"
+            },
+            "prior_display": {
+              "display": "0.58",
+              "value": "0.58"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "25.7%",
+              "value": "25.7%"
+            },
+            "label": {
+              "display": "Gross margin",
+              "value": "Gross margin"
+            },
+            "prior_display": {
+              "display": "27.9%",
+              "value": "27.9%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-5.7%",
+              "value": "-5.7%"
+            },
+            "label": {
+              "display": "Net margin",
+              "value": "Net margin"
+            },
+            "prior_display": {
+              "display": "-3.0%",
+              "value": "-3.0%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-3.9%",
+              "value": "-3.9%"
+            },
+            "label": {
+              "display": "Operating margin",
+              "value": "Operating margin"
+            },
+            "prior_display": {
+              "display": "-1.5%",
+              "value": "-1.5%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-1.0%",
+              "value": "-1.0%"
+            },
+            "label": {
+              "display": "Return on assets",
+              "value": "Return on assets"
+            },
+            "prior_display": {
+              "display": "-0.5%",
+              "value": "-0.5%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          },
+          {
+            "display": {
+              "display": "-6.8%",
+              "value": "-6.8%"
+            },
+            "label": {
+              "display": "Return on equity",
+              "value": "Return on equity"
+            },
+            "prior_display": {
+              "display": "-3.3%",
+              "value": "-3.3%"
+            },
+            "status": {
+              "display": "ok",
+              "value": "ok"
+            }
+          }
+        ],
+        "schema_version": "statementlens/v1(spec12 \u00a76 + upstream PLAN P4/P5 shape; in-repo impl)",
+        "source": "statementlens",
+        "total": null,
+        "truncated_from": null
+      },
+      "gaps_json": [],
+      "order_index": 5,
+      "required": true,
+      "section_key": "ratio_pack",
+      "title": "Ratio pack",
+      "type": "table"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "counts": {
+          "high": 2,
+          "medium": 4
+        },
+        "dataset": "flags",
+        "items": [
+          {
+            "amount_display": null,
+            "evidence": "Interest cover: -2.20\u00d7; operating_profit: -150951.37; interest_expense: 68687.61",
+            "label": "Interest cover below 2\u00d7",
+            "message": "Operating profit covers interest less than twice over, leaving little headroom against a trading downturn.",
+            "reference": null,
+            "rule_id": "interest_cover_thin",
+            "severity": "high",
+            "severity_rank": 3
+          },
+          {
+            "amount_display": null,
+            "evidence": "operating_profit: -150951.37; revenue: 3853733.39; operating_expenses: 1141360.85",
+            "label": "Operating loss",
+            "message": "The business made a loss at the operating line before financing and tax.",
+            "reference": null,
+            "rule_id": "operating_loss",
+            "severity": "high",
+            "severity_rank": 3
+          },
+          {
+            "amount_display": null,
+            "evidence": "Debt to equity: 6.07; total_liabilities: 19679944.49; total_equity: 3240694.79",
+            "label": "Debt to equity above 2\u00d7",
+            "message": "Borrowings are more than twice equity, so the balance sheet is highly geared.",
+            "reference": null,
+            "rule_id": "gearing_high",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": null,
+            "evidence": "Accruals ratio: 7.3%; net_income: -219638.98; cf_operating: -1886610.70",
+            "label": "Earnings quality \u2014 high accruals",
+            "message": "The gap between reported earnings and operating cash flow exceeds 5% of total assets, so a large share of profit is currently non-cash.",
+            "reference": null,
+            "rule_id": "high_accruals_ratio",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": null,
+            "evidence": "Gross margin: 25.7%; revenue: 3853733.39; cogs: 2863323.91",
+            "label": "Gross margin compression",
+            "message": "Gross margin fell against the prior period. Cost of sales is growing faster than revenue.",
+            "reference": null,
+            "rule_id": "margin_compression",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": null,
+            "evidence": "Quick ratio: 0.55; Current ratio: 1.06; inventory: 9162636.51",
+            "label": "Quick ratio below 0.8",
+            "message": "Excluding inventory, liquid assets cover less than 80% of current liabilities.",
+            "reference": null,
+            "rule_id": "quick_ratio_thin",
+            "severity": "medium",
+            "severity_rank": 2
+          }
+        ],
+        "schema_version": "statementlens/v1(spec12 \u00a76 + upstream PLAN P4/P5 shape; in-repo impl)",
+        "source": "statementlens"
+      },
+      "gaps_json": [],
+      "order_index": 6,
+      "required": true,
+      "section_key": "risk_flags",
+      "title": "Risk flags",
+      "type": "flags"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "columns": [
+          {
+            "align": "left",
+            "field": "account_name",
+            "format": "text",
+            "label": "Category"
+          },
+          {
+            "align": "right",
+            "field": "amount",
+            "format": "money",
+            "label": "Spend"
+          },
+          {
+            "align": "right",
+            "field": "txn_count",
+            "format": "integer",
+            "label": "Items"
+          },
+          {
+            "align": "right",
+            "field": "auto_rate",
+            "format": "percent",
+            "label": "Auto-coded"
+          }
+        ],
+        "dataset": "categories",
+        "row_count": 5,
+        "rows": [
+          {
+            "account_name": {
+              "display": "Professional fees",
+              "value": "Professional fees"
+            },
+            "amount": {
+              "display": "\u00a368,236",
+              "value": "68236.09"
+            },
+            "auto_rate": {
+              "display": "100.0%",
+              "value": "100.0000"
+            },
+            "txn_count": {
+              "display": "11",
+              "value": 11
+            }
+          },
+          {
+            "account_name": {
+              "display": "Cost of sales",
+              "value": "Cost of sales"
+            },
+            "amount": {
+              "display": "\u00a316,793",
+              "value": "16793.05"
+            },
+            "auto_rate": {
+              "display": "100.0%",
+              "value": "100.0000"
+            },
+            "txn_count": {
+              "display": "11",
+              "value": 11
+            }
+          },
+          {
+            "account_name": {
+              "display": "Utilities",
+              "value": "Utilities"
+            },
+            "amount": {
+              "display": "\u00a311,855",
+              "value": "11855.29"
+            },
+            "auto_rate": {
+              "display": "100.0%",
+              "value": "100.0000"
+            },
+            "txn_count": {
+              "display": "10",
+              "value": 10
+            }
+          },
+          {
+            "account_name": {
+              "display": "Software subscriptions",
+              "value": "Software subscriptions"
+            },
+            "amount": {
+              "display": "\u00a34,710",
+              "value": "4710.30"
+            },
+            "auto_rate": {
+              "display": "100.0%",
+              "value": "100.0000"
+            },
+            "txn_count": {
+              "display": "4",
+              "value": 4
+            }
+          },
+          {
+            "account_name": {
+              "display": "Rent",
+              "value": "Rent"
+            },
+            "amount": {
+              "display": "\u00a32,058",
+              "value": "2058.41"
+            },
+            "auto_rate": {
+              "display": "100.0%",
+              "value": "100.0000"
+            },
+            "txn_count": {
+              "display": "4",
+              "value": 4
+            }
+          }
+        ],
+        "schema_version": "spendsort/v1(services/export.py COLUMNS @2026-09-22)",
+        "source": "spendsort",
+        "total": {
+          "account_name": {
+            "display": "Total",
+            "value": "Total"
+          },
+          "amount": {
+            "display": "\u00a3103,653",
+            "value": "103653.14"
+          },
+          "auto_rate": {
+            "display": "",
+            "value": null
+          },
+          "txn_count": {
+            "display": "40",
+            "value": "40"
+          }
+        },
+        "truncated_from": null
+      },
+      "gaps_json": [],
+      "order_index": 7,
+      "required": true,
+      "section_key": "spend_by_category",
+      "title": "Spend by category",
+      "type": "table"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "dataset": "categories",
+        "drafted": false,
+        "figure_refs": [
+          {
+            "display": "\u00a368,236",
+            "label": "Professional fees",
+            "ref_id": "account_name0.amount",
+            "unit": "money",
+            "value": "68236.09"
+          },
+          {
+            "display": "100.0%",
+            "label": "Professional fees (proportion coded automatically)",
+            "ref_id": "account_name0.auto_rate",
+            "unit": "percent",
+            "value": "100.0000"
+          },
+          {
+            "display": "\u00a31",
+            "label": "Professional fees (average confidence)",
+            "ref_id": "account_name0.avg_confidence",
+            "unit": "money",
+            "value": "1.0000"
+          },
+          {
+            "display": "\u00a316,793",
+            "label": "Cost of sales",
+            "ref_id": "account_name1.amount",
+            "unit": "money",
+            "value": "16793.05"
+          },
+          {
+            "display": "100.0%",
+            "label": "Cost of sales (proportion coded automatically)",
+            "ref_id": "account_name1.auto_rate",
+            "unit": "percent",
+            "value": "100.0000"
+          },
+          {
+            "display": "\u00a31",
+            "label": "Cost of sales (average confidence)",
+            "ref_id": "account_name1.avg_confidence",
+            "unit": "money",
+            "value": "1.0000"
+          },
+          {
+            "display": "\u00a311,855",
+            "label": "Utilities",
+            "ref_id": "account_name2.amount",
+            "unit": "money",
+            "value": "11855.29"
+          },
+          {
+            "display": "100.0%",
+            "label": "Utilities (proportion coded automatically)",
+            "ref_id": "account_name2.auto_rate",
+            "unit": "percent",
+            "value": "100.0000"
+          },
+          {
+            "display": "\u00a31",
+            "label": "Utilities (average confidence)",
+            "ref_id": "account_name2.avg_confidence",
+            "unit": "money",
+            "value": "1.0000"
+          },
+          {
+            "display": "\u00a34,710",
+            "label": "Software subscriptions",
+            "ref_id": "account_name3.amount",
+            "unit": "money",
+            "value": "4710.30"
+          },
+          {
+            "display": "100.0%",
+            "label": "Software subscriptions (proportion coded automatically)",
+            "ref_id": "account_name3.auto_rate",
+            "unit": "percent",
+            "value": "100.0000"
+          },
+          {
+            "display": "\u00a31",
+            "label": "Software subscriptions (average confidence)",
+            "ref_id": "account_name3.avg_confidence",
+            "unit": "money",
+            "value": "1.0000"
+          },
+          {
+            "display": "\u00a32,058",
+            "label": "Rent",
+            "ref_id": "account_name4.amount",
+            "unit": "money",
+            "value": "2058.41"
+          },
+          {
+            "display": "100.0%",
+            "label": "Rent (proportion coded automatically)",
+            "ref_id": "account_name4.auto_rate",
+            "unit": "percent",
+            "value": "100.0000"
+          },
+          {
+            "display": "\u00a31",
+            "label": "Rent (average confidence)",
+            "ref_id": "account_name4.avg_confidence",
+            "unit": "money",
+            "value": "1.0000"
+          }
+        ],
+        "max_words": 160,
+        "schema_version": "spendsort/v1(services/export.py COLUMNS @2026-09-22)",
+        "source": "spendsort",
+        "text": "",
+        "tone_rules": [
+          "Open with total categorised spend for the month.",
+          "Name the three largest categories and their share of the total.",
+          "Mention the proportion coded automatically, as a measure of data quality only.",
+          "Do not comment on whether any category is too high or too low."
+        ]
+      },
+      "gaps_json": [],
+      "order_index": 8,
+      "required": true,
+      "section_key": "spend_commentary",
+      "title": "Spend commentary",
+      "type": "narrative"
+    },
+    {
+      "binding_status": "bound",
+      "content_json": {
+        "counts": {
+          "high": 3,
+          "low": 2,
+          "medium": 9
+        },
+        "dataset": "exceptions",
+        "items": [
+          {
+            "amount_display": "\u00a3123",
+            "evidence": "INV-0014, NOTE-001",
+            "label": "Dispute",
+            "message": "Short payment against invoice INV-0014: 41.44 withheld pending the dispute recorded in the counterparty notes.",
+            "reference": "TXN-0014",
+            "rule_id": "dispute",
+            "severity": "high",
+            "severity_rank": 3
+          },
+          {
+            "amount_display": "\u00a3844",
+            "evidence": "INV-0023, TXN-0023",
+            "label": "Duplicate",
+            "message": "Second payment of 844.21 for invoice INV-0023; transaction TXN-0023 already settled it on 2024-09-09.",
+            "reference": "TXN-0024",
+            "rule_id": "duplicate",
+            "severity": "high",
+            "severity_rank": 3
+          },
+          {
+            "amount_display": "\u00a3468",
+            "evidence": "INV-0024, NOTE-002",
+            "label": "Dispute",
+            "message": "Short payment against invoice INV-0024: 376.80 withheld pending the dispute recorded in the counterparty notes.",
+            "reference": "TXN-0025",
+            "rule_id": "dispute",
+            "severity": "high",
+            "severity_rank": 3
+          },
+          {
+            "amount_display": "\u00a3283",
+            "evidence": "INV-0002",
+            "label": "Missing reference",
+            "message": "Amount matches invoice INV-0002 exactly but the payment carries no PO or invoice reference, so the matcher could not link it.",
+            "reference": "TXN-0002",
+            "rule_id": "missing_reference",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a3293",
+            "evidence": "INV-0008",
+            "label": "Partial payment",
+            "message": "Payment of 293.43 settles only part of invoice INV-0008 (474.23); balance 180.80 remains outstanding.",
+            "reference": "TXN-0008",
+            "rule_id": "partial_payment",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a3694",
+            "evidence": "INV-0013",
+            "label": "Partial payment",
+            "message": "Payment of 694.31 settles only part of invoice INV-0013 (899.05); balance 204.74 remains outstanding.",
+            "reference": "TXN-0013",
+            "rule_id": "partial_payment",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a3292",
+            "evidence": "INV-0019",
+            "label": "Missing reference",
+            "message": "Amount matches invoice INV-0019 exactly but the payment carries no PO or invoice reference, so the matcher could not link it.",
+            "reference": "TXN-0019",
+            "rule_id": "missing_reference",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a31,592",
+            "evidence": "INV-0021",
+            "label": "Partial payment",
+            "message": "Payment of 1591.55 settles only part of invoice INV-0021 (2434.01); balance 842.46 remains outstanding.",
+            "reference": "TXN-0021",
+            "rule_id": "partial_payment",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a34,490",
+            "evidence": "INV-0022",
+            "label": "Partial payment",
+            "message": "Payment of 4489.59 settles only part of invoice INV-0022 (7419.14); balance 2929.55 remains outstanding.",
+            "reference": "TXN-0022",
+            "rule_id": "partial_payment",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a3310",
+            "evidence": "INV-0033",
+            "label": "Partial payment",
+            "message": "Payment of 309.73 settles only part of invoice INV-0033 (462.25); balance 152.52 remains outstanding.",
+            "reference": "TXN-0034",
+            "rule_id": "partial_payment",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a32,596",
+            "evidence": null,
+            "label": "Unknown",
+            "message": "No invoice, prior transaction or note in the available context explains this payment. Insufficient evidence to assign a root cause.",
+            "reference": "TXN-0042",
+            "rule_id": "unknown",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a32,016",
+            "evidence": null,
+            "label": "Unknown",
+            "message": "No invoice, prior transaction or note in the available context explains this payment. Insufficient evidence to assign a root cause.",
+            "reference": "TXN-0043",
+            "rule_id": "unknown",
+            "severity": "medium",
+            "severity_rank": 2
+          },
+          {
+            "amount_display": "\u00a3181",
+            "evidence": "INV-0007",
+            "label": "Timing",
+            "message": "Invoice INV-0007 was due 2024-09-10 but paid 2024-10-25, landing outside the matching window.",
+            "reference": "TXN-0007",
+            "rule_id": "timing",
+            "severity": "low",
+            "severity_rank": 1
+          },
+          {
+            "amount_display": "\u00a31,346",
+            "evidence": "INV-0030",
+            "label": "Timing",
+            "message": "Invoice INV-0030 was due 2024-10-27 but paid 2024-12-26, landing outside the matching window.",
+            "reference": "TXN-0031",
+            "rule_id": "timing",
+            "severity": "low",
+            "severity_rank": 1
+          }
+        ],
+        "schema_version": "ledgerfab/0.1.0+statements(vendored 2026-09-22)",
+        "source": "ledgerfab"
+      },
+      "gaps_json": [],
+      "order_index": 9,
+      "required": false,
+      "section_key": "payables_exceptions",
+      "title": "Payables exceptions",
+      "type": "flags"
+    },
+    {
+      "binding_status": "gap",
+      "content_json": {},
+      "gaps_json": [
+        {
+          "dataset": "segment_ratios",
+          "detail": "statementlens publishes no dataset 'segment_ratios'; available: ['ratios', 'flags']",
+          "reason": "unknown_dataset",
+          "source": "statementlens"
+        }
+      ],
+      "order_index": 10,
+      "required": true,
+      "section_key": "segment_performance",
+      "title": "Performance by segment",
+      "type": "table"
+    }
+  ],
+  "structure_hash": "596213ff41816fc314dbac2968a0bc8fe16f9a547a05925a420a97c8cd282c44",
+  "template_ref": "monthly_management_pack@v1",
+  "value_digest": "04c58e9eb76c7a91940c1a18938f27449cf47fd19f0d0c834cb85937a8672fd8"
+}

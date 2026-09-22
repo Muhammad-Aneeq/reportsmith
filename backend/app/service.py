@@ -353,6 +353,11 @@ def edit_section(db: Session, section_id: int, text: str, editor: str) -> Sectio
     if section.pack.status == Status.DRAFT:
         section.pack.status = Status.IN_REVIEW
     db.commit()
+    # `expire_on_commit=False` keeps objects usable after commit, at the cost of leaving
+    # collections loaded before the insert stale. Without this refresh the caller gets a
+    # section reporting zero edits immediately after recording one — and the edit history
+    # is the feature, so a stale read of it is not a cosmetic problem.
+    db.refresh(section)
     return section
 
 
@@ -402,6 +407,17 @@ def signoff(
     can be reached without its guards.
     """
     pack = get_pack(db, pack_id)
+
+    # Refuse illegal transitions BEFORE writing anything. Without this, signing an
+    # already-issued pack got as far as inserting a second signoff row and surfaced as a
+    # UNIQUE constraint error from SQLite — a database message standing in for a
+    # governance decision, which is exactly the wrong place for that decision to live.
+    if pack.status in (Status.SIGNED, Status.ISSUED):
+        raise TransitionError(
+            f"cannot signoff a pack that is {pack.status}"
+            + ("; archives are immutable" if pack.status == Status.ISSUED else "")
+        )
+
     if pack.status == Status.DRAFT:
         pack.status = apply(pack_view(db, pack), Event.SUBMIT)
 

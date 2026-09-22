@@ -55,6 +55,9 @@ _LEADING_MINUS_MONEY = re.compile(r"(?<![\w)])[-−]\s?([£$€¥]\s?[\d,]+(?:\.
 _DOUBLE_SPACE = re.compile(r"  +")
 _SPACE_BEFORE_PUNCT = re.compile(r"\s+([,.;:%])")
 
+# "no recommendations", "do not recommend", "never recommend", "avoid recommending".
+_RECOMMENDATION_BAN = re.compile(r"(no|not|never|avoid)[^.]{0,24}?recommend", re.I)
+
 
 def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tuple[str, list[Violation]]:
     """Return (possibly-fixed text, violations).
@@ -130,7 +133,10 @@ def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tu
     # Recommendation-shaped language, when the voice forbids it. Matched on a small,
     # explicit list rather than anything clever: a false positive here costs a reviewer
     # thirty seconds, and a vague heuristic would produce many.
-    if "no recommendations" in style.voice.lower():
+    # Match a *prohibition*, not one exact phrase. The shipped pack says "Do not
+    # recommend, forecast, or speculate"; an earlier exact-string check silently did
+    # nothing for it, which is the worst outcome for a rule of this kind.
+    if _RECOMMENDATION_BAN.search(style.voice):
         for pattern in (r"\bshould\b", r"\bmust\b", r"\brecommend(?:ed|s|ation)?\b", r"\bwe suggest\b"):
             for match in re.finditer(pattern, lowered):
                 violations.append(

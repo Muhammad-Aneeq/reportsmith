@@ -103,9 +103,10 @@ def test_vendored_manifest_covers_every_vendored_file() -> None:
         p.relative_to(LEDGERFAB_DIR).as_posix()
         for p in LEDGERFAB_DIR.rglob("*.py")
         if "__pycache__" not in p.parts
-        # `statements/` is THIS project's extension, not vendored code. It is
-        # deliberately outside the manifest — see PLAN.md D-002.
-        and "statements" not in p.parts
+        # LOCAL CHANGE (ReportSmith). Upstream excluded `statements/` because there it
+        # was authored, not vendored. Here BOTH halves are vendored, so excluding it
+        # would leave the code every figure in the pack comes from unprotected against
+        # silent drift — the opposite of what this test is for. See ledgerfab/VENDORED.md.
     }
     assert on_disk == set(_manifest()), (
         "ledgerfab/VENDORED.md's manifest and the vendored files on disk disagree. "
