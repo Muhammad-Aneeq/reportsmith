@@ -1,0 +1,150 @@
+# Default red-flag rules.
+#
+# The first four are the ones spec 12 F4 names by hand; the rest are the standard
+# review instincts a controller applies to a monthly pack, codified.
+#
+# Rules are data. Edit this file, restart, and the pack flags differently — no deploy.
+# What you *cannot* do from here is compute: selectors are `ratio.<id>`, `line.<code>`
+# or `delta.<ratio_id>`, operators are a closed set, and there is no expression syntax.
+# That fence is deliberate (app/analysis/flags.py).
+
+rules:
+  # -- the four spec 12 F4 names -------------------------------------------
+  - rule_id: current_ratio_below_one
+    label: Current ratio below 1
+    severity: high
+    message: >-
+      Current liabilities exceed current assets, so short-term obligations are not
+      covered by short-term resources.
+    when:
+      selector: ratio.current_ratio
+      op: lt
+      value: 1.0
+    evidence: [ratio.current_ratio, ratio.quick_ratio]
+
+  - rule_id: receivable_days_rising_on_flat_revenue
+    label: Receivable days rising while revenue is flat
+    severity: high
+    message: >-
+      Receivable days increased by more than 20% while revenue moved less than 5%.
+      Collection is slowing independently of trading volume.
+    when:
+      all:
+        - { selector: delta.receivable_days, op: gt, value: 20 }
+        # "Flat" is a band a reader can see and change, not a judgement buried in code.
+        - { selector: delta.revenue_line, op: between, value: [-5, 5] }
+    evidence: [ratio.receivable_days, line.accounts_receivable, line.revenue]
+
+  - rule_id: margin_compression
+    label: Gross margin compression
+    severity: medium
+    message: >-
+      Gross margin fell against the prior period. Cost of sales is growing faster than
+      revenue.
+    when:
+      selector: delta.gross_margin
+      op: lt
+      value: -2
+    evidence: [ratio.gross_margin, line.revenue, line.cogs]
+
+  - rule_id: negative_ocf_positive_ni
+    label: Negative operating cash flow with positive net income
+    severity: high
+    message: >-
+      The business reported a profit but consumed cash in operations. Earnings are not
+      converting to cash this period.
+    when:
+      all:
+        - { selector: line.cf_operating, op: lt, value: 0 }
+        - { selector: line.net_income, op: gt, value: 0 }
+    evidence: [line.net_income, line.cf_operating, ratio.accruals_ratio]
+
+  # -- the standard review instincts ---------------------------------------
+  - rule_id: quick_ratio_thin
+    label: Quick ratio below 0.8
+    severity: medium
+    message: >-
+      Excluding inventory, liquid assets cover less than 80% of current liabilities.
+    when:
+      selector: ratio.quick_ratio
+      op: lt
+      value: 0.8
+    evidence: [ratio.quick_ratio, ratio.current_ratio, line.inventory]
+
+  - rule_id: negative_equity
+    label: Negative equity
+    severity: high
+    message: Liabilities exceed assets; the entity is balance-sheet insolvent.
+    when:
+      selector: line.total_equity
+      op: lt
+      value: 0
+    evidence: [line.total_equity, line.total_liabilities, line.total_assets]
+
+  - rule_id: interest_cover_thin
+    label: Interest cover below 2×
+    severity: high
+    message: >-
+      Operating profit covers interest less than twice over, leaving little headroom
+      against a trading downturn.
+    when:
+      selector: ratio.interest_cover
+      op: lt
+      value: 2.0
+    evidence: [ratio.interest_cover, line.operating_profit, line.interest_expense]
+
+  - rule_id: operating_loss
+    label: Operating loss
+    severity: high
+    message: The business made a loss at the operating line before financing and tax.
+    when:
+      selector: line.operating_profit
+      op: lt
+      value: 0
+    evidence: [line.operating_profit, line.revenue, line.operating_expenses]
+
+  - rule_id: inventory_build
+    label: Inventory building faster than sales
+    severity: medium
+    message: >-
+      Inventory days rose by more than 15% against the prior period. Stock is
+      accumulating relative to the rate it is being sold.
+    when:
+      selector: delta.inventory_days
+      op: gt
+      value: 15
+    evidence: [ratio.inventory_days, line.inventory, line.cogs]
+
+  - rule_id: payable_stretch
+    label: Payable days stretching
+    severity: medium
+    message: >-
+      Payable days rose by more than 15%. The business is taking longer to pay
+      suppliers, which supports cash at the cost of supplier goodwill.
+    when:
+      selector: delta.payable_days
+      op: gt
+      value: 15
+    evidence: [ratio.payable_days, line.accounts_payable, line.cogs]
+
+  - rule_id: high_accruals_ratio
+    label: Earnings quality — high accruals
+    severity: medium
+    message: >-
+      The gap between reported earnings and operating cash flow exceeds 5% of total
+      assets, so a large share of profit is currently non-cash.
+    when:
+      selector: ratio.accruals_ratio
+      op: gt
+      value: 5
+    evidence: [ratio.accruals_ratio, line.net_income, line.cf_operating]
+
+  - rule_id: gearing_high
+    label: Debt to equity above 2×
+    severity: medium
+    message: Borrowings are more than twice equity, so the balance sheet is highly geared.
+    when:
+      selector: ratio.debt_to_equity
+      op: gt
+      value: 2.0
+    evidence: [ratio.debt_to_equity, line.total_liabilities, line.total_equity]

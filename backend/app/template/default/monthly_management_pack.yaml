@@ -1,0 +1,204 @@
+id: monthly_management_pack
+name: Monthly Management Pack
+version: 1
+description: >-
+  The pack a controller assembles by hand every month: headline KPIs, a P&L and balance
+  sheet summary, ratio and risk review, spend by category, and the payables exceptions
+  worth chasing. Defined once here; assembled, drafted and gated automatically thereafter.
+
+# -------------------------------------------------------------------------- style --
+# The linter's entire rulebook. Versioned with the template, because changing how the
+# pack is allowed to speak is a tracked, evaluable event — not a prompt tweak.
+style:
+  voice: >-
+    Third person, past tense, factual. Report what the figures show. Do not recommend,
+    forecast, or speculate about causes the data does not contain.
+  rounding:
+    money: 0
+    percent: 1
+    ratio: 2
+  currency:
+    code: GBP
+    symbol: "£"
+    position: prefix
+    thousands: ","
+    negative: parens
+  # Words that make a management pack sound like a press release. The linter flags each
+  # one; none of them can be auto-fixed, because choosing the honest replacement is a
+  # judgement the reviewer has to make.
+  taboo_phrases:
+    - significant
+    - significantly
+    - robust
+    - leverage
+    - world-class
+    - utilise
+    - utilize
+    - synergy
+    - strong performance
+    - challenging headwinds
+  max_sentence_words: 30
+
+sections:
+  # ---------------------------------------------------------------- kpi_grid --
+  - id: headline_kpis
+    title: Headline figures
+    type: kpi_grid
+    required: true
+    binding:
+      source: ledgerfab
+      select: period_metrics
+    kpis:
+      - { id: revenue,          label: Revenue,            metric: revenue,          format: money,   compare: prior_period, direction: higher_is_better }
+      - { id: gross_margin,     label: Gross margin,       metric: gross_margin_pct, format: percent, compare: prior_period, direction: higher_is_better }
+      - { id: operating_profit, label: Operating profit,   metric: operating_profit, format: money,   compare: prior_period, direction: higher_is_better }
+      - { id: net_income,       label: Net income,         metric: net_income,       format: money,   compare: prior_period, direction: higher_is_better }
+      - { id: cash,             label: Cash,               metric: cash,             format: money,   compare: prior_period, direction: higher_is_better }
+      - { id: open_payables,    label: Open payables,      metric: accounts_payable, format: money,   compare: prior_period, direction: lower_is_better }
+      - { id: ar_days,          label: Receivable days,    metric: receivable_days,  format: days,    compare: prior_period, direction: lower_is_better }
+      - { id: exceptions,       label: Payables exceptions, metric: exception_count, format: integer, compare: prior_period, direction: lower_is_better }
+
+  # ------------------------------------------------------------------- table --
+  - id: pnl_summary
+    title: Profit and loss
+    type: table
+    required: true
+    binding:
+      source: ledgerfab
+      select: pnl_lines
+    columns:
+      - { field: label,        label: "",            align: left,  format: text }
+      - { field: amount,       label: This month,    align: right, format: money }
+      - { field: prior_amount, label: Prior month,   align: right, format: money }
+      - { field: delta_pct,    label: Change,        align: right, format: percent }
+
+  # --------------------------------------------------------------- narrative --
+  - id: performance_commentary
+    title: Performance commentary
+    type: narrative
+    required: true
+    max_words: 200
+    binding:
+      source: ledgerfab
+      select: pnl_lines
+    tone_rules:
+      - Open with revenue for the month and its movement against the prior month.
+      - Then cover gross margin and operating profit, in that order.
+      - State every movement in both absolute and percentage terms.
+      - Name the line item, never a customer or a vendor.
+      - Do not offer a cause. These figures do not contain one.
+
+  - id: balance_sheet_summary
+    title: Balance sheet
+    type: table
+    required: true
+    binding:
+      source: ledgerfab
+      select: bs_lines
+    columns:
+      - { field: label,        label: "",           align: left,  format: text }
+      - { field: amount,       label: This month,   align: right, format: money }
+      - { field: prior_amount, label: Prior month,  align: right, format: money }
+      - { field: delta_pct,    label: Change,       align: right, format: percent }
+
+  - id: cash_commentary
+    title: Cash commentary
+    type: narrative
+    required: true
+    max_words: 160
+    binding:
+      source: ledgerfab
+      select: cf_lines
+    tone_rules:
+      - Open with the net movement in cash and the closing balance.
+      - Name the two largest contributors to operating cash flow.
+      - Distinguish operating, investing and financing movements explicitly.
+      - Do not describe the cash position as healthy, tight, or any other judgement.
+
+  # ------------------------------------------------- ratios + flags (analysis) --
+  - id: ratio_pack
+    title: Ratio pack
+    type: table
+    required: true
+    binding:
+      source: statementlens
+      select: ratios
+      order_by: [category, formula_id]
+    columns:
+      - { field: label,        label: Ratio,       align: left,  format: text }
+      - { field: display,      label: This month,  align: right, format: text }
+      - { field: prior_display, label: Prior month, align: right, format: text }
+      - { field: status,       label: Status,      align: left,  format: text }
+
+  - id: risk_flags
+    title: Risk flags
+    type: flags
+    required: true
+    binding:
+      source: statementlens
+      select: flags
+      order_by: ["-severity_rank", rule_id]
+
+  # ----------------------------------------------------- spendsort category cut --
+  - id: spend_by_category
+    title: Spend by category
+    type: table
+    required: true
+    binding:
+      source: spendsort
+      select: categories
+      order_by: ["-amount"]
+      limit: 10
+    total_row: true
+    columns:
+      - { field: account_name,   label: Category,     align: left,   format: text }
+      - { field: amount,         label: Spend,        align: right,  format: money }
+      - { field: txn_count,      label: Items,        align: right,  format: integer }
+      - { field: auto_rate,      label: Auto-coded,   align: right,  format: percent }
+
+  - id: spend_commentary
+    title: Spend commentary
+    type: narrative
+    required: true
+    max_words: 160
+    binding:
+      source: spendsort
+      select: categories
+      order_by: ["-amount"]
+      limit: 5
+    tone_rules:
+      - Open with total categorised spend for the month.
+      - Name the three largest categories and their share of the total.
+      - Mention the proportion coded automatically, as a measure of data quality only.
+      - Do not comment on whether any category is too high or too low.
+
+  # ------------------------------------------------------- payables exceptions --
+  - id: payables_exceptions
+    title: Payables exceptions
+    type: flags
+    required: false
+    binding:
+      source: ledgerfab
+      select: exceptions
+      order_by: ["-severity_rank", txn_id]
+
+  # ------------------------------------------------------------- the real GAP --
+  # A management pack legitimately wants divisional performance. This data source
+  # genuinely has no segment dimension, so the binding cannot resolve and the section
+  # renders as an explicit GAP (spec 13 F2) rather than disappearing.
+  #
+  # `required: true` on purpose. It means the default pack CANNOT be issued until a
+  # human either resolves the gap or records a waiver saying why the pack is being
+  # issued without it (spec 13 F5). That is the governance story running on the default
+  # path rather than in a test fixture — see PLAN.md D-006.
+  - id: segment_performance
+    title: Performance by segment
+    type: table
+    required: true
+    binding:
+      source: statementlens
+      select: segment_ratios
+    columns:
+      - { field: segment, label: Segment, align: left,  format: text }
+      - { field: revenue, label: Revenue, align: right, format: money }
+      - { field: margin,  label: Margin,  align: right, format: percent }

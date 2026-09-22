@@ -9,3 +9,6 @@ node_modules/
 *.sqlite3
 .env
 dist/
+archive/
+*.db-shm
+*.db-wal

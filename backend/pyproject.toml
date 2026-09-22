@@ -1,0 +1,140 @@
+[project]
+name = "reportsmith"
+version = "0.1.0"
+description = "A governed reporting assistant: define the pack once as a versioned template, assemble it monthly from live data, draft narratives that cannot invent a number, and gate issuance behind human sign-off."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+dependencies = [
+    # -- api + settings ------------------------------------------------------
+    "fastapi>=0.141,<1.0",
+    "uvicorn[standard]>=0.34",
+    "pydantic>=2.13,<3.0",
+    "pydantic-settings>=2.7",
+    "python-multipart>=0.0.20",
+    # -- persistence ---------------------------------------------------------
+    "sqlalchemy>=2.0.52,<3.0",
+    # -- templates and the flag rules: their entire third-party surface -------
+    "pyyaml>=6.0.3",
+    # -- archive rendering ---------------------------------------------------
+    "reportlab>=5.0.1,<6.0",
+    # -- narrative composer. Versions taken from ../statementlens, which probed
+    #    them in its own Phase 0. A major release past every older sibling's
+    #    0.2.x pin, so the upper bounds are a real guard, not decoration.
+    "langgraph>=1.2.11,<2.0",
+    "langchain-core>=1.6.1,<2.0",
+    "langchain-openai>=1.6.0,<2.0",
+    # -- telemetry (spec 00 A1 "OpenTelemetry pre-wired") --------------------
+    "opentelemetry-api>=1.30",
+    "opentelemetry-sdk>=1.30",
+    "opentelemetry-instrumentation-fastapi>=0.51b0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "httpx>=0.28",
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "types-pyyaml>=6.0",
+    "types-reportlab>=4.2",
+    # Dev-only, and only because the vendored emitter ships an XLSX export whose
+    # test we run unmodified. ReportSmith consumes the emitter in-process and never
+    # writes a workbook, so this stays out of `dependencies`: carrying it at runtime
+    # would import a parser the product does not use. Running a vendored suite
+    # as-written is worth one dev dependency; editing a vendored test is not.
+    "openpyxl>=3.1.5",
+]
+
+[project.scripts]
+reportsmith = "app.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app", "ledgerfab"]
+
+# ---------------------------------------------------------------------- ruff --
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["numcheck"]  # standalone package; it lints under its own config
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "ASYNC", "T20"]
+ignore = [
+    "B008",   # FastAPI's Depends() in defaults is the framework's idiom
+    "RUF012", # ClassVar annotations on pydantic model config
+]
+# Carried over from ../statementlens with its reasoning intact: these characters are
+# input the code must recognise (a spreadsheet's nil cell, a no-break thousands
+# separator) or are load-bearing in prose a reviewer is meant to read.
+allowed-confusables = ["−", "×", "≈", "→", "–", "—", " "]
+
+[tool.ruff.lint.per-file-ignores]
+"app/cli.py" = ["T20"]
+"ledgerfab/cli.py" = ["T20"]
+"tests/*" = ["T20"]
+"../fixtures/*" = ["T20"]
+# Vendored upstream: `__all__` grouped by entity kind rather than alphabetically.
+# Re-sorting would widen the fork surface for no gain (ledgerfab/VENDORED.md).
+"ledgerfab/__init__.py" = ["RUF022"]
+"ledgerfab/statements/__init__.py" = ["RUF022"]
+# Upstream's ruff enables C901 and ours does not, so its `# noqa: C901` reads as an
+# unused directive here. Editing a vendored file to silence that would be the wrong
+# side of the fork line; ignoring the rule in *our* config is the right side.
+"ledgerfab/generators/*.py" = ["RUF100"]
+
+# --------------------------------------------------------------------- mypy --
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+# Vendored upstream: typed well enough, but not strict-clean, and editing it to
+# satisfy this config would widen the fork surface (ledgerfab/VENDORED.md).
+#
+# Listed module-by-module, never as `ledgerfab.*`. A wildcard would also swallow
+# `ledgerfab.statements.*` — code this pack's every figure comes from — and mypy
+# would report success having checked none of it. ../finsight hit exactly that
+# (its D-019) and it hid a real bug.
+module = [
+    "ledgerfab",
+    "ledgerfab.__main__",
+    "ledgerfab.cli",
+    "ledgerfab.export",
+    "ledgerfab.ground_truth",
+    "ledgerfab.hashing",
+    "ledgerfab.messiness",
+    "ledgerfab.models",
+    "ledgerfab.profiles",
+    "ledgerfab.rng",
+    "ledgerfab.generators.*",
+]
+strict = false
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["reportlab.*", "langgraph.*", "langchain_core.*", "langchain_openai.*"]
+ignore_missing_imports = true
+
+# ------------------------------------------------------------------- pytest --
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Only the backend root. `numcheck` is imported package-qualified (`numcheck.tokens`)
+# and its own directory is deliberately NOT on the path — putting it there makes its
+# modules shadow same-named stdlib modules. See numcheck/ORIGIN.md.
+pythonpath = ["."]
+asyncio_mode = "auto"
+markers = [
+    "live: hits a real LLM; costs money and needs OPENAI_API_KEY. Excluded by `make test`.",
+]
+filterwarnings = ["error::DeprecationWarning:app.*"]

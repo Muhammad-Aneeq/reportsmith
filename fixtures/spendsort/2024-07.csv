@@ -1,0 +1,41 @@
+﻿date,vendor_raw,vendor_norm,amount,currency,account,account_name,confidence,source,reason,status,learned,coa_valid,cost_usd,memo
+2024-07-01,Northgate Systems Limited,NORTHGATE SYSTEMS,2862.82,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Northgate Systems Limited — invoice NOR-2024-2641
+2024-07-01,Eastgate Supplies LLP,EASTGATE SUPPLIES,1135.08,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Eastgate Supplies LLP — invoice EAS-2024-3624
+2024-07-03,Northgate Systems Limited,NORTHGATE SYSTEMS,2905.81,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Northgate Systems Limited — invoice NOR-2024-2642
+2024-07-05,Kestrel Partners Ltd,KESTREL PARTNERS,3170.46,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6953
+2024-07-05,Eastgate Supplies LLP,EASTGATE SUPPLIES,4315.00,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Eastgate Supplies LLP — invoice EAS-2024-3625
+2024-07-06,Bluefin Industrial & Co,BLUEFIN INDUSTRIAL & CO,3824.01,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Bluefin Industrial & Co — invoice BLU-2024-2814
+2024-07-07,Redmayne Consulting PLC,REDMAYNE CONSULTING,615.47,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Redmayne Consulting PLC — invoice RED-2024-3366
+2024-07-08,Kestrel Partners Ltd,KESTREL PARTNERS,636.45,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6955
+2024-07-09,Kestrel Partners Ltd,KESTREL PARTNERS,449.02,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6956
+2024-07-10,Jarrow Supplies LLP,JARROW SUPPLIES,278.54,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Jarrow Supplies LLP — invoice JAR-2024-6128
+2024-07-10,Redmayne Consulting PLC,REDMAYNE CONSULTING,774.17,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Redmayne Consulting PLC — invoice RED-2024-3365
+2024-07-10,Eastgate Supplies LLP,EASTGATE SUPPLIES,3296.55,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Eastgate Supplies LLP — invoice EAS-2024-3626
+2024-07-10,Hollowway Systems & Co,HOLLOWWAY SYSTEMS & CO,16519.58,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Hollowway Systems & Co — invoice HOL-2024-2964
+2024-07-11,Kestrel Partners Ltd,KESTREL PARTNERS,3400.65,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6957
+2024-07-13,Bluefin Industrial & Co,BLUEFIN INDUSTRIAL & CO,5944.81,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Bluefin Industrial & Co — invoice BLU-2024-2813
+2024-07-13,Marchmont Consulting PLC,MARCHMONT CONSULTING,295.17,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Marchmont Consulting PLC — invoice MAR-2024-4384
+2024-07-13,Greylock Consulting PLC,GREYLOCK CONSULTING,4009.11,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Greylock Consulting PLC — invoice GRE-2024-3520
+2024-07-14,Kestrel Partners Ltd,KESTREL PARTNERS,8046.51,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6958
+2024-07-14,Marchmont Consulting PLC,MARCHMONT CONSULTING,3291.25,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Marchmont Consulting PLC — invoice MAR-2024-4385
+2024-07-15,Greylock Consulting PLC,GREYLOCK CONSULTING,498.25,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Greylock Consulting PLC — invoice GRE-2024-3517
+2024-07-17,Ironvale Partners PLC,IRONVALE PARTNERS,328.77,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Ironvale Partners PLC — invoice IRO-2024-7458
+2024-07-17,Hollowway Systems & Co,HOLLOWWAY SYSTEMS & CO,648.56,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Hollowway Systems & Co — invoice HOL-2024-2963
+2024-07-17,Greylock Consulting PLC,GREYLOCK CONSULTING,1124.97,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Greylock Consulting PLC — invoice GRE-2024-3519
+2024-07-17,Northgate Systems Limited,NORTHGATE SYSTEMS,1276.92,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Northgate Systems Limited — invoice NOR-2024-2644
+2024-07-18,Marchmont Consulting PLC,MARCHMONT CONSULTING,244.82,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Marchmont Consulting PLC — invoice MAR-2024-4382
+2024-07-19,Orrell Supplies Ltd,ORRELL SUPPLIES,150.73,GBP,5000,Cost of sales,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Orrell Supplies Ltd — invoice ORR-2024-4774
+2024-07-19,Northgate Systems Limited,NORTHGATE SYSTEMS,855.62,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Northgate Systems Limited — invoice NOR-2024-2643
+2024-07-21,Jarrow Supplies LLP,JARROW SUPPLIES,741.85,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Jarrow Supplies LLP — invoice JAR-2024-6127
+2024-07-21,Jarrow Supplies LLP,JARROW SUPPLIES,503.35,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Jarrow Supplies LLP — invoice JAR-2024-6129
+2024-07-21,Ironvale Partners PLC,IRONVALE PARTNERS,1949.49,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Ironvale Partners PLC — invoice IRO-2024-7460
+2024-07-22,Ironvale Partners PLC,IRONVALE PARTNERS,806.73,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Ironvale Partners PLC — invoice IRO-2024-7459
+2024-07-23,Greylock Consulting PLC,GREYLOCK CONSULTING,1371.33,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Greylock Consulting PLC — invoice GRE-2024-3518
+2024-07-24,Marchmont Consulting PLC,MARCHMONT CONSULTING,677.36,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Marchmont Consulting PLC — invoice MAR-2024-4383
+2024-07-26,Kestrel Partners Ltd,KESTREL PARTNERS,304.44,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6959
+2024-07-27,Redmayne Consulting PLC,REDMAYNE CONSULTING,784.98,GBP,6200,Rent,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Redmayne Consulting PLC — invoice RED-2024-3367
+2024-07-27,Orrell Supplies Ltd,ORRELL SUPPLIES,828.70,GBP,5000,Cost of sales,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Orrell Supplies Ltd — invoice ORR-2024-4775
+2024-07-28,Eastgate Supplies LLP,EASTGATE SUPPLIES,777.11,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Eastgate Supplies LLP — invoice EAS-2024-3623
+2024-07-30,Marchmont Consulting PLC,MARCHMONT CONSULTING,346.86,GBP,6300,Utilities,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Marchmont Consulting PLC — invoice MAR-2024-4381
+2024-07-31,Kestrel Partners Ltd,KESTREL PARTNERS,415.48,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Kestrel Partners Ltd — invoice KES-2024-6954
+2024-07-31,Jarrow Supplies LLP,JARROW SUPPLIES,598.79,GBP,6000,Professional fees,1.000,memory,learned from a human correction,auto,yes,yes,0.000000,Jarrow Supplies LLP — invoice JAR-2024-6130
