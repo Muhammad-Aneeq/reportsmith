@@ -54,6 +54,9 @@ fixtures: ## Regenerate the SpendSort export fixtures by RUNNING SpendSort
 capture: ## Screenshot + VERIFY all six screens headless (needs `make dev` running)
 	$(WEB) node capture.mjs
 
+record: ## Record docs/demo.webm by driving the real app (needs `make dev` running)
+	$(WEB) node record-demo.mjs
+
 golden: ## Regenerate the committed golden assembly files
 	$(PYX) evals/make_golden.py
 

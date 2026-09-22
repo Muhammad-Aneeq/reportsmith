@@ -7,6 +7,12 @@
 
 ![Review — the AI draft beside the current text, the figures the section was allowed to cite, and the verified badge](docs/screenshot-review.png)
 
+**▶ [60-second demo](docs/demo.webm)** — the full governance flow, recorded by driving the
+real app (`make record`). Assemble, review, edit with a tracked diff, watch it *refuse* to
+issue, waive the gaps with a reason, sign, verify the archive, and diff against the next
+month. The header badge in the recording reads `live · gpt-5.6-luna` — that is real model
+output, every figure cross-checked.
+
 <details>
 <summary>The other five screens, in both themes</summary>
 
@@ -111,7 +117,10 @@ composer through which the ledger, the other sections, or the raw world could ar
 isolation is structural, not a line in a prompt.
 
 **Every number it writes is verified in code.** `numcheck` extracts each numeric token and
-requires it to match a supplied figure *at the precision the model itself wrote*. `£3.8m`
+requires it to match a supplied figure *at the precision the model itself wrote*. Run live
+against `gpt-5.6-luna`, **87 of 87 figures verified** — and when a section's tone rules asked
+for a total the binding did not supply, the model *declined to invent it* rather than guess.
+That was a bug in the template, and the fix was to supply the total, not to loosen the check. `£3.8m`
 is checked to one decimal; `£3,815,070.61` to two. There is no tolerance setting, because a
 tolerance setting is a knob, and a knob gets widened the first time a build goes red. A
 mismatch triggers one re-draft; if it survives that, the offending **sentence is dropped** —
@@ -171,6 +180,7 @@ structure, changed numbers" is a claim a test can falsify rather than a look.
 make test             # lint, typecheck, 383 backend tests, 38 frontend tests
 make evals-gate       # the three CI gates, plus the self-test that proves a gate can fail
 make capture          # screenshot AND verify all six screens, headless, both themes
+make record           # re-record docs/demo.webm by driving the real app
 make fixtures         # regenerate the SpendSort fixtures by RUNNING SpendSort
 make golden           # regenerate the committed golden assembly files
 ```
@@ -234,9 +244,10 @@ and asserts that in every case the pack still has exactly as many sections as th
 
 ## STATUS — honest
 
-**Working end to end.** `make demo` assembles, narrates, approves, waives, signs, archives
-and diffs two periods. 383 backend tests, 38 frontend tests, all three eval gates green, and
-every screen verified headless in both themes.
+**Working end to end, on both paths.** `make demo` assembles, narrates, approves, waives,
+signs, archives and diffs two periods. 383 backend tests, 38 frontend tests, all three eval
+gates green, every screen verified headless in both themes — and the numeric-fidelity gate
+now passes **against a real model** as well as the mock.
 
 | Area | State |
 |---|---|
@@ -246,11 +257,11 @@ every screen verified headless in both themes.
 | `numcheck` + composer + tone linter | ✅ complete; `numcheck` standalone and CI-tested without the app |
 | Sign-off, tracked edits, waivers, archive + PDF | ✅ complete |
 | Six screens, aurora, both themes | ✅ complete |
-| **Live LLM path** | ⚠️ implemented, `live`-marked, **not exercised here** — no API key was used. Drop one into `.env` (see `.env.example`) and run `make test-live`. Mock is the default and the only path CI runs |
+| **Live LLM path** | ✅ **run and measured** against `gpt-5.6-luna`: **87/87 figures verified, 100% fidelity**, one retry across twelve drafts, $0.0028 per pack. Evidence: `evals/results/fidelity-live-gpt-5.6-luna.json`. Mock remains the default and the only path CI runs |
 | **StatementLens ratios/flags** | ⚠️ computed in-repo to upstream's P4/P5 shapes; the live swap is one reader change — BLOCKERS **B4** |
 | **`numcheck` upstream** | ⚠️ belongs in StatementLens (its P6). If it writes its own, one of the two has to go — BLOCKERS **B4** |
 | Screens verified headless, both themes | ✅ `make capture` — 7 screens × 2 themes, asserted, not just photographed |
-| Demo video | ❌ not recorded — the shot list is in `docs/DEMO_SCRIPT.md` |
+| Demo video | ✅ `docs/demo.webm` — 60s, recorded from the real app via `make record`. Un-narrated; the voiceover script is `docs/DEMO_SCRIPT.md` |
 
 Read [`BLOCKERS.md`](BLOCKERS.md) for the full list, including the Phase 0 mistake that
 shaped a day of planning and how it was corrected.

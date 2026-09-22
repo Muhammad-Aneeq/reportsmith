@@ -152,6 +152,14 @@ class SpendSortAdapter:
         for row in rows:
             groups.setdefault(str(row["account"] or ""), []).append(row)
 
+        # The period total, so each category can carry its share. A "spend commentary" is
+        # mostly a statement about proportions, and a share computed by the model rather than
+        # supplied to it is a number nobody can check.
+        period_total = sum(
+            (r["amount"] for r in rows if r["decided"] and isinstance(r["amount"], Decimal)),
+            Decimal(0),
+        )
+
         out: list[dict[str, Value]] = []
         for account, members in groups.items():
             decided = [m for m in members if m["decided"]]
@@ -160,9 +168,7 @@ class SpendSortAdapter:
             # an ignore here would also hide a genuine future change to that builder.
             amounts = [m["amount"] for m in decided if isinstance(m["amount"], Decimal)]
             amount = sum(amounts, Decimal(0))
-            confidences = [
-                m["confidence"] for m in decided if isinstance(m["confidence"], Decimal)
-            ]
+            confidences = [m["confidence"] for m in decided if isinstance(m["confidence"], Decimal)]
             out.append(
                 {
                     "account": account,
@@ -170,6 +176,9 @@ class SpendSortAdapter:
                     "amount": amount,
                     "txn_count": len(decided),
                     "queued_count": len(members) - len(decided),
+                    "share_pct": (
+                        quantize(amount / period_total * 100, 4) if period_total else None
+                    ),
                     "auto_rate": quantize(Decimal(len(decided)) / Decimal(len(members)) * 100, 4),
                     "avg_confidence": (
                         quantize(sum(confidences, Decimal(0)) / Decimal(len(confidences)), 4)
@@ -184,6 +193,7 @@ class SpendSortAdapter:
                 "account",
                 "account_name",
                 "amount",
+                "share_pct",
                 "txn_count",
                 "queued_count",
                 "auto_rate",

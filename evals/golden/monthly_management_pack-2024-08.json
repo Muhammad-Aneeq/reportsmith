@@ -333,6 +333,20 @@
         "drafted": false,
         "figure_refs": [
           {
+            "display": "\u00a38,546,925",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "8546924.89"
+          },
+          {
+            "display": "(\u00a390,534)",
+            "label": "total delta across all rows shown",
+            "ref_id": "total.delta",
+            "unit": "money",
+            "value": "-90533.97"
+          },
+          {
             "display": "\u00a33,853,733",
             "label": "Revenue",
             "ref_id": "label0.amount",
@@ -818,6 +832,20 @@
         "dataset": "cf_lines",
         "drafted": false,
         "figure_refs": [
+          {
+            "display": "(\u00a31,317,774)",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "-1317774.21"
+          },
+          {
+            "display": "\u00a393,837",
+            "label": "total delta across all rows shown",
+            "ref_id": "total.delta",
+            "unit": "money",
+            "value": "93836.70"
+          },
           {
             "display": "(\u00a3219,639)",
             "label": "Net income",
@@ -1674,11 +1702,25 @@
         "drafted": false,
         "figure_refs": [
           {
+            "display": "\u00a3103,653",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "103653.14"
+          },
+          {
             "display": "\u00a368,236",
             "label": "Professional fees",
             "ref_id": "account_name0.amount",
             "unit": "money",
             "value": "68236.09"
+          },
+          {
+            "display": "65.8%",
+            "label": "Professional fees (share of the month's spend)",
+            "ref_id": "account_name0.share_pct",
+            "unit": "percent",
+            "value": "65.8312"
           },
           {
             "display": "100.0%",
@@ -1688,10 +1730,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Professional fees (average confidence)",
             "ref_id": "account_name0.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1702,6 +1744,13 @@
             "value": "16793.05"
           },
           {
+            "display": "16.2%",
+            "label": "Cost of sales (share of the month's spend)",
+            "ref_id": "account_name1.share_pct",
+            "unit": "percent",
+            "value": "16.2012"
+          },
+          {
             "display": "100.0%",
             "label": "Cost of sales (proportion coded automatically)",
             "ref_id": "account_name1.auto_rate",
@@ -1709,10 +1758,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Cost of sales (average confidence)",
             "ref_id": "account_name1.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1723,6 +1772,13 @@
             "value": "11855.29"
           },
           {
+            "display": "11.4%",
+            "label": "Utilities (share of the month's spend)",
+            "ref_id": "account_name2.share_pct",
+            "unit": "percent",
+            "value": "11.4375"
+          },
+          {
             "display": "100.0%",
             "label": "Utilities (proportion coded automatically)",
             "ref_id": "account_name2.auto_rate",
@@ -1730,10 +1786,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Utilities (average confidence)",
             "ref_id": "account_name2.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1744,6 +1800,13 @@
             "value": "4710.30"
           },
           {
+            "display": "4.5%",
+            "label": "Software subscriptions (share of the month's spend)",
+            "ref_id": "account_name3.share_pct",
+            "unit": "percent",
+            "value": "4.5443"
+          },
+          {
             "display": "100.0%",
             "label": "Software subscriptions (proportion coded automatically)",
             "ref_id": "account_name3.auto_rate",
@@ -1751,10 +1814,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Software subscriptions (average confidence)",
             "ref_id": "account_name3.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1765,6 +1828,13 @@
             "value": "2058.41"
           },
           {
+            "display": "2.0%",
+            "label": "Rent (share of the month's spend)",
+            "ref_id": "account_name4.share_pct",
+            "unit": "percent",
+            "value": "1.9859"
+          },
+          {
             "display": "100.0%",
             "label": "Rent (proportion coded automatically)",
             "ref_id": "account_name4.auto_rate",
@@ -1772,10 +1842,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Rent (average confidence)",
             "ref_id": "account_name4.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           }
         ],
@@ -1978,5 +2048,5 @@
   ],
   "structure_hash": "596213ff41816fc314dbac2968a0bc8fe16f9a547a05925a420a97c8cd282c44",
   "template_ref": "monthly_management_pack@v1",
-  "value_digest": "04c58e9eb76c7a91940c1a18938f27449cf47fd19f0d0c834cb85937a8672fd8"
+  "value_digest": "b157c393c37555abd72cd2c7cb8b66b082f98c2ff4d2061330749a1dcc0ae1ad"
 }

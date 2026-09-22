@@ -55,6 +55,8 @@ class NarrativeResult:
     violations: list[dict[str, Any]] = field(default_factory=list)
     dropped_sentences: list[str] = field(default_factory=list)
     retried: bool = False
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
     def to_content(self, base: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -203,4 +205,6 @@ def compose_section(
         violations=[v.to_json() for v in final.get("violations", [])],
         dropped_sentences=final.get("dropped", []),
         retried=final.get("retried", False) or final.get("attempt", 1) > 1,
+        prompt_tokens=first.prompt_tokens,
+        completion_tokens=first.completion_tokens,
     )

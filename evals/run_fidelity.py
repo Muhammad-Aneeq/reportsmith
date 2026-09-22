@@ -50,7 +50,9 @@ def run(composer: Composer | None = None) -> tuple[object, list[dict[str, object
             spec = template.section(section.section_key)
             if not isinstance(spec, NarrativeSection) or section.has_gap:
                 continue
-            result = compose_section(spec, template, period, section.content_json, composer=composer)
+            result = compose_section(
+                spec, template, period, section.content_json, composer=composer
+            )
             refs = [
                 FigureRef(
                     ref_id=r["ref_id"],
@@ -72,6 +74,8 @@ def run(composer: Composer | None = None) -> tuple[object, list[dict[str, object
                     "retried": result.retried,
                     "dropped": len(result.dropped_sentences),
                     "words": len(result.text.split()),
+                    "prompt_tokens": result.prompt_tokens,
+                    "completion_tokens": result.completion_tokens,
                 }
             )
 
@@ -96,7 +100,9 @@ def main() -> int:
         caught = [r for r in rows if r["dropped"] or r["retried"]]
         print(f"self-test: {len(caught)}/{len(rows)} sections triggered the cross-check")
         for row in caught[:3]:
-            print(f"  {row['period']}/{row['section']}: dropped={row['dropped']} retried={row['retried']}")
+            print(
+                f"  {row['period']}/{row['section']}: dropped={row['dropped']} retried={row['retried']}"
+            )
         if not caught:
             print("FAIL — the faulty composer slipped an unsupported figure past the gate.")
             return 1
@@ -105,6 +111,13 @@ def main() -> int:
 
     report, rows = run()
     print(report.summary())
+    prompt = sum(int(r["prompt_tokens"]) for r in rows)
+    completion = sum(int(r["completion_tokens"]) for r in rows)
+    if prompt:
+        # Measured, not modelled. Priced at gpt-5.6-luna's published rate in MODEL_COSTS.md.
+        print(
+            f"  tokens: {prompt:,} prompt + {completion:,} completion across {len(rows)} sections"
+        )
     for row in rows:
         mark = "ok " if row["verified"] else "FAIL"
         print(

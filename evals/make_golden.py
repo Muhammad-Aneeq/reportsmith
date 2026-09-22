@@ -29,7 +29,9 @@ def canonical(pack) -> str:
             "value_digest": pack.value_digest,
             "sections": [s.as_row() for s in pack.sections],
         },
-        indent=2, sort_keys=True, default=str,
+        indent=2,
+        sort_keys=True,
+        default=str,
     )
 
 
@@ -44,8 +46,10 @@ def main() -> int:
         pack = assemble(template, period, adapters)
         path = OUT / f"{template.id}-{period}.json"
         path.write_text(canonical(pack), encoding="utf-8", newline="\n")
-        print(f"  {path.relative_to(REPO)}  structure={pack.structure_hash[:12]} "
-              f"values={pack.value_digest[:12]}")
+        print(
+            f"  {path.relative_to(REPO)}  structure={pack.structure_hash[:12]} "
+            f"values={pack.value_digest[:12]}"
+        )
     return 0
 
 

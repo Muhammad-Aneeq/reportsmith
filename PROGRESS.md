@@ -196,3 +196,62 @@ So the position is stated rather than implied: `OpenAIComposer` is implemented, 
 and **has never been executed**. "A real model, given only a figure list, passes the fidelity
 gate" is an argument this repo makes from its architecture, not a measurement it contains
 (BLOCKERS **B7**). One `make test-live` closes it, for under a cent.
+
+---
+
+## The live model, and the demo — **both closed**
+
+### Running it closed the last claim, and found three bugs
+
+The user supplied a key, so the live path finally ran against **`gpt-5.6-luna`** (confirmed
+available by listing the models on the key rather than trusting the name):
+
+```
+PASS numeric-fidelity 100.00% (92/92 figures across 6 section(s))
+  tokens: 4,547 prompt + 3,914 completion across 6 sections
+```
+
+92 of 92 figures verified, two periods, six sections, one retry in twelve drafts, nothing
+dropped. The architecture's central claim is now a measurement rather than an argument.
+
+**Three defects that mock mode structurally could not have found:**
+
+1. **The key was unreachable.** `env_file=".env"` resolves against the *cwd*, and `make dev`
+   starts uvicorn from `backend/` — so the root `.env` that `.env.example` instructs you to
+   create was never read, and the app sat in mock mode reporting itself configured. And
+   `Settings` has an `env_prefix` of `REPORTSMITH_`, so it would never have seen
+   `OPENAI_API_KEY` anyway; the SDK reads that from `os.environ`. Both fixed. This would have
+   hit the first person to follow the instructions.
+
+2. **A section asked for figures its binding never supplied — and the model refused to
+   invent them.** `spend_commentary`'s rules say *"open with total categorised spend"* and
+   *"name the three largest categories and their share of the total"*; the frame carried
+   neither. It wrote: *"Total categorised spend for the month was not stated in the figures."*
+   Correct, and useless. The fix was to **supply the figures** — column totals are now
+   computed in code and citable, and `categories` carries `share_pct` — not to relax the
+   rules. It now opens *"Total categorised spend for the month was £81,006. The three largest
+   categories were Utilities at £41,316, representing 51.0% of spend…"*
+
+3. **Two figures were wrong before the model saw them.** The ref format was *inferred* — "a
+   Decimal that is not a percentage or a count is money" — so an average confidence of 0.94
+   was handed over as **£1**, and four of them summed into a total of **£4**. A figure list
+   given to a model must not contain nonsense. Named map now, non-additive fields excluded.
+
+`MODEL_COSTS.md` was rewritten from measurements: **$0.0028 per pack**. The previous estimate
+was 2.5× low on output tokens because it ignored reasoning tokens — the ordinary way a cost
+page becomes fiction.
+
+### The video exists
+
+`frontend/record-demo.mjs` drives the real app through the governance flow and records it:
+**`docs/demo.webm`, 60 seconds, VP8**. Verified as a real recording rather than an empty
+container — ~23,800 frame blocks — and verified as a real *run*: pack 3 came out of it
+`issued`, 11/11 approved, three waivers recorded, one section carrying a tracked human edit
+with a 19-operation word diff.
+
+It is un-narrated. `docs/DEMO_SCRIPT.md` holds the voiceover lines, already timed to the cuts.
+The header badge in the footage reads `live · gpt-5.6-luna`, so the prose on screen is real
+model output with every figure cross-checked — which is a stronger thing to show than the
+mock would have been.
+
+All screenshots were re-taken from the same live state, so the doc set and the video agree.

@@ -333,6 +333,20 @@
         "drafted": false,
         "figure_refs": [
           {
+            "display": "\u00a38,637,459",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "8637458.86"
+          },
+          {
+            "display": "\u00a3100,858",
+            "label": "total delta across all rows shown",
+            "ref_id": "total.delta",
+            "unit": "money",
+            "value": "100858.15"
+          },
+          {
             "display": "\u00a33,815,071",
             "label": "Revenue",
             "ref_id": "label0.amount",
@@ -818,6 +832,20 @@
         "dataset": "cf_lines",
         "drafted": false,
         "figure_refs": [
+          {
+            "display": "(\u00a31,411,611)",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "-1411610.91"
+          },
+          {
+            "display": "(\u00a3597,959)",
+            "label": "total delta across all rows shown",
+            "ref_id": "total.delta",
+            "unit": "money",
+            "value": "-597959.21"
+          },
           {
             "display": "(\u00a3113,316)",
             "label": "Net income",
@@ -1656,11 +1684,25 @@
         "drafted": false,
         "figure_refs": [
           {
+            "display": "\u00a381,006",
+            "label": "total amount across all rows shown",
+            "ref_id": "total.amount",
+            "unit": "money",
+            "value": "81005.57"
+          },
+          {
             "display": "\u00a341,316",
             "label": "Utilities",
             "ref_id": "account_name0.amount",
             "unit": "money",
             "value": "41316.16"
+          },
+          {
+            "display": "51.0%",
+            "label": "Utilities (share of the month's spend)",
+            "ref_id": "account_name0.share_pct",
+            "unit": "percent",
+            "value": "51.0041"
           },
           {
             "display": "100.0%",
@@ -1670,10 +1712,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Utilities (average confidence)",
             "ref_id": "account_name0.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1684,6 +1726,13 @@
             "value": "25549.20"
           },
           {
+            "display": "31.5%",
+            "label": "Professional fees (share of the month's spend)",
+            "ref_id": "account_name1.share_pct",
+            "unit": "percent",
+            "value": "31.5401"
+          },
+          {
             "display": "100.0%",
             "label": "Professional fees (proportion coded automatically)",
             "ref_id": "account_name1.auto_rate",
@@ -1691,10 +1740,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Professional fees (average confidence)",
             "ref_id": "account_name1.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1705,6 +1754,13 @@
             "value": "13160.78"
           },
           {
+            "display": "16.2%",
+            "label": "Rent (share of the month's spend)",
+            "ref_id": "account_name2.share_pct",
+            "unit": "percent",
+            "value": "16.2468"
+          },
+          {
             "display": "100.0%",
             "label": "Rent (proportion coded automatically)",
             "ref_id": "account_name2.auto_rate",
@@ -1712,10 +1768,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Rent (average confidence)",
             "ref_id": "account_name2.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           },
           {
@@ -1726,6 +1782,13 @@
             "value": "979.43"
           },
           {
+            "display": "1.2%",
+            "label": "Cost of sales (share of the month's spend)",
+            "ref_id": "account_name3.share_pct",
+            "unit": "percent",
+            "value": "1.2091"
+          },
+          {
             "display": "100.0%",
             "label": "Cost of sales (proportion coded automatically)",
             "ref_id": "account_name3.auto_rate",
@@ -1733,10 +1796,10 @@
             "value": "100.0000"
           },
           {
-            "display": "\u00a31",
+            "display": "1.00",
             "label": "Cost of sales (average confidence)",
             "ref_id": "account_name3.avg_confidence",
-            "unit": "money",
+            "unit": "bare",
             "value": "1.0000"
           }
         ],
@@ -1969,5 +2032,5 @@
   ],
   "structure_hash": "596213ff41816fc314dbac2968a0bc8fe16f9a547a05925a420a97c8cd282c44",
   "template_ref": "monthly_management_pack@v1",
-  "value_digest": "39508803c9d278c32b5dfd23ce829a38bd1205bcb8d051d92698ed37eef8266b"
+  "value_digest": "3b8f63f72abb5d6c7dfd2f87c5f36a1e6fe757ac4903eaacd7790263455f6d97"
 }

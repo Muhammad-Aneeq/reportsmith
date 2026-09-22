@@ -84,8 +84,7 @@ def lint(
                     rule="currency.negative",
                     severity="warning",
                     message=(
-                        f"rendered {count} negative amount(s) in parentheses, "
-                        f"per the pack style"
+                        f"rendered {count} negative amount(s) in parentheses, per the pack style"
                     ),
                     excerpt="",
                     fixed=True,
@@ -155,8 +154,7 @@ def lint(
                         rule="voice.no_recommendations",
                         severity="error",
                         message=(
-                            "this pack's voice forbids recommendations; "
-                            "state what the figures show"
+                            "this pack's voice forbids recommendations; state what the figures show"
                         ),
                         excerpt=out[max(0, match.start() - 30) : match.end() + 30].strip(),
                     )

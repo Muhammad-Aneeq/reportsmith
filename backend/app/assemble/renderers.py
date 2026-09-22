@@ -203,18 +203,56 @@ def build_figure_refs(
         f for f in frame.columns if any(isinstance(row.get(f), Decimal) for row in frame.rows)
     ]
 
+    # Column totals, as first-class citable figures.
+    #
+    # A tone rule like "open with total categorised spend" is unanswerable if the frame only
+    # carries per-row amounts: the model must either invent the total or decline. Given
+    # gpt-5.6-luna it declined — *"Total categorised spend for the month was not stated in the
+    # figures"* — which is the right behaviour and a useless paragraph. The total is a
+    # deterministic function of the bound rows, so it is computed here, in code, and supplied
+    # like any other figure. Percentages are excluded: summing a column of percentages
+    # produces a number with no meaning.
+    for field_name in numeric_fields:
+        if (
+            field_name in _NOT_ADDITIVE
+            or "pct" in field_name
+            or field_name.endswith("_rate")
+            or field_name.startswith("prior")
+        ):
+            continue
+        # Narrowed in the comprehension itself rather than filtered then ignored: the Frame
+        # value type is a union, and `sum` over it is a type error that would otherwise be
+        # silenced with a comment instead of fixed.
+        values: list[Decimal] = [
+            v for row in frame.rows if isinstance(v := row.get(field_name), Decimal)
+        ]
+        if len(values) < 2:
+            continue
+        total = sum(values, Decimal(0))
+        fmt = "integer" if field_name.endswith("_count") else "money"
+        refs.append(
+            {
+                "ref_id": f"total.{field_name}",
+                "label": f"total {field_name.replace('_', ' ')} across all rows shown",
+                "value": str(total),
+                "display": format_value(total, fmt, style),
+                "unit": "count" if fmt == "integer" else "money",
+            }
+        )
+
     for index, row in enumerate(frame.rows):
         label = str(row.get(label_field)) if label_field else f"row {index + 1}"
         for field_name in numeric_fields:
             value = row.get(field_name)
             if not isinstance(value, Decimal):
                 continue
-            fmt = (
+            fmt = _NON_MONEY_FIELDS.get(
+                field_name,
                 "percent"
                 if "pct" in field_name or field_name.endswith("_rate")
                 else "integer"
                 if field_name.endswith("_count")
-                else "money"
+                else "money",
             )
             refs.append(
                 {
@@ -222,14 +260,33 @@ def build_figure_refs(
                     "label": _ref_label(label, field_name),
                     "value": str(value),
                     "display": format_value(value, fmt, style),
-                    "unit": "percent"
-                    if fmt == "percent"
-                    else "money"
-                    if fmt == "money"
-                    else "count",
+                    "unit": {
+                        "percent": "percent",
+                        "money": "money",
+                        "ratio": "bare",
+                        "integer": "count",
+                    }.get(fmt, "count"),
                 }
             )
     return refs
+
+
+# Fields whose numeric type is NOT money, and whether they can meaningfully be totalled.
+# Named rather than inferred: the previous heuristic ("a Decimal that is not a pct or a count
+# is money") rendered an average confidence of 0.94 as "£1", and then summed four of them into
+# a "total average confidence across all rows shown" of "£4". A figure list handed to a model
+# must not contain figures that are wrong before it starts.
+_NON_MONEY_FIELDS: dict[str, str] = {
+    "avg_confidence": "ratio",
+    "confidence": "ratio",
+    "share_pct": "percent",
+    "auto_rate": "percent",
+    "severity_rank": "integer",
+}
+# Only additive quantities get a total. An average, a ratio and a percentage do not add up.
+_NOT_ADDITIVE = frozenset(
+    {"avg_confidence", "confidence", "share_pct", "auto_rate", "severity_rank"}
+)
 
 
 # How a figure's field name reads when the composer copies the label into a sentence.
@@ -246,6 +303,7 @@ _FIELD_PHRASES: dict[str, str] = {
     "txn_count": " (number of items)",
     "queued_count": " (items awaiting review)",
     "auto_rate": " (proportion coded automatically)",
+    "share_pct": " (share of the month's spend)",
     "avg_confidence": " (average confidence)",
 }
 

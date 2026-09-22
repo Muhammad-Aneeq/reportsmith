@@ -45,6 +45,11 @@ class DraftResult:
     text: str
     model: str
     cited_refs: list[str] = field(default_factory=list)
+    # Reported by the provider, not estimated. MODEL_COSTS.md quotes these, and a cost page
+    # built on guesses is the kind of thing that is wrong by an order of magnitude and never
+    # corrected because nobody measured.
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 @runtime_checkable
@@ -147,7 +152,14 @@ class OpenAIComposer:
         client = ChatOpenAI(model=self.model, temperature=self.temperature)
         response = client.invoke([SystemMessage(content=system), HumanMessage(content=human)])
         text = response.content if isinstance(response.content, str) else str(response.content)
-        return DraftResult(text=text.strip(), model=self.name)
+
+        usage = getattr(response, "usage_metadata", None) or {}
+        return DraftResult(
+            text=text.strip(),
+            model=self.name,
+            prompt_tokens=int(usage.get("input_tokens", 0)),
+            completion_tokens=int(usage.get("output_tokens", 0)),
+        )
 
 
 def get_composer(*, faulty: bool = False) -> Composer:

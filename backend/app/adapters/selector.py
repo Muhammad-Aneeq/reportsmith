@@ -187,9 +187,7 @@ def _sort_key(
         else:
             comparable = str(value)
         if descending:
-            comparable = (
-                -comparable if isinstance(comparable, Decimal) else _invert_str(comparable)
-            )
+            comparable = -comparable if isinstance(comparable, Decimal) else _invert_str(comparable)
         key.append((0, comparable))
     key.extend(str(row.get(t, "")) for t in tiebreak)
     return tuple(key)

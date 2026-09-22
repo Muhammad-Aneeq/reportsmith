@@ -14,7 +14,7 @@
 | **B5** | No published `aurora-ui` package | low | none | Local `frontend/src/components/aurora/` — the convention in all ten sibling repos (PLAN **D-003**) |
 | **B0** | **A stale directory read made P0 assert both siblings were spec-only** | — | corrected before any code was written | Root cause and correction below |
 | **B6** | Chrome extension not connected, so no browser automation | low | none — resolved a better way | Headless Playwright (`make capture`) screenshots **and asserts** all six screens in both themes; the manual script is in `docs/GOVERNANCE.md` |
-| **B7** | No API key available to the build | medium | the live LLM path is implemented but **never run** | `.env.example` ships; `make test-live` runs it. Recorded in README STATUS as unproven rather than quietly implied |
+| ~~**B7**~~ | ~~No API key, so the live path is unproven~~ | — | **CLOSED** — the user supplied a key; the live path was run and measured | 87/87 figures verified against `gpt-5.6-luna`, 100% fidelity. See below |
 
 ---
 
@@ -132,24 +132,45 @@ exactly that.
 
 ---
 
-## B7 · No API key, so the live model path is unproven
+## B7 · The live model path — CLOSED, and what running it found
 
 **Found:** P8. `OPENAI_API_KEY` is not set in this environment. Keys exist in four sibling
 repos' `.env` files; the user was asked and chose to supply their own key to this project
 rather than have a sibling's borrowed, so nothing was taken.
 
-**What this means, stated plainly:** `OpenAIComposer` is implemented, `live`-marked and
-excluded from CI. **It has never been executed.** The claim "a real model, given only a
-figure list, passes the numeric-fidelity gate" is an argument this repo makes from its
-architecture — it is not a measurement this repo contains. README STATUS says so.
+**Closed.** The user supplied a key, and the live path was run against **`gpt-5.6-luna`**:
 
-**To close it:** put a key in `.env` (see `.env.example`) and run
-
-```bash
-make test-live                        # the live-marked tests
-REPORTSMITH_LLM=live make evals       # the fidelity gate against the real model
+```
+PASS numeric-fidelity 100.00% (87/87 figures across 6 section(s))
+  tokens: 4,547 prompt + 3,920 completion across 6 sections
 ```
 
-A full pack is three narrative sections and costs well under a cent (`MODEL_COSTS.md`). The
-interesting outcome is not "it passed" — it is whatever the cross-check catches if it does
-not.
+87 of 87 figures verified, across two periods and six sections, with **one** retry in twelve
+drafts and no sentence dropped. `evals/results/fidelity-live-gpt-5.6-luna.json` is committed.
+The claim is now a measurement rather than an argument.
+
+**Three things running it found that mock mode could not have:**
+
+1. **A settings bug that made the key unreachable.** `env_file=".env"` resolves against the
+   *current working directory*, and `make dev` starts uvicorn from `backend/` — so the root
+   `.env` that `.env.example` instructs you to create was never read, and the app stayed in
+   mock mode while insisting it was configured. Worse, `Settings` has an `env_prefix` of
+   `REPORTSMITH_`, so it would never have seen `OPENAI_API_KEY` anyway; the OpenAI SDK reads
+   that variable from `os.environ` directly. Both are fixed, and this would have hit the
+   first person who followed the instructions.
+2. **A template asking for figures its binding did not supply.** `spend_commentary`'s tone
+   rules say *"open with total categorised spend"* and *"name the three largest categories
+   and their share of the total"* — and the frame carried neither. The model **refused to
+   invent them**: *"Total categorised spend for the month was not stated in the figures."*
+   Correct behaviour, useless paragraph. The fix was to supply the figures — column totals
+   are now computed in code and citable, and `categories` carries `share_pct` — not to
+   loosen the rules.
+3. **Two figures that were wrong before the model saw them.** The figure-ref format was
+   inferred ("a Decimal that is not a percentage or a count is money"), so an average
+   confidence of 0.94 was presented as **"£1"**, and four of them were summed into a "total
+   average confidence of £4". A figure list handed to a model must not contain figures that
+   are already wrong. Now driven by a named map, with non-additive fields excluded from
+   totals.
+
+Mock mode is still the default and still the only path CI runs — the point of the mock is
+that the product works with no key, and that remains true.

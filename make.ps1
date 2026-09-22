@@ -42,6 +42,7 @@ switch ($Target) {
             'diff         Show the month-diff verdict',
             'fixtures     Regenerate the SpendSort export fixtures by RUNNING SpendSort',
             'capture      Screenshot + VERIFY all six screens headless (needs make dev running)',
+            'record       Record docs/demo.webm by driving the real app (needs make dev running)',
             'golden       Regenerate the committed golden assembly files',
             'test         Lint, typecheck, then the full suite (LLM mocked)',
             'test-fast    Tests only',
@@ -75,6 +76,7 @@ switch ($Target) {
     'diff' { Run 'backend' @($py, '-m', 'app.cli', 'demo') }
     'fixtures' { Run '.' @($py, 'fixtures/gen_fixtures.py') }
     'capture' { Run 'frontend' @('node', 'capture.mjs') }
+    'record' { Run 'frontend' @('node', 'record-demo.mjs') }
     'golden' { Run '.' @($py, 'evals/make_golden.py') }
     'test' {
         & $PSCommandPath 'lint'

@@ -13,8 +13,8 @@ identical and the value digest is not.
 | Frontend tests | **38 passing** |
 | Eval gates | numeric fidelity **100%** · gate self-test · state machine · E2E · golden files |
 | Screens verified | **7 × 2 themes**, headless, asserted — not just photographed |
-| Live model calls made | **zero** — mock is the default and the only path CI runs |
-| Cost to build and run | **$0.00** |
+| Live model | **87/87 figures verified** against `gpt-5.6-luna`; mock remains the default and the only path CI runs |
+| Cost to build and run | **$0.00** mock · **$0.0056** for the one live two-period run |
 
 Against the definition of done, item by item:
 
@@ -32,7 +32,7 @@ Against the definition of done, item by item:
 | CI gates green, mock mode marked | ✅ named in the job titles |
 | README, MODEL_COSTS, PLAN ticked | ✅ |
 | Screens verified headless, both themes | ✅ `make capture` |
-| Demo video | ❌ not recorded — shot list in `docs/DEMO_SCRIPT.md` |
+| Demo video | ✅ `docs/demo.webm`, 60s, recorded from the real app (`make record`) |
 
 ---
 
@@ -87,9 +87,53 @@ reading about it, which is the same lesson applied.
 | **Not blocked** | Everything in the definition of done. The product runs end to end. |
 | **B4 · StatementLens P4/P5** | Its computations and flags are not built upstream (it is at P3 of P11). Computed in-repo to its own PLAN's shapes, so the swap is one reader change. |
 | **B4 · `numcheck` upstream** | It belongs in StatementLens (its P6) and is written here because that phase has not arrived. If upstream writes its own, spec 13 §10's *"shared harness with Spec 12"* stops being true and one of the two has to go. |
-| **Live LLM** | Implemented and `live`-marked, but never run — no API key was used. The claim "it works with a real model" is **not** evidenced by this repo. |
-| **Demo video** | Not recorded — needs a person and a screen recorder. Everything it must *show* is built; the shot list, with exact commands and clicks, is `docs/DEMO_SCRIPT.md`. |
+| **Live LLM** | ✅ **Closed.** Run against `gpt-5.6-luna`: 87/87 figures verified, one retry in twelve drafts. Evidence committed. |
+| **Demo video** | ✅ **Closed.** `docs/demo.webm` — 60 seconds, VP8, recorded by driving the real app end to end. Un-narrated; `docs/DEMO_SCRIPT.md` is the voiceover script, timed to it. |
 | **Browser automation** | The Chrome extension never connected (B6). Resolved with headless Playwright, which turned out better — it **asserts** rather than photographs, and caught three real defects. |
+
+---
+
+## What running the live model found
+
+The live path was the last unproven claim, and running it closed it: **87 of 87 figures
+verified** across two periods and six sections against `gpt-5.6-luna`, with one retry in
+twelve drafts and no sentence dropped. `evals/results/fidelity-live-gpt-5.6-luna.json` is
+committed, and `MODEL_COSTS.md` now quotes measured token counts rather than estimates — the
+old estimate was 2.5x low on output, because it did not account for reasoning tokens.
+
+Three defects surfaced that mock mode structurally could not have found:
+
+**1 · The key was unreachable.** `env_file=".env"` resolves against the *current working
+directory*, and `make dev` starts uvicorn from `backend/` — so the root `.env` that
+`.env.example` tells you to create was never read, and the app stayed in mock mode while
+reporting itself configured. Compounding it, `Settings` has an `env_prefix` of
+`REPORTSMITH_` and so would never have seen `OPENAI_API_KEY` at all; the OpenAI SDK reads
+that from `os.environ` directly. This would have hit the first person who followed the
+instructions exactly.
+
+**2 · A section asking for figures its binding never supplied.** `spend_commentary`'s tone
+rules say *"open with total categorised spend"* and *"name the three largest categories and
+their share of the total"*. The frame carried neither. The model **refused to invent them**:
+
+> *"Total categorised spend for the month was not stated in the figures. … Their shares of
+> total were not provided."*
+
+Exactly the behaviour the architecture is for, and a useless paragraph. The fix was to supply
+the figures — column totals are now computed in code and citable, and `categories` carries
+`share_pct` — not to weaken the rules. The same section now opens *"Total categorised spend
+for the month was £81,006. The three largest categories were Utilities at £41,316,
+representing 51.0% of spend…"*, with nine verified figures.
+
+**3 · Two figures that were wrong before the model saw them.** The figure-ref format was
+inferred — *a Decimal that is not a percentage or a count is money* — so an average confidence
+of 0.94 was handed to the model as **"£1"**, and four of them were summed into a "total
+average confidence across all rows shown" of **"£4"**. A figure list given to a model must not
+contain figures that are already nonsense. Now driven by a named map, with non-additive
+fields excluded from totals.
+
+The pattern is the same one as the other two mistakes in this project: the thing that was
+merely *described* — a key location, a tone rule, a numeric format — was the thing that was
+wrong. Running it is what found all three.
 
 ---
 
@@ -248,8 +292,6 @@ derivation depends on the bound.
 2. **Offer `numcheck` upstream** before StatementLens reaches P6, together with notes 1 and 2
    above. This is time-sensitive in a way the others are not — once a second implementation
    exists, the "shared harness" claim is already false.
-3. **Run the live path once and publish the result.** The architecture's claim is that a real
-   model, given only a figure list, passes the fidelity gate. That is currently an argument,
-   not a measurement (B7). Drop a key into `.env` and run `make test-live`; it costs under a
-   cent. The interesting outcome is not "it passed" — it is whatever the cross-check catches
-   if it does not.
+3. **Narrate the demo.** The footage exists and is 60 seconds; `docs/DEMO_SCRIPT.md` carries
+   the lines, already timed to the cuts. That is the last thing between this and
+   "launch-ready" under spec 00 E.
