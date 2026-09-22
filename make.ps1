@@ -41,6 +41,7 @@ switch ($Target) {
             'month2       The same template on the NEXT period',
             'diff         Show the month-diff verdict',
             'fixtures     Regenerate the SpendSort export fixtures by RUNNING SpendSort',
+            'capture      Screenshot + VERIFY all six screens headless (needs make dev running)',
             'golden       Regenerate the committed golden assembly files',
             'test         Lint, typecheck, then the full suite (LLM mocked)',
             'test-fast    Tests only',
@@ -73,6 +74,7 @@ switch ($Target) {
     'month2' { Run 'backend' @($py, '-m', 'app.cli', 'month2') }
     'diff' { Run 'backend' @($py, '-m', 'app.cli', 'demo') }
     'fixtures' { Run '.' @($py, 'fixtures/gen_fixtures.py') }
+    'capture' { Run 'frontend' @('node', 'capture.mjs') }
     'golden' { Run '.' @($py, 'evals/make_golden.py') }
     'test' {
         & $PSCommandPath 'lint'

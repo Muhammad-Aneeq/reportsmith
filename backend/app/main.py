@@ -323,11 +323,27 @@ def _diff_side(section: SectionRow | None) -> dict[str, Any] | None:
     elif section.type == "table":
         columns = content.get("columns", [])
         if columns:
-            first, last = columns[0]["field"], columns[-1]["field"]
+            label_col = columns[0]["field"]
+            # The *value* column, not the last one. The ratio pack's last column is
+            # `status`, so taking the last rendered every row as "ok → ok" — a diff view
+            # reporting that nothing moved because it was comparing the wrong column.
+            #
+            # Preference: the first numerically-formatted column; failing that the second
+            # column, which in a label-first table is the value. The ratio pack's value is
+            # pre-rendered text ("27.9%", "63.2 days") and so matches no format, which is
+            # why falling back to the *last* column was wrong rather than merely unlucky.
+            value_col = next(
+                (
+                    c["field"]
+                    for c in columns[1:]
+                    if c.get("format") in ("money", "percent", "integer")
+                ),
+                columns[1]["field"] if len(columns) > 1 else columns[0]["field"],
+            )
             summary = [
                 {
-                    "label": str(r.get(first, {}).get("display", "")),
-                    "display": str(r.get(last, {}).get("display", "")),
+                    "label": str(r.get(label_col, {}).get("display", "")),
+                    "display": str(r.get(value_col, {}).get("display", "")),
                 }
                 for r in content.get("rows", [])[:6]
             ]

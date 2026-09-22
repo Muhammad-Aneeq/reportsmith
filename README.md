@@ -5,9 +5,27 @@
 > assembled from live data each period, narrated by a model that cannot invent a number, and
 > gated behind a human sign-off that records what was changed and what was waived.
 
-![Review screen — AI draft beside the current text, with a word-level diff](docs/screenshot-review.png)
+![Review — the AI draft beside the current text, the figures the section was allowed to cite, and the verified badge](docs/screenshot-review.png)
 
-*(Screenshot: the Review screen. Run `make dev` and open http://localhost:5173/review.)*
+<details>
+<summary>The other five screens, in both themes</summary>
+
+| | dark | light |
+|---|---|---|
+| **Templates** — YAML editor, validated as you type | [png](docs/screenshots/templates-dark.png) | [png](docs/screenshots/templates-light.png) |
+| **Pack run** — binding status per section, gaps panel | [png](docs/screenshots/pack-run-dark.png) | [png](docs/screenshots/pack-run-light.png) |
+| **Review** — tracked edits, figure chips | [png](docs/screenshots/review-dark.png) | [png](docs/screenshots/review-light.png) |
+| **Sign-off** — the checklist, blocked on three gaps | [png](docs/screenshots/signoff-dark.png) | [png](docs/screenshots/signoff-light.png) |
+| **Archive** — hashes and a live integrity check | [png](docs/screenshots/archive-dark.png) | [png](docs/screenshots/archive-light.png) |
+| **Month diff** — identical structure, changed numbers | [png](docs/screenshots/month-diff-dark.png) | [png](docs/screenshots/month-diff-light.png) |
+| **/aurora** — all nine spec 00 A2 components | [png](docs/screenshots/aurora-dark.png) | [png](docs/screenshots/aurora-light.png) |
+
+These are produced by `make capture`, which does not just screenshot — it **fails** if a
+screen renders empty, shows an error state, scrolls horizontally, logs a console error, or
+is missing a claim the README makes about it. A screenshot of a broken page is worse than
+no screenshot.
+
+</details>
 
 ---
 
@@ -150,8 +168,9 @@ structure, changed numbers" is a claim a test can falsify rather than a look.
 ### Other targets
 
 ```bash
-make test             # lint, typecheck, 330+ backend tests, 38 frontend tests
+make test             # lint, typecheck, 383 backend tests, 38 frontend tests
 make evals-gate       # the three CI gates, plus the self-test that proves a gate can fail
+make capture          # screenshot AND verify all six screens, headless, both themes
 make fixtures         # regenerate the SpendSort fixtures by RUNNING SpendSort
 make golden           # regenerate the committed golden assembly files
 ```
@@ -216,7 +235,8 @@ and asserts that in every case the pack still has exactly as many sections as th
 ## STATUS — honest
 
 **Working end to end.** `make demo` assembles, narrates, approves, waives, signs, archives
-and diffs two periods. 330 backend tests, 38 frontend tests, all three eval gates green.
+and diffs two periods. 383 backend tests, 38 frontend tests, all three eval gates green, and
+every screen verified headless in both themes.
 
 | Area | State |
 |---|---|
@@ -226,10 +246,11 @@ and diffs two periods. 330 backend tests, 38 frontend tests, all three eval gate
 | `numcheck` + composer + tone linter | ✅ complete; `numcheck` standalone and CI-tested without the app |
 | Sign-off, tracked edits, waivers, archive + PDF | ✅ complete |
 | Six screens, aurora, both themes | ✅ complete |
-| **Live LLM path** | ⚠️ implemented, `live`-marked, **not exercised here** — no API key was used. Mock is the default and the only path CI runs |
+| **Live LLM path** | ⚠️ implemented, `live`-marked, **not exercised here** — no API key was used. Drop one into `.env` (see `.env.example`) and run `make test-live`. Mock is the default and the only path CI runs |
 | **StatementLens ratios/flags** | ⚠️ computed in-repo to upstream's P4/P5 shapes; the live swap is one reader change — BLOCKERS **B4** |
 | **`numcheck` upstream** | ⚠️ belongs in StatementLens (its P6). If it writes its own, one of the two has to go — BLOCKERS **B4** |
-| Demo video | ❌ not recorded |
+| Screens verified headless, both themes | ✅ `make capture` — 7 screens × 2 themes, asserted, not just photographed |
+| Demo video | ❌ not recorded — the shot list is in `docs/DEMO_SCRIPT.md` |
 
 Read [`BLOCKERS.md`](BLOCKERS.md) for the full list, including the Phase 0 mistake that
 shaped a day of planning and how it was corrected.

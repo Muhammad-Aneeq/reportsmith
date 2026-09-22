@@ -79,6 +79,11 @@ class SpendSortAdapter:
     def __init__(self, fixtures_dir: Path | None = None) -> None:
         self.dir = fixtures_dir or (settings.fixtures_dir / "spendsort")
 
+    # NB: no absolute path ever appears in an error raised from here. A gap's detail is
+    # rendered in the UI *and* written into the issued markdown and PDF — so an absolute
+    # path would put the build machine's directory layout and username into a document
+    # that gets distributed. The period and the remedy are what a reader needs.
+
     def catalog(self) -> tuple[str, ...]:
         return ("categories", "transactions", "review_queue")
 
@@ -87,7 +92,7 @@ class SpendSortAdapter:
         if not path.exists():
             available = sorted(p.stem for p in self.dir.glob("*.csv")) if self.dir.exists() else []
             raise FileNotFoundError(
-                f"no SpendSort export for {period} at {path}; "
+                f"no SpendSort export for {period}; "
                 f"available: {available or 'none'} — run `make fixtures` to regenerate"
             )
         return path

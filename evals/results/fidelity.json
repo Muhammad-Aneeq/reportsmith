@@ -1,7 +1,7 @@
 {
   "fidelity_pct": "100.00",
-  "figures_checked": 36,
-  "figures_verified": 36,
+  "figures_checked": 34,
+  "figures_verified": 34,
   "sections": 6,
   "passed": true,
   "failures": [],
@@ -12,10 +12,10 @@
       "model": "mock",
       "prompt_version": "monthly_management_pack@v1/performance_commentary",
       "verified": true,
-      "figures_checked": 6,
+      "figures_checked": 8,
       "retried": false,
       "dropped": 0,
-      "words": 24
+      "words": 35
     },
     {
       "period": "2024-07",
@@ -24,9 +24,9 @@
       "prompt_version": "monthly_management_pack@v1/cash_commentary",
       "verified": true,
       "figures_checked": 6,
-      "retried": false,
-      "dropped": 0,
-      "words": 36
+      "retried": true,
+      "dropped": 1,
+      "words": 27
     },
     {
       "period": "2024-07",
@@ -34,10 +34,10 @@
       "model": "mock",
       "prompt_version": "monthly_management_pack@v1/spend_commentary",
       "verified": true,
-      "figures_checked": 6,
+      "figures_checked": 5,
       "retried": false,
       "dropped": 0,
-      "words": 19
+      "words": 14
     },
     {
       "period": "2024-08",
@@ -45,10 +45,10 @@
       "model": "mock",
       "prompt_version": "monthly_management_pack@v1/performance_commentary",
       "verified": true,
-      "figures_checked": 6,
+      "figures_checked": 8,
       "retried": false,
       "dropped": 0,
-      "words": 24
+      "words": 35
     },
     {
       "period": "2024-08",
@@ -56,10 +56,10 @@
       "model": "mock",
       "prompt_version": "monthly_management_pack@v1/cash_commentary",
       "verified": true,
-      "figures_checked": 6,
-      "retried": false,
-      "dropped": 0,
-      "words": 36
+      "figures_checked": 2,
+      "retried": true,
+      "dropped": 2,
+      "words": 14
     },
     {
       "period": "2024-08",
@@ -67,10 +67,10 @@
       "model": "mock",
       "prompt_version": "monthly_management_pack@v1/spend_commentary",
       "verified": true,
-      "figures_checked": 6,
+      "figures_checked": 5,
       "retried": false,
       "dropped": 0,
-      "words": 20
+      "words": 16
     }
   ]
 }

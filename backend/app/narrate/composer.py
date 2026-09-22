@@ -75,24 +75,38 @@ class MockComposer:
                 model=self.name,
             )
 
-        # Largest absolute figures first — a management paragraph leads with the big
-        # numbers, and this also makes the output stable under row reordering.
-        ranked = sorted(refs, key=lambda r: abs(r.value), reverse=True)[:4]
         display = request.display_by_ref
+        by_id = {ref.ref_id: ref for ref in refs}
 
+        # Only this period's figures lead. The frame carries prior-month and movement refs
+        # alongside each current one, and ranking the whole set by magnitude put "revenue
+        # (prior month)" first — a management paragraph that opens on last month's number,
+        # then restates it two sentences later. Comparatives are *support*, so they are
+        # attached to their own figure rather than competing with it.
+        current = [r for r in refs if "(" not in r.label] or refs
+        ranked = sorted(current, key=lambda r: abs(r.value), reverse=True)[:3]
+
+        def movement_of(ref: FigureRef) -> str:
+            """', up 2.9% on the prior month' — if that movement was actually supplied."""
+            delta = by_id.get(f"{ref.ref_id.rsplit('.', 1)[0]}.delta_pct")
+            if delta is None or delta.value == 0:
+                return ""
+            direction = "up" if delta.value > 0 else "down"
+            shown = display.get(delta.ref_id, str(delta.value)).lstrip("+-−")
+            return f", {direction} {shown} on the prior month"
+
+        sentences: list[str] = []
         lead = ranked[0]
-        sentences = [
-            f"For {request.period}, {lead.label.lower()} was "
-            f"{display.get(lead.ref_id, lead.value)}."
-        ]
-        for ref in ranked[1:3]:
+        sentences.append(
+            # "totalled" rather than "was": the label may be singular or plural
+            # ("revenue", "utilities") and this mock cannot do subject-verb agreement.
+            f"For {request.period}, {lead.label.lower()} totalled "
+            f"{display.get(lead.ref_id, lead.value)}{movement_of(lead)}."
+        )
+        for ref in ranked[1:]:
             sentences.append(
-                f"{ref.label.capitalize()} stood at {display.get(ref.ref_id, ref.value)}."
-            )
-        if len(ranked) > 3:
-            tail = ranked[3]
-            sentences.append(
-                f"{tail.label.capitalize()} was {display.get(tail.ref_id, tail.value)}."
+                f"{ref.label.capitalize()} stood at "
+                f"{display.get(ref.ref_id, ref.value)}{movement_of(ref)}."
             )
 
         if self.faulty:

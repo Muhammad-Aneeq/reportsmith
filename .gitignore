@@ -12,3 +12,6 @@ dist/
 archive/
 *.db-shm
 *.db-wal
+
+# Never commit a real key.
+.env

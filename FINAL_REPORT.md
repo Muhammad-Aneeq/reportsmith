@@ -9,9 +9,10 @@ identical and the value digest is not.
 
 | | |
 |---|---|
-| Backend tests | **330 passing** (169 of them the vendored engine's own suites, run here) |
+| Backend tests | **383 passing** (169 of them the vendored engine's own suites, run here) |
 | Frontend tests | **38 passing** |
 | Eval gates | numeric fidelity **100%** · gate self-test · state machine · E2E · golden files |
+| Screens verified | **7 × 2 themes**, headless, asserted — not just photographed |
 | Live model calls made | **zero** — mock is the default and the only path CI runs |
 | Cost to build and run | **$0.00** |
 
@@ -30,7 +31,8 @@ Against the definition of done, item by item:
 | `make month2` + diff view | ✅ |
 | CI gates green, mock mode marked | ✅ named in the job titles |
 | README, MODEL_COSTS, PLAN ticked | ✅ |
-| Demo video | ❌ not recorded |
+| Screens verified headless, both themes | ✅ `make capture` |
+| Demo video | ❌ not recorded — shot list in `docs/DEMO_SCRIPT.md` |
 
 ---
 
@@ -86,7 +88,37 @@ reading about it, which is the same lesson applied.
 | **B4 · StatementLens P4/P5** | Its computations and flags are not built upstream (it is at P3 of P11). Computed in-repo to its own PLAN's shapes, so the swap is one reader change. |
 | **B4 · `numcheck` upstream** | It belongs in StatementLens (its P6) and is written here because that phase has not arrived. If upstream writes its own, spec 13 §10's *"shared harness with Spec 12"* stops being true and one of the two has to go. |
 | **Live LLM** | Implemented and `live`-marked, but never run — no API key was used. The claim "it works with a real model" is **not** evidenced by this repo. |
-| **Demo video** | Not recorded. |
+| **Demo video** | Not recorded — needs a person and a screen recorder. Everything it must *show* is built; the shot list, with exact commands and clicks, is `docs/DEMO_SCRIPT.md`. |
+| **Browser automation** | The Chrome extension never connected (B6). Resolved with headless Playwright, which turned out better — it **asserts** rather than photographs, and caught three real defects. |
+
+---
+
+## What headless capture found that the test suite did not
+
+`make capture` was written because the Chrome extension would not connect (B6). It renders
+each screen, asserts what must be on it, and fails on a console error or a horizontal
+scrollbar. Three defects surfaced in the first two runs, none of which any unit test would
+have caught, and all three would have shipped:
+
+- **A duplicate React key** on the Sign-off blockers list. Three unresolved gaps produce three
+  blockers sharing the code `gap_unresolved`; React silently collapses same-keyed siblings, so
+  a reviewer would have seen **one** blocker and believed they had one problem to fix.
+- **An absolute path in published output** — a Windows user directory in a gap detail, which is
+  rendered in the UI *and written into the issued markdown and PDF*. A document meant to be
+  distributed was carrying a directory layout and a username. `tests/test_no_path_leaks.py`
+  now asserts this across gaps, the issued document and the archive manifest.
+- **The month-diff comparing the wrong column** — it took each table's last column, and the
+  ratio pack's last column is `status`, so every row read "ok -> ok" and the money-shot screen
+  reported that nothing had moved.
+
+And one thing only a person reading the screen would have caught: the mock composer opened on
+*last* month's revenue and never stated a movement, despite the section's tone rules asking
+for exactly that. It now reads *"For 2024-07, revenue totalled £3,815,071, up 2.9% on the
+prior month."* That text is in every screenshot and the demo, so it was worth the fix.
+
+The general lesson matches the one from the Phase 0 mistake: **run it, look at it, and assert
+on what you see.** Listing a directory, and rendering a page without checking it, fail the
+same way.
 
 ---
 
@@ -211,11 +243,13 @@ derivation depends on the bound.
 ## The next three things
 
 1. **Record the demo video.** Every other launch requirement is met; this is the gap between
-   "done" and "launch-ready" (spec 00 E).
+   "done" and "launch-ready" (spec 00 E). `docs/DEMO_SCRIPT.md` is the 80-second shot list,
+   and `make capture`'s seeding produces exactly the state it assumes.
 2. **Offer `numcheck` upstream** before StatementLens reaches P6, together with notes 1 and 2
    above. This is time-sensitive in a way the others are not — once a second implementation
    exists, the "shared harness" claim is already false.
 3. **Run the live path once and publish the result.** The architecture's claim is that a real
    model, given only a figure list, passes the fidelity gate. That is currently an argument,
-   not a measurement. One live run against `gpt-4o-mini` costs under a cent and would turn it
-   into evidence — or find something worth knowing.
+   not a measurement (B7). Drop a key into `.env` and run `make test-live`; it costs under a
+   cent. The interesting outcome is not "it passed" — it is whatever the cross-check catches
+   if it does not.

@@ -13,6 +13,8 @@
 | **B4** | StatementLens has **not yet reached P4 (computations), P5 (flags) or P6 (`numcheck`)** — it is through P3 of P11 | medium | none to the definition of done; both are built in-repo | numcheck **originates here**, module-for-module matching their P6 design (PLAN **D-004**); ratios/flags computed in-repo to their P4/P5 shapes (PLAN **D-018**) |
 | **B5** | No published `aurora-ui` package | low | none | Local `frontend/src/components/aurora/` — the convention in all ten sibling repos (PLAN **D-003**) |
 | **B0** | **A stale directory read made P0 assert both siblings were spec-only** | — | corrected before any code was written | Root cause and correction below |
+| **B6** | Chrome extension not connected, so no browser automation | low | none — resolved a better way | Headless Playwright (`make capture`) screenshots **and asserts** all six screens in both themes; the manual script is in `docs/GOVERNANCE.md` |
+| **B7** | No API key available to the build | medium | the live LLM path is implemented but **never run** | `.env.example` ships; `make test-live` runs it. Recorded in README STATUS as unproven rather than quietly implied |
 
 ---
 
@@ -88,3 +90,66 @@ So the brief's *"the numcheck numeric cross-check from `../statementlens` (impor
 **Found:** P0. Spec 00 A2 describes `aurora-ui` as *"a local workspace package imported by all frontends"*. No such package is published, and all ten sibling repos instead carry `frontend/src/components/aurora/` locally.
 
 **What was done:** the same — a local implementation of the spec 00 A2 tokens (`#0B1E3B`, `#10B981`, frosted glass, Space Grotesk / Inter) and all nine components, rendered by an `/aurora` route, which is spec 00 A2's stated acceptance criterion. Nothing in the directory imports from a screen, so lifting it into a package later is a move, not a rewrite.
+
+
+---
+
+## B6 · No browser automation on the build machine
+
+**Found:** P6. The Chrome extension reported *"Browser extension is not connected"* on every
+attempt, so the UI could not be driven the way the rest of the portfolio's projects are.
+
+**Resolved, and arguably better.** `frontend/capture.mjs` drives headless Chromium through
+Playwright and is wired to `make capture`. It is not a screenshot script: it **fails the
+build** if a screen renders under 120 characters, shows an error state, scrolls horizontally
+at 1440px or 1280px, logs a console error, or is missing a phrase the README claims is on it.
+
+It earned its keep immediately, finding three real defects a screenshot alone would have
+photographed and shipped:
+
+1. **A duplicate React key** on the Sign-off blockers list. A pack with three unresolved gaps
+   produces three blockers that all share the code `gap_unresolved`, and React silently
+   collapses same-keyed siblings — so a reviewer would have seen **one** blocker and believed
+   they had one problem.
+2. **An absolute path leaking into published output.** The gap detail read
+   `...no SpendSort export for 2024-06 at C:\Users\<name>\Desktop\...`. Gap details are
+   rendered in the UI *and written into the issued markdown and PDF*, so that put a directory
+   layout and a username into a document meant to be distributed. Fixed, with
+   `tests/test_no_path_leaks.py` asserting it across gaps, the issued document and the
+   archive manifest.
+3. **The month-diff comparing the wrong column.** The summary took each table's *last*
+   column; the ratio pack's last column is `status`, so every row read "ok -> ok" and the
+   diff view reported that nothing had moved.
+
+The first screenshots also showed both demo packs already issued, so the Sign-off screen
+rendered its archive panel instead of the checklist — the screen's whole argument. Fixed by
+seeding a third pack mid-review, which is now what `docs/DEMO_SCRIPT.md` sets up.
+
+**Not a substitute for a human looking.** Playwright asserts what it was told to assert. The
+screens were also read by eye, which is how the mock composer's prose got fixed — it opened
+on *last* month's revenue and never stated a movement, despite the tone rules asking for
+exactly that.
+
+---
+
+## B7 · No API key, so the live model path is unproven
+
+**Found:** P8. `OPENAI_API_KEY` is not set in this environment. Keys exist in four sibling
+repos' `.env` files; the user was asked and chose to supply their own key to this project
+rather than have a sibling's borrowed, so nothing was taken.
+
+**What this means, stated plainly:** `OpenAIComposer` is implemented, `live`-marked and
+excluded from CI. **It has never been executed.** The claim "a real model, given only a
+figure list, passes the numeric-fidelity gate" is an argument this repo makes from its
+architecture — it is not a measurement this repo contains. README STATUS says so.
+
+**To close it:** put a key in `.env` (see `.env.example`) and run
+
+```bash
+make test-live                        # the live-marked tests
+REPORTSMITH_LLM=live make evals       # the fidelity gate against the real model
+```
+
+A full pack is three narrative sections and costs well under a cent (`MODEL_COSTS.md`). The
+interesting outcome is not "it passed" — it is whatever the cross-check catches if it does
+not.

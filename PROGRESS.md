@@ -140,3 +140,59 @@ than one inherited. Thirteen component tests hold the claims that would otherwis
   "it works with a real model" is an argument this repo makes but does not evidence.
 - **Browser-driven UI verification** — the Chrome extension was not connected, so the screens
   were verified through the API and a manual script is written up in `docs/GOVERNANCE.md`.
+
+---
+
+## Closing the three gaps — **two closed, one is yours**
+
+### Browser verification, resolved better than intended
+
+The Chrome extension never connected (BLOCKERS **B6**), so `frontend/capture.mjs` drives
+headless Chromium instead, wired to `make capture`. It is deliberately not a screenshot
+script: it **fails** if a screen renders under 120 characters, shows an error state, scrolls
+horizontally at 1440px or 1280px, logs a console error, or is missing a phrase the README
+claims is on it.
+
+It paid for itself in two runs, finding three defects that would have shipped and that no
+unit test would have caught:
+
+- a **duplicate React key** on the Sign-off blockers list — three gaps produce three blockers
+  sharing the code `gap_unresolved`, and React collapses same-keyed siblings, so a reviewer
+  would have seen one blocker and believed they had one problem;
+- an **absolute path in published output** — a Windows user directory inside a gap detail,
+  which is rendered in the UI *and written into the issued markdown and PDF*
+  (`tests/test_no_path_leaks.py` now guards gaps, the document and the manifest);
+- the **month-diff comparing the wrong column** — it took each table's last column, and the
+  ratio pack's last is `status`, so every row read "ok → ok" on the screen whose entire job
+  is showing what moved.
+
+The first run also caught a framing error rather than a bug: both demo packs were already
+issued, so Sign-off rendered its archive panel instead of the checklist — the screen's whole
+argument. The demo now seeds a third pack mid-review, and `docs/DEMO_SCRIPT.md` assumes that
+state.
+
+And one thing only a person looking would have caught. The mock composer opened on *last*
+month's revenue and never stated a movement, despite the tone rules asking for exactly that:
+
+> before — *"For 2024-06, revenue (prior month) was £3,736,377. Revenue stood at £3,707,889."*
+> after — *"For 2024-07, revenue totalled £3,815,071, up 2.9% on the prior month."*
+
+That text is in every screenshot and in the demo, so it was worth the fix.
+
+### The demo video
+
+Not recorded — it needs a person and a screen recorder. Everything it must *show* is built
+and reproducible, so what exists instead is `docs/DEMO_SCRIPT.md`: an 80-second shot list
+with the exact commands, the exact clicks, and the two things not to crop out (the `mock LLM`
+badge and the synthetic-data banner).
+
+### The live model path — left to the user, deliberately
+
+`OPENAI_API_KEY` is not set here. Keys sit in four sibling repos' `.env` files; the user was
+asked and chose to supply their own to this project rather than have a sibling's borrowed, so
+none was taken. `.env.example` ships and `.gitignore` covers `.env`.
+
+So the position is stated rather than implied: `OpenAIComposer` is implemented, `live`-marked
+and **has never been executed**. "A real model, given only a figure list, passes the fidelity
+gate" is an argument this repo makes from its architecture, not a measurement it contains
+(BLOCKERS **B7**). One `make test-live` closes it, for under a cent.

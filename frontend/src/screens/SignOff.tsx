@@ -223,8 +223,12 @@ export function SignOff() {
             {sign.isError && <ErrorState error={sign.error} what="the sign-off" />}
             {pack.data.blockers.length > 0 && (
               <ul className="rs-list-reset" style={{ marginBottom: 14 }}>
+                {/* Keyed on code AND message: a pack with three unresolved gaps produces
+                    three blockers that all share the code `gap_unresolved`, and React
+                    silently collapses same-keyed siblings — so the reviewer would have
+                    seen one blocker and believed they had one problem. */}
                 {pack.data.blockers.map((blocker) => (
-                  <li key={blocker.code} className="rs-note">
+                  <li key={`${blocker.code}:${blocker.message}`} className="rs-note">
                     <code>{blocker.code}</code> — {blocker.message}
                   </li>
                 ))}

@@ -51,6 +51,9 @@ diff: ## Show the month-diff verdict for the two most recent packs
 fixtures: ## Regenerate the SpendSort export fixtures by RUNNING SpendSort
 	$(PYX) fixtures/gen_fixtures.py
 
+capture: ## Screenshot + VERIFY all six screens headless (needs `make dev` running)
+	$(WEB) node capture.mjs
+
 golden: ## Regenerate the committed golden assembly files
 	$(PYX) evals/make_golden.py
 
