@@ -91,7 +91,10 @@ const problems = [];
 async function capture(browser, theme) {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
-    deviceScaleFactor: 2,
+    // 1x for the gallery. These are full-page captures of long screens, and at 2x the set
+    // was 14 MB — real weight in a repo whose whole pitch is that you can clone and run it.
+    // The README hero is re-taken at 2x below, viewport-only, where the sharpness shows.
+    deviceScaleFactor: 1,
     colorScheme: theme,
     reducedMotion: 'reduce', // deterministic frames; no half-finished transitions
   });
@@ -145,6 +148,13 @@ async function capture(browser, theme) {
 
   // The README's hero shot: the Review screen, which carries the governance argument.
   if (theme === 'dark') {
+    const hero = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      deviceScaleFactor: 2,
+      colorScheme: 'dark',
+      reducedMotion: 'reduce',
+    });
+    const page = await hero.newPage();
     await page.goto(`${BASE}/review/3`, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
     await settle(page);
