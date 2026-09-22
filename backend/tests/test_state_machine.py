@@ -9,6 +9,7 @@ from __future__ import annotations
 import itertools
 
 import pytest
+
 from app.issue.states import (
     TRANSITIONS,
     Event,
@@ -22,8 +23,12 @@ from app.issue.states import (
 
 def _section(key="s1", *, required=True, approved=True, gaps=None):
     return {
-        "key": key, "title": key.title(), "required": required,
-        "approved": approved, "type": "table", "gaps": gaps or [],
+        "key": key,
+        "title": key.title(),
+        "required": required,
+        "approved": approved,
+        "type": "table",
+        "gaps": gaps or [],
     }
 
 
@@ -146,8 +151,9 @@ def test_full_flow_through_the_service(db_session, period):
     with pytest.raises(TransitionError, match="unresolved gap"):
         service.signoff(db_session, pack.id, "A. Controller", [])
 
-    waivers = [{"section_key": g["section_key"], "reason": "Accepted for this period."}
-               for g in gapped]
+    waivers = [
+        {"section_key": g["section_key"], "reason": "Accepted for this period."} for g in gapped
+    ]
     issued = service.signoff(db_session, pack.id, "A. Controller", waivers)
     assert issued.status == Status.ISSUED
     assert issued.archive is not None
@@ -166,7 +172,9 @@ def test_waiver_without_a_reason_is_refused(db_session, period):
 
     with pytest.raises(service.ServiceError, match="needs a reason"):
         service.signoff(
-            db_session, pack.id, "A. Controller",
+            db_session,
+            pack.id,
+            "A. Controller",
             [{"section_key": gapped[0]["section_key"], "reason": "   "}],
         )
 
@@ -177,6 +185,8 @@ def test_cannot_waive_a_section_that_has_no_gap(db_session, period):
     pack = service.create_pack(db_session, "monthly_management_pack", period)
     with pytest.raises(service.ServiceError, match="has no gap"):
         service.signoff(
-            db_session, pack.id, "A. Controller",
+            db_session,
+            pack.id,
+            "A. Controller",
             [{"section_key": "pnl_summary", "reason": "because"}],
         )

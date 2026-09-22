@@ -109,9 +109,7 @@ def world_for(period_id: str, profile: str = "realistic", seed: int = DEFAULT_SE
 
 
 def all_periods() -> list[PeriodRef]:
-    return [
-        PeriodRef(id=p.id, label=p.label, index=p.index) for p in statements_for().periods
-    ]
+    return [PeriodRef(id=p.id, label=p.label, index=p.index) for p in statements_for().periods]
 
 
 def period_ref(period_id: str) -> PeriodRef:

@@ -105,13 +105,16 @@ def check_guards(view: PackView, event: Event) -> list[GuardFailure]:
                 GuardFailure(
                     "gap_unresolved",
                     f"required section {section['title']!r} has an unresolved gap ({reasons}). "
-                    f"Resolve it, or record a waiver saying why the pack is being issued without it.",
+                    f"Resolve it, or record a waiver saying why the pack is "
+                    f"being issued without it.",
                 )
             )
 
     if event is Event.ISSUE and view.already_issued:
         failures.append(
-            GuardFailure("already_issued", "this pack has already been issued; archives are immutable")
+            GuardFailure(
+                "already_issued", "this pack has already been issued; archives are immutable"
+            )
         )
 
     return failures
@@ -123,14 +126,11 @@ def apply(view: PackView, event: Event) -> Status:
     if key not in TRANSITIONS:
         legal = sorted(e for (s, e) in TRANSITIONS if s == view.status)
         raise TransitionError(
-            f"cannot {event} a pack that is {view.status}; "
-            f"legal from here: {legal or 'nothing — this is a terminal state'}"
+            f"cannot {event} a pack that is {view.status}; legal from here: {legal or 'nothing'}"
         )
 
     failures = check_guards(view, event)
     if failures:
-        raise TransitionError(
-            f"cannot {event}: " + "; ".join(f.message for f in failures)
-        )
+        raise TransitionError(f"cannot {event}: " + "; ".join(f.message for f in failures))
 
     return TRANSITIONS[key]

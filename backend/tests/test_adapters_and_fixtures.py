@@ -6,6 +6,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+
 from app.adapters.base import SchemaMismatch
 from app.adapters.ledgerfab_adapter import LedgerfabAdapter
 from app.adapters.spendsort_adapter import (
@@ -46,7 +47,7 @@ def test_spendsort_fixture_is_a_real_export():
 @pytest.mark.parametrize(
     "stored,expected",
     [
-        ("'-EDF Energy", "-EDF Energy"),   # the exporter added this quote
+        ("'-EDF Energy", "-EDF Energy"),  # the exporter added this quote
         ("'=SUM(A1)", "=SUM(A1)"),
         ("'@handle", "@handle"),
         ("'Round Table Ltd", "'Round Table Ltd"),  # genuinely part of the name — kept
@@ -113,9 +114,7 @@ def test_ratios_never_return_zero_for_undefined(period):
 def test_negative_equity_computes_with_a_caveat(period):
     from app.analysis.formula import compute_all
 
-    computations = compute_all(
-        {"net_income": Decimal(-100), "total_equity": Decimal(-50)}, period
-    )
+    computations = compute_all({"net_income": Decimal(-100), "total_equity": Decimal(-50)}, period)
     roe = next(c for c in computations if c.formula_id == "return_on_equity")
     assert roe.status == "caveat"
     assert roe.value is not None
@@ -139,8 +138,12 @@ def test_rules_load_and_are_unique():
     rules = load_rules()
     assert len(rules) >= 12
     assert len({r.rule_id for r in rules}) == len(rules)
-    for name in ("current_ratio_below_one", "receivable_days_rising_on_flat_revenue",
-                 "margin_compression", "negative_ocf_positive_ni"):
+    for name in (
+        "current_ratio_below_one",
+        "receivable_days_rising_on_flat_revenue",
+        "margin_compression",
+        "negative_ocf_positive_ni",
+    ):
         assert any(r.rule_id == name for r in rules), f"spec 12 F4 names {name}"
 
 

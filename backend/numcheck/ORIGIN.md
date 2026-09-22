@@ -24,17 +24,22 @@ neither is possible against code that does not exist. Confirmed with the user on
 
 | Property | Why it matters |
 |---|---|
-| **Zero imports from `app`** | `grep -r "from app" numcheck/` returns nothing, asserted by `test_numcheck_standalone.py`. The dependency runs one way only. |
+| **Zero imports from `app`** | `grep -r "from app" numcheck/` returns nothing, asserted by `test_numcheck.py`. The dependency runs one way only. |
 | **`pydantic` is the entire third-party surface** | No FastAPI, no SQLAlchemy, no ledgerfab. It has its own `pyproject.toml`. |
-| **Its own tests, runnable alone** | `cd backend && pytest numcheck/tests` passes with the application not installed. |
+| **Its own tests, runnable alone** | `pytest numcheck/tests` — 46 tests, application not installed, verified in an empty directory. |
 | **Module-for-module match with their P6 design** | `models · tokens · match · exempt · verify · surgery` — one deliberate rename, below. |
 
 ## The lift procedure
 
 ```bash
 cp -r reportsmith/backend/numcheck  statementlens/backend/numcheck
-cd statementlens/backend && pytest numcheck/tests     # should pass untouched
+cd statementlens/backend && pytest numcheck/tests     # 46 passed
 ```
+
+**Verified, not assumed.** The package was copied into an empty directory with no ReportSmith
+code present and its suite run from the parent: 46 tests, all passing, with `pydantic` and
+`pytest` the only things installed. CI runs the same check on every push (the
+`numcheck-standalone` job), so the one-way dependency cannot rot as this repo grows around it.
 
 Then delete this file and tick P6. Nothing else should need to change.
 
@@ -76,7 +81,7 @@ that writes `£3.8m` claims one decimal place and is checked to one; one that wr
 `£3,815,070.61` claims two. There is no epsilon to tune, because an epsilon is a knob, and
 a knob gets widened the first time a build goes red at 5pm.
 
-**The exemption list is closed at two entries**, and `test_exemptions_closed.py` asserts its
+**The exemption list is closed at two entries**, and `test_numcheck.py` asserts its
 exact contents. Exemption creep is how this class of checker quietly dies: every exemption
 is a hole, each arrives individually reasonable, and eventually the gate is green because it
 stopped looking. Anything a narrative may legitimately cite is supplied as a `FigureRef` —

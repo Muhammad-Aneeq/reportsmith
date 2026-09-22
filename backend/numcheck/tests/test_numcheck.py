@@ -5,6 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
+
 from numcheck import FigureRef, drop_failing_sentences, split_sentences, tokenize, verify
 from numcheck.exempt import EXEMPTIONS
 from numcheck.match import matches
@@ -54,9 +55,7 @@ def test_tokenizer_values(text, value):
     assert tokenize(text)[0].value == value
 
 
-@pytest.mark.parametrize(
-    "text,precision", [("3.8", 1), ("3", 0), ("3.815", 3), ("1,234.56", 2)]
-)
+@pytest.mark.parametrize("text,precision", [("3.8", 1), ("3", 0), ("3.815", 3), ("1,234.56", 2)])
 def test_precision_is_what_the_author_wrote(text, precision):
     assert tokenize(text)[0].precision == precision
 
@@ -74,11 +73,11 @@ def test_spans_are_exact():
 @pytest.mark.parametrize(
     "written,ok",
     [
-        ("£3.8m", True),          # 1 dp at millions scale
-        ("£3,815,071", True),     # 0 dp
+        ("£3.8m", True),  # 1 dp at millions scale
+        ("£3,815,071", True),  # 0 dp
         ("£3,815,070.61", True),  # exact
-        ("£3.82m", True),         # 2 dp at millions scale
-        ("£3.9m", False),         # wrong at the precision written
+        ("£3.82m", True),  # 2 dp at millions scale
+        ("£3.9m", False),  # wrong at the precision written
         ("£3,815,072", False),
         # "£4m" is ACCEPTED, and that is correct: £3,815,071 rounded to the nearest
         # million is £4m, so the sentence is true at the precision it was written to.
@@ -129,7 +128,9 @@ def test_no_tolerance_knob_exists():
     tree = ast.parse(source)
     # Strip every docstring, then unparse back to code-only text.
     for node in ast.walk(tree):
-        if isinstance(node, ast.Module | ast.FunctionDef | ast.ClassDef) and ast.get_docstring(node):
+        if isinstance(node, ast.Module | ast.FunctionDef | ast.ClassDef) and ast.get_docstring(
+            node
+        ):
             node.body = node.body[1:]
     code = ast.unparse(tree).lower()
 
@@ -222,7 +223,7 @@ def test_numcheck_imports_nothing_from_the_application():
     """It must lift into StatementLens as a directory move. See ORIGIN.md."""
     from pathlib import Path
 
-    package = Path(__file__).resolve().parents[1] / "numcheck"
+    package = Path(__file__).resolve().parents[1]
     for module in package.glob("*.py"):
         source = module.read_text(encoding="utf-8")
         assert "from app" not in source, f"{module.name} imports from the application"
@@ -235,7 +236,7 @@ def test_numcheck_does_not_shadow_a_stdlib_module():
     import sys
     from pathlib import Path
 
-    package = Path(__file__).resolve().parents[1] / "numcheck"
+    package = Path(__file__).resolve().parents[1]
     stdlib = set(sys.stdlib_module_names)
     for module in package.glob("*.py"):
         assert module.stem not in stdlib, (

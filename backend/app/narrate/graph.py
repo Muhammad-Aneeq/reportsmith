@@ -185,9 +185,7 @@ def compose_section(
     chosen = composer or get_composer()
     first = chosen.draft(request, attempt=1)  # kept as the AI draft of record
 
-    final: NarrativeState = _GRAPH.invoke(
-        {"request": request, "composer": chosen, "attempt": 0}
-    )
+    final: NarrativeState = _GRAPH.invoke({"request": request, "composer": chosen, "attempt": 0})
 
     check: CheckResult = final["check"]
     return NarrativeResult(

@@ -48,10 +48,10 @@ def db_session() -> Iterator:
     the second test to issue a pack collide with the first — and the collision would look
     like the immutability guard working, which is exactly the false pass worth avoiding.
     """
-    import app.db as db_module
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
+    import app.db as db_module
     from app.settings import settings
 
     root = Path(tempfile.mkdtemp(prefix="rs-db-"))

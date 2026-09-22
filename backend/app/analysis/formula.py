@@ -33,6 +33,10 @@ Unit = Literal["ratio", "percent", "days", "money", "times"]
 # What a period's figures look like coming in: line_code → amount (or None if absent).
 Figures = dict[str, Decimal | None]
 
+# Every formula has this shape: figures in, (value, status, note) out. Named once so the
+# registry, the decorator and the hand-built entries cannot drift apart.
+FormulaFn = Callable[[Figures], tuple[Decimal | None, Status, str]]
+
 
 @dataclass(frozen=True, slots=True)
 class Computation:
@@ -77,7 +81,7 @@ class Formula:
     unit: Unit
     definition: str
     inputs: tuple[str, ...]
-    fn: Callable[[Figures], tuple[Decimal | None, Status, str]]
+    fn: FormulaFn
 
 
 REGISTRY: dict[str, Formula] = {}
@@ -85,8 +89,8 @@ REGISTRY: dict[str, Formula] = {}
 
 def register(
     formula_id: str, label: str, category: str, unit: Unit, definition: str, inputs: tuple[str, ...]
-) -> Callable[[Callable[[Figures], tuple[Decimal | None, Status, str]]], Callable]:
-    def wrap(fn: Callable[[Figures], tuple[Decimal | None, Status, str]]) -> Callable:
+) -> Callable[[FormulaFn], FormulaFn]:
+    def wrap(fn: FormulaFn) -> FormulaFn:
         REGISTRY[formula_id] = Formula(formula_id, label, category, unit, definition, inputs, fn)
         return fn
 
@@ -117,16 +121,28 @@ def _div(
 # ------------------------------------------------------------------ liquidity --
 
 
-@register("current_ratio", "Current ratio", "Liquidity", "ratio",
-          "Current assets ÷ current liabilities", ("total_current_assets", "total_current_liabilities"))
+@register(
+    "current_ratio",
+    "Current ratio",
+    "Liquidity",
+    "ratio",
+    "Current assets ÷ current liabilities",
+    ("total_current_assets", "total_current_liabilities"),
+)
 def _current_ratio(f: Figures) -> tuple[Decimal | None, Status, str]:
-    return _div(f.get("total_current_assets"), f.get("total_current_liabilities"),
-                "current liabilities")
+    return _div(
+        f.get("total_current_assets"), f.get("total_current_liabilities"), "current liabilities"
+    )
 
 
-@register("quick_ratio", "Quick ratio", "Liquidity", "ratio",
-          "(Current assets − inventory) ÷ current liabilities",
-          ("total_current_assets", "inventory", "total_current_liabilities"))
+@register(
+    "quick_ratio",
+    "Quick ratio",
+    "Liquidity",
+    "ratio",
+    "(Current assets − inventory) ÷ current liabilities",
+    ("total_current_assets", "inventory", "total_current_liabilities"),
+)
 def _quick_ratio(f: Figures) -> tuple[Decimal | None, Status, str]:
     ca, inv = f.get("total_current_assets"), f.get("inventory")
     numerator = None if ca is None else ca - (inv or Decimal(0))
@@ -136,32 +152,62 @@ def _quick_ratio(f: Figures) -> tuple[Decimal | None, Status, str]:
 # -------------------------------------------------------------- profitability --
 
 
-@register("gross_margin", "Gross margin", "Profitability", "percent",
-          "Gross profit ÷ revenue", ("gross_profit", "revenue"))
+@register(
+    "gross_margin",
+    "Gross margin",
+    "Profitability",
+    "percent",
+    "Gross profit ÷ revenue",
+    ("gross_profit", "revenue"),
+)
 def _gross_margin(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("gross_profit"), f.get("revenue"), "revenue", scale=Decimal(100))
 
 
-@register("operating_margin", "Operating margin", "Profitability", "percent",
-          "Operating profit ÷ revenue", ("operating_profit", "revenue"))
+@register(
+    "operating_margin",
+    "Operating margin",
+    "Profitability",
+    "percent",
+    "Operating profit ÷ revenue",
+    ("operating_profit", "revenue"),
+)
 def _operating_margin(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("operating_profit"), f.get("revenue"), "revenue", scale=Decimal(100))
 
 
-@register("net_margin", "Net margin", "Profitability", "percent",
-          "Net income ÷ revenue", ("net_income", "revenue"))
+@register(
+    "net_margin",
+    "Net margin",
+    "Profitability",
+    "percent",
+    "Net income ÷ revenue",
+    ("net_income", "revenue"),
+)
 def _net_margin(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("net_income"), f.get("revenue"), "revenue", scale=Decimal(100))
 
 
-@register("return_on_assets", "Return on assets", "Profitability", "percent",
-          "Net income ÷ total assets", ("net_income", "total_assets"))
+@register(
+    "return_on_assets",
+    "Return on assets",
+    "Profitability",
+    "percent",
+    "Net income ÷ total assets",
+    ("net_income", "total_assets"),
+)
 def _roa(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("net_income"), f.get("total_assets"), "total assets", scale=Decimal(100))
 
 
-@register("return_on_equity", "Return on equity", "Profitability", "percent",
-          "Net income ÷ total equity", ("net_income", "total_equity"))
+@register(
+    "return_on_equity",
+    "Return on equity",
+    "Profitability",
+    "percent",
+    "Net income ÷ total equity",
+    ("net_income", "total_equity"),
+)
 def _roe(f: Figures) -> tuple[Decimal | None, Status, str]:
     equity = f.get("total_equity")
     value, status, note = _div(f.get("net_income"), equity, "total equity", scale=Decimal(100))
@@ -175,8 +221,14 @@ def _roe(f: Figures) -> tuple[Decimal | None, Status, str]:
 # ------------------------------------------------------------------- leverage --
 
 
-@register("debt_to_equity", "Debt to equity", "Leverage", "ratio",
-          "Total liabilities ÷ total equity", ("total_liabilities", "total_equity"))
+@register(
+    "debt_to_equity",
+    "Debt to equity",
+    "Leverage",
+    "ratio",
+    "Total liabilities ÷ total equity",
+    ("total_liabilities", "total_equity"),
+)
 def _dte(f: Figures) -> tuple[Decimal | None, Status, str]:
     equity = f.get("total_equity")
     value, status, note = _div(f.get("total_liabilities"), equity, "total equity")
@@ -185,8 +237,14 @@ def _dte(f: Figures) -> tuple[Decimal | None, Status, str]:
     return value, status, note
 
 
-@register("interest_cover", "Interest cover", "Leverage", "times",
-          "Operating profit ÷ interest expense", ("operating_profit", "interest_expense"))
+@register(
+    "interest_cover",
+    "Interest cover",
+    "Leverage",
+    "times",
+    "Operating profit ÷ interest expense",
+    ("operating_profit", "interest_expense"),
+)
 def _interest_cover(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("operating_profit"), f.get("interest_expense"), "interest expense")
 
@@ -194,7 +252,7 @@ def _interest_cover(f: Figures) -> tuple[Decimal | None, Status, str]:
 # ----------------------------------------------------------------- efficiency --
 
 
-def _days_formula(numerator_key: str, base_key: str, label_base: str):
+def _days_formula(numerator_key: str, base_key: str, label_base: str) -> FormulaFn:
     def fn(f: Figures) -> tuple[Decimal | None, Status, str]:
         # Monthly statements, so the conversion base is the period, not a year. Using 365
         # on a one-month set inflates every days metric by ~12× — the classic version of
@@ -205,19 +263,28 @@ def _days_formula(numerator_key: str, base_key: str, label_base: str):
 
 
 REGISTRY["receivable_days"] = Formula(
-    "receivable_days", "Receivable days", "Efficiency", "days",
+    "receivable_days",
+    "Receivable days",
+    "Efficiency",
+    "days",
     "Accounts receivable ÷ revenue × 30 (monthly basis)",
     ("accounts_receivable", "revenue"),
     _days_formula("accounts_receivable", "revenue", "revenue"),
 )
 REGISTRY["payable_days"] = Formula(
-    "payable_days", "Payable days", "Efficiency", "days",
+    "payable_days",
+    "Payable days",
+    "Efficiency",
+    "days",
     "Accounts payable ÷ cost of sales × 30 (monthly basis)",
     ("accounts_payable", "cogs"),
     _days_formula("accounts_payable", "cogs", "cost of sales"),
 )
 REGISTRY["inventory_days"] = Formula(
-    "inventory_days", "Inventory days", "Efficiency", "days",
+    "inventory_days",
+    "Inventory days",
+    "Efficiency",
+    "days",
     "Inventory ÷ cost of sales × 30 (monthly basis)",
     ("inventory", "cogs"),
     _days_formula("inventory", "cogs", "cost of sales"),
@@ -227,16 +294,26 @@ REGISTRY["inventory_days"] = Formula(
 # ------------------------------------------------------------------ cash flow --
 
 
-@register("operating_cf_ratio", "Operating cash flow ratio", "Cash flow", "ratio",
-          "Operating cash flow ÷ current liabilities",
-          ("cf_operating", "total_current_liabilities"))
+@register(
+    "operating_cf_ratio",
+    "Operating cash flow ratio",
+    "Cash flow",
+    "ratio",
+    "Operating cash flow ÷ current liabilities",
+    ("cf_operating", "total_current_liabilities"),
+)
 def _ocf_ratio(f: Figures) -> tuple[Decimal | None, Status, str]:
     return _div(f.get("cf_operating"), f.get("total_current_liabilities"), "current liabilities")
 
 
-@register("accruals_ratio", "Accruals ratio", "Cash flow", "percent",
-          "(Net income − operating cash flow) ÷ total assets",
-          ("net_income", "cf_operating", "total_assets"))
+@register(
+    "accruals_ratio",
+    "Accruals ratio",
+    "Cash flow",
+    "percent",
+    "(Net income − operating cash flow) ÷ total assets",
+    ("net_income", "cf_operating", "total_assets"),
+)
 def _accruals(f: Figures) -> tuple[Decimal | None, Status, str]:
     ni, ocf = f.get("net_income"), f.get("cf_operating")
     numerator = None if ni is None or ocf is None else ni - ocf

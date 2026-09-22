@@ -149,8 +149,14 @@ def get_template(
         "yaml": row.yaml,
         "locked": service.template_is_locked(db, row),
         "sections": [
-            {"id": s.id, "title": s.title, "type": s.type, "required": s.required,
-             "source": s.binding.source, "select": s.binding.select}
+            {
+                "id": s.id,
+                "title": s.title,
+                "type": s.type,
+                "required": s.required,
+                "source": s.binding.source,
+                "select": s.binding.select,
+            }
             for s in template.sections
         ],
     }
@@ -178,8 +184,14 @@ def validate_template(body: TemplateIn) -> dict[str, Any]:
         "valid": True,
         "ref": template.ref,
         "sections": [
-            {"id": s.id, "title": s.title, "type": s.type, "required": s.required,
-             "source": s.binding.source, "select": s.binding.select}
+            {
+                "id": s.id,
+                "title": s.title,
+                "type": s.type,
+                "required": s.required,
+                "source": s.binding.source,
+                "select": s.binding.select,
+            }
             for s in template.sections
         ],
     }
@@ -218,7 +230,9 @@ def list_packs(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
 
 
 @app.get("/api/packs/diff")
-def diff_packs(a: int = Query(...), b: int = Query(...), db: Session = Depends(get_db)) -> dict[str, Any]:
+def diff_packs(
+    a: int = Query(...), b: int = Query(...), db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """The month-diff view (spec 13 F7): identical structure, changed numbers."""
     try:
         pack_a, pack_b = service.get_pack(db, a), service.get_pack(db, b)
@@ -229,18 +243,28 @@ def diff_packs(a: int = Query(...), b: int = Query(...), db: Session = Depends(g
     sections_b = {s.section_key: s for s in pack_b.sections}
 
     rows: list[dict[str, Any]] = []
-    for key in sorted(set(sections_a) | set(sections_b), key=lambda k: (
-        sections_a.get(k).order_index if k in sections_a else sections_b[k].order_index
-    )):
+
+    def _order(key: str) -> int:
+        # A section present in only one pack still needs a position, so the diff renders in
+        # template order rather than alphabetically.
+        section = sections_a.get(key) or sections_b[key]
+        return section.order_index
+
+    for key in sorted(set(sections_a) | set(sections_b), key=_order):
         left, right = sections_a.get(key), sections_b.get(key)
+        # One of the two always exists — `key` came from the union of their keys.
+        either = left or right
+        assert either is not None
         rows.append(
             {
                 "section_key": key,
-                "title": (left or right).title,
-                "type": (left or right).type,
+                "title": either.title,
+                "type": either.type,
                 "in_a": left is not None,
                 "in_b": right is not None,
-                "structure_same": left is not None and right is not None and left.type == right.type,
+                "structure_same": left is not None
+                and right is not None
+                and left.type == right.type,
                 "values_changed": _values_changed(left, right),
                 "a": _diff_side(left),
                 "b": _diff_side(right),
@@ -248,10 +272,20 @@ def diff_packs(a: int = Query(...), b: int = Query(...), db: Session = Depends(g
         )
 
     return {
-        "a": {"id": pack_a.id, "period": pack_a.period, "template_ref": pack_a.template_ref,
-              "structure_hash": pack_a.structure_hash, "value_digest": pack_a.value_digest},
-        "b": {"id": pack_b.id, "period": pack_b.period, "template_ref": pack_b.template_ref,
-              "structure_hash": pack_b.structure_hash, "value_digest": pack_b.value_digest},
+        "a": {
+            "id": pack_a.id,
+            "period": pack_a.period,
+            "template_ref": pack_a.template_ref,
+            "structure_hash": pack_a.structure_hash,
+            "value_digest": pack_a.value_digest,
+        },
+        "b": {
+            "id": pack_b.id,
+            "period": pack_b.period,
+            "template_ref": pack_b.template_ref,
+            "structure_hash": pack_b.structure_hash,
+            "value_digest": pack_b.value_digest,
+        },
         "structure_identical": pack_a.structure_hash == pack_b.structure_hash,
         "values_differ": pack_a.value_digest != pack_b.value_digest,
         "sections": rows,
@@ -291,12 +325,16 @@ def _diff_side(section: SectionRow | None) -> dict[str, Any] | None:
         if columns:
             first, last = columns[0]["field"], columns[-1]["field"]
             summary = [
-                {"label": str(r.get(first, {}).get("display", "")),
-                 "display": str(r.get(last, {}).get("display", ""))}
+                {
+                    "label": str(r.get(first, {}).get("display", "")),
+                    "display": str(r.get(last, {}).get("display", "")),
+                }
                 for r in content.get("rows", [])[:6]
             ]
     elif section.type == "flags":
-        summary = [{"label": i["label"], "display": i["severity"]} for i in content.get("items", [])]
+        summary = [
+            {"label": i["label"], "display": i["severity"]} for i in content.get("items", [])
+        ]
     elif section.type == "narrative":
         summary = [{"label": "text", "display": (content.get("text") or "")[:400]}]
     return {"gap": bool(section.gaps_json), "summary": summary}
@@ -343,8 +381,13 @@ def export_pack(pack_id: int, db: Session = Depends(get_db)) -> str:
 
     pack_json = service.pack_to_json(db, pack)
     sections = [
-        {"section_key": s.section_key, "title": s.title, "type": s.type,
-         "content_json": s.content_json, "gaps_json": s.gaps_json}
+        {
+            "section_key": s.section_key,
+            "title": s.title,
+            "type": s.type,
+            "content_json": s.content_json,
+            "gaps_json": s.gaps_json,
+        }
         for s in sorted(pack.sections, key=lambda s: s.order_index)
     ]
     waivers = pack.signoff.waivers_json if pack.signoff else []
@@ -366,7 +409,9 @@ def edit_section(section_id: int, body: EditIn, db: Session = Depends(get_db)) -
 
 
 @app.post("/api/sections/{section_id}/approve")
-def approve_section(section_id: int, body: ApproveIn, db: Session = Depends(get_db)) -> dict[str, Any]:
+def approve_section(
+    section_id: int, body: ApproveIn, db: Session = Depends(get_db)
+) -> dict[str, Any]:
     try:
         return service.section_to_json(service.approve_section(db, section_id, body.approver))
     except Exception as exc:

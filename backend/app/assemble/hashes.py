@@ -68,8 +68,10 @@ def value_digest(sections: list[dict[str, Any]]) -> str:
             figures.append([row for row in content.get("rows", [])])
         elif section["type"] == "kpi_grid":
             figures.append(
-                [{"id": k["id"], "value": k.get("value"), "prior": k.get("prior_value")}
-                 for k in content.get("kpis", [])]
+                [
+                    {"id": k["id"], "value": k.get("value"), "prior": k.get("prior_value")}
+                    for k in content.get("kpis", [])
+                ]
             )
         elif section["type"] == "flags":
             figures.append([f["rule_id"] for f in content.get("items", [])])

@@ -69,9 +69,7 @@ def write_archive(
     """Write the four artefacts and return the row for the `archives` table."""
     out = archive_dir(pack_id)
     if out.exists() and (out / "pack.md").exists():
-        raise ArchiveError(
-            f"pack {pack_id} is already archived at {out}; archives are append-only"
-        )
+        raise ArchiveError(f"pack {pack_id} is already archived at {out}; archives are append-only")
     out.mkdir(parents=True, exist_ok=True)
 
     markdown = render_markdown(pack, sections, waivers=waivers, signoff=signoff)

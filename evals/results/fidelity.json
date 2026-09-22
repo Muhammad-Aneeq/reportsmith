@@ -1,0 +1,76 @@
+{
+  "fidelity_pct": "100.00",
+  "figures_checked": 36,
+  "figures_verified": 36,
+  "sections": 6,
+  "passed": true,
+  "failures": [],
+  "rows": [
+    {
+      "period": "2024-07",
+      "section": "performance_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/performance_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 24
+    },
+    {
+      "period": "2024-07",
+      "section": "cash_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/cash_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 36
+    },
+    {
+      "period": "2024-07",
+      "section": "spend_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/spend_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 19
+    },
+    {
+      "period": "2024-08",
+      "section": "performance_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/performance_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 24
+    },
+    {
+      "period": "2024-08",
+      "section": "cash_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/cash_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 36
+    },
+    {
+      "period": "2024-08",
+      "section": "spend_commentary",
+      "model": "mock",
+      "prompt_version": "monthly_management_pack@v1/spend_commentary",
+      "verified": true,
+      "figures_checked": 6,
+      "retried": false,
+      "dropped": 0,
+      "words": 20
+    }
+  ]
+}

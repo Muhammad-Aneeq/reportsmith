@@ -14,6 +14,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
+
 from app.adapters.base import GapReason, resolve_binding
 from app.adapters.frame import Frame, frame_from_dicts
 from app.assemble.engine import assemble
@@ -25,8 +26,18 @@ class _Base:
     SCHEMA_VERSION = "test/v0"
 
     def catalog(self):
-        return ("pnl_lines", "bs_lines", "cf_lines", "period_metrics", "exceptions",
-                "invoices", "gl_expense_lines", "ratios", "flags", "categories")
+        return (
+            "pnl_lines",
+            "bs_lines",
+            "cf_lines",
+            "period_metrics",
+            "exceptions",
+            "invoices",
+            "gl_expense_lines",
+            "ratios",
+            "flags",
+            "categories",
+        )
 
     def fetch(self, dataset, period):
         raise NotImplementedError
@@ -59,9 +70,7 @@ class ReturnsEmptyFrame(_Base):
 
 class ReturnsWrongColumns(_Base):
     def fetch(self, dataset, period):
-        return frame_from_dicts(
-            [{"nonsense": Decimal("1")}], source=self.name, dataset=dataset
-        )
+        return frame_from_dicts([{"nonsense": Decimal("1")}], source=self.name, dataset=dataset)
 
 
 class EmptyCatalog(_Base):
@@ -78,25 +87,45 @@ class ReturnsNullValues(_Base):
     def fetch(self, dataset, period):
         return frame_from_dicts(
             [{"metric": None, "value": None, "label": None, "rule_id": None, "severity": None}],
-            source=self.name, dataset=dataset,
+            source=self.name,
+            dataset=dataset,
         )
 
 
 class ReturnsHugeFrame(_Base):
     def fetch(self, dataset, period):
         return frame_from_dicts(
-            [{"metric": f"m{i}", "value": Decimal(i), "label": str(i), "rule_id": str(i),
-              "severity": "low", "severity_rank": 1} for i in range(5000)],
-            source=self.name, dataset=dataset,
+            [
+                {
+                    "metric": f"m{i}",
+                    "value": Decimal(i),
+                    "label": str(i),
+                    "rule_id": str(i),
+                    "severity": "low",
+                    "severity_rank": 1,
+                }
+                for i in range(5000)
+            ],
+            source=self.name,
+            dataset=dataset,
         )
 
 
 class ReturnsUnicodeSoup(_Base):
     def fetch(self, dataset, period):
         return frame_from_dicts(
-            [{"metric": "\x00﻿", "value": Decimal("1"), "label": "🙂‮",
-              "rule_id": "x", "severity": "low", "severity_rank": 1}],
-            source=self.name, dataset=dataset,
+            [
+                {
+                    "metric": "\x00﻿",
+                    "value": Decimal("1"),
+                    "label": "🙂‮",
+                    "rule_id": "x",
+                    "severity": "low",
+                    "severity_rank": 1,
+                }
+            ],
+            source=self.name,
+            dataset=dataset,
         )
 
 
@@ -105,16 +134,34 @@ class ReturnsFloatsNotDecimals(_Base):
 
     def fetch(self, dataset, period):
         return frame_from_dicts(
-            [{"metric": "revenue", "value": 1.1, "label": "Revenue", "rule_id": "x",
-              "severity": "low", "severity_rank": 1}],
-            source=self.name, dataset=dataset,
+            [
+                {
+                    "metric": "revenue",
+                    "value": 1.1,
+                    "label": "Revenue",
+                    "rule_id": "x",
+                    "severity": "low",
+                    "severity_rank": 1,
+                }
+            ],
+            source=self.name,
+            dataset=dataset,
         )
 
 
 MISBEHAVIOURS = [
-    RaisesValueError, RaisesKeyError, ReturnsNone, ReturnsList, ReturnsEmptyFrame,
-    ReturnsWrongColumns, EmptyCatalog, CatalogRaises, ReturnsNullValues,
-    ReturnsHugeFrame, ReturnsUnicodeSoup, ReturnsFloatsNotDecimals,
+    RaisesValueError,
+    RaisesKeyError,
+    ReturnsNone,
+    ReturnsList,
+    ReturnsEmptyFrame,
+    ReturnsWrongColumns,
+    EmptyCatalog,
+    CatalogRaises,
+    ReturnsNullValues,
+    ReturnsHugeFrame,
+    ReturnsUnicodeSoup,
+    ReturnsFloatsNotDecimals,
 ]
 
 

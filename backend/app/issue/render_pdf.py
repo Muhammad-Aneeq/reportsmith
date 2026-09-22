@@ -44,15 +44,21 @@ def render_pdf(
 
     styles = getSampleStyleSheet()
     navy = colors.HexColor(AURORA_NAVY)
-    emerald = colors.HexColor(AURORA_EMERALD)
 
     h1 = ParagraphStyle("rs-h1", parent=styles["Title"], textColor=navy, fontSize=24, spaceAfter=6)
     h2 = ParagraphStyle("rs-h2", parent=styles["Heading2"], textColor=navy, spaceBefore=14)
     body = ParagraphStyle("rs-body", parent=styles["BodyText"], fontSize=9.5, leading=14)
-    meta = ParagraphStyle("rs-meta", parent=body, textColor=colors.HexColor("#64748B"), fontSize=8.5)
+    meta = ParagraphStyle(
+        "rs-meta", parent=body, textColor=colors.HexColor("#64748B"), fontSize=8.5
+    )
     gap_style = ParagraphStyle(
-        "rs-gap", parent=body, textColor=colors.HexColor("#B45309"),
-        backColor=colors.HexColor("#FEF3C7"), borderPadding=6, spaceBefore=4, spaceAfter=4,
+        "rs-gap",
+        parent=body,
+        textColor=colors.HexColor("#B45309"),
+        backColor=colors.HexColor("#FEF3C7"),
+        borderPadding=6,
+        spaceBefore=4,
+        spaceAfter=4,
     )
     right = ParagraphStyle("rs-right", parent=body, alignment=TA_RIGHT)
 
@@ -74,7 +80,9 @@ def render_pdf(
 
     def _table(rows: list[list[str]], aligns: list[str]) -> Table:
         table = Table(rows, hAlign="LEFT", repeatRows=1)
-        style = [
+        # reportlab's stubs type this as a tightly-shaped tuple union; the list is built
+        # dynamically (alignment is appended per column), which the stub cannot express.
+        style: list[Any] = [
             ("BACKGROUND", (0, 0), (-1, 0), navy),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTSIZE", (0, 0), (-1, -1), 8.5),
@@ -98,7 +106,9 @@ def render_pdf(
                 )
             waiver = waiver_by_section.get(section["section_key"])
             if waiver:
-                story.append(Paragraph(f"<i>Waived by {waiver['signer']}: {waiver['reason']}</i>", meta))
+                story.append(
+                    Paragraph(f"<i>Waived by {waiver['signer']}: {waiver['reason']}</i>", meta)
+                )
             continue
 
         content = section.get("content_json") or {}
@@ -121,8 +131,12 @@ def render_pdf(
             rows = [["Measure", "This month", "Prior month", "Change"]]
             for kpi in content.get("kpis", []):
                 rows.append(
-                    ["—" if kpi.get("missing") else kpi["label"],
-                     kpi.get("display", ""), kpi.get("prior_display", ""), kpi.get("delta_display", "")]
+                    [
+                        "—" if kpi.get("missing") else kpi["label"],
+                        kpi.get("display", ""),
+                        kpi.get("prior_display", ""),
+                        kpi.get("delta_display", ""),
+                    ]
                 )
             story.append(_table(rows, ["left", "right", "right", "right"]))
         elif kind == "flags":
@@ -131,7 +145,9 @@ def render_pdf(
                 story.append(Paragraph("<i>No items were flagged this period.</i>", body))
             for item in items:
                 story.append(
-                    Paragraph(f"<b>{item['label']}</b> ({item['severity']}) — {item['message']}", body)
+                    Paragraph(
+                        f"<b>{item['label']}</b> ({item['severity']}) — {item['message']}", body
+                    )
                 )
         elif kind == "narrative":
             text = (content.get("text") or "").strip() or "<i>Not drafted.</i>"
@@ -153,7 +169,9 @@ def render_pdf(
             Paragraph(f"Signed by <b>{signoff['signer']}</b> at {signoff['at']}.", body),
         ]
         for waiver in waivers or []:
-            story.append(Paragraph(f"Waived — <b>{waiver['section_key']}</b>: {waiver['reason']}", body))
+            story.append(
+                Paragraph(f"Waived — <b>{waiver['section_key']}</b>: {waiver['reason']}", body)
+            )
 
     story.append(Spacer(1, 6 * mm))
     story.append(Paragraph(f"Data snapshot {pack.get('snapshot_hash', '')[:16]}", right))
@@ -161,10 +179,15 @@ def render_pdf(
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         SimpleDocTemplate(
-            str(path), pagesize=A4,
-            leftMargin=18 * mm, rightMargin=18 * mm, topMargin=18 * mm, bottomMargin=18 * mm,
-            title=f"{cover.get('title')} — {pack['period']}", author="ReportSmith",
+            str(path),
+            pagesize=A4,
+            leftMargin=18 * mm,
+            rightMargin=18 * mm,
+            topMargin=18 * mm,
+            bottomMargin=18 * mm,
+            title=f"{cover.get('title')} — {pack['period']}",
+            author="ReportSmith",
         ).build(story)
-    except Exception:  # noqa: BLE001 — see the module docstring: degrade, never block
+    except Exception:
         return None
     return path

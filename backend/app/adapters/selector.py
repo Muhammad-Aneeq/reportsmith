@@ -25,14 +25,17 @@ class SelectorError(ValueError):
 
 
 def _compare(left: Value, op: str, right: Any) -> bool:
+    # Every comparison here is genuinely dynamic — `Value` is a union whose members are not
+    # mutually comparable — so the results are coerced with bool() rather than annotated
+    # away. A TypeError below is a real data problem and becomes a named gap.
     if op == "eq":
-        return left == right
+        return bool(left == right)
     if op == "ne":
-        return left != right
+        return bool(left != right)
     if op == "in":
-        return left in right
+        return bool(left in right)
     if op == "not_in":
-        return left not in right
+        return bool(left not in right)
 
     # Ordered comparisons on None are a category error, not False: a row with no value
     # is not "less than 10", it is unknown. Excluding it is the honest reading.
@@ -40,13 +43,13 @@ def _compare(left: Value, op: str, right: Any) -> bool:
         return False
     try:
         if op == "gt":
-            return left > right  # type: ignore[operator]
+            return bool(left > right)
         if op == "gte":
-            return left >= right  # type: ignore[operator]
+            return bool(left >= right)
         if op == "lt":
-            return left < right  # type: ignore[operator]
+            return bool(left < right)
         if op == "lte":
-            return left <= right  # type: ignore[operator]
+            return bool(left <= right)
     except TypeError as exc:
         raise SelectorError(
             f"cannot compare {type(left).__name__} with {type(right).__name__} using {op!r}"
@@ -92,10 +95,13 @@ def _aggregate(values: list[Value], fn: AggFn) -> Value:
         return len({str(v) for v in present})
     if not present:
         return None
-    if fn == "min":
-        return min(present)  # type: ignore[type-var]
-    if fn == "max":
-        return max(present)  # type: ignore[type-var]
+    if fn in ("min", "max"):
+        # Comparable only within one type. Mixed types in a column are a data problem,
+        # and raising here surfaces it as a named gap rather than an arbitrary winner.
+        try:
+            return min(present) if fn == "min" else max(present)
+        except TypeError as exc:
+            raise SelectorError(f"cannot {fn} a column of mixed types") from exc
 
     numbers: list[Decimal] = []
     for v in present:
@@ -137,10 +143,10 @@ def _apply_group(frame: Frame, selector: Selector) -> Frame:
 
     out: list[dict[str, Value]] = []
     for key_values, members in groups.items():
-        row: dict[str, Value] = dict(zip(keys, key_values, strict=True))
+        grouped: dict[str, Value] = dict(zip(keys, key_values, strict=True))
         for field_name, fn in selector.aggregate.items():
-            row[field_name] = _aggregate([m.get(field_name) for m in members], fn)
-        out.append(row)
+            grouped[field_name] = _aggregate([m.get(field_name) for m in members], fn)
+        out.append(grouped)
 
     columns = tuple(keys) + tuple(selector.aggregate)
     return Frame(
@@ -153,7 +159,9 @@ def _apply_group(frame: Frame, selector: Selector) -> Frame:
     )
 
 
-def _sort_key(row: dict[str, Value], fields: list[str], tiebreak: tuple[str, ...]) -> tuple:
+def _sort_key(
+    row: dict[str, Value], fields: list[str], tiebreak: tuple[str, ...]
+) -> tuple[Any, ...]:
     """A total, type-stable sort key.
 
     Python refuses to order ``None`` against a number, and refuses to order a string
@@ -171,15 +179,18 @@ def _sort_key(row: dict[str, Value], fields: list[str], tiebreak: tuple[str, ...
             # pinned last in both directions by never negating their rank.
             key.append((1, 0))
             continue
+        comparable: Any
         if isinstance(value, bool):
-            rank, comparable = 0, Decimal(int(value))
+            comparable = Decimal(int(value))
         elif isinstance(value, Decimal | int):
-            rank, comparable = 0, Decimal(value)
+            comparable = Decimal(value)
         else:
-            rank, comparable = 0, str(value)
+            comparable = str(value)
         if descending:
-            comparable = -comparable if isinstance(comparable, Decimal) else _invert_str(comparable)
-        key.append((rank, comparable))
+            comparable = (
+                -comparable if isinstance(comparable, Decimal) else _invert_str(comparable)
+            )
+        key.append((0, comparable))
     key.extend(str(row.get(t, "")) for t in tiebreak)
     return tuple(key)
 

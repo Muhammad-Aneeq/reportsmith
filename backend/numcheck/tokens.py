@@ -30,7 +30,9 @@ _NUMBER = re.compile(
     # Left floating outside the group it is absorbed into every token's span, shifting
     # `start` one character left - which silently breaks every span-based check
     # downstream, including the period exemption and sentence surgery.
-    (?:(?P<currency>[""" + CURRENCY_SYMBOLS + r"""])\s?)?
+    (?:(?P<currency>["""
+    + CURRENCY_SYMBOLS
+    + r"""])\s?)?
     (?P<digits>\d{1,3}(?:[, ]\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)
     (?P<scale>bn|[kmb])?\b
     (?P<percent>\s?%)?

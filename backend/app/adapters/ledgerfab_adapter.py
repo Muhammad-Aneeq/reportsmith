@@ -111,7 +111,11 @@ class LedgerfabAdapter:
             if line is None:
                 continue
             amount = to_money(line.amount)
-            prior_amount = to_money(st.amount(prior, code)) if prior and st.amount(prior, code) is not None else None
+            prior_amount = (
+                to_money(st.amount(prior, code))
+                if prior and st.amount(prior, code) is not None
+                else None
+            )
             rows.append(
                 {
                     "line_code": code,
@@ -183,15 +187,45 @@ class LedgerfabAdapter:
 
         metrics: list[tuple[str, str, Decimal | None, Decimal | None]] = [
             ("revenue", "Revenue", figure("revenue", period), figure("revenue", prior)),
-            ("gross_profit", "Gross profit", figure("gross_profit", period), figure("gross_profit", prior)),
+            (
+                "gross_profit",
+                "Gross profit",
+                figure("gross_profit", period),
+                figure("gross_profit", prior),
+            ),
             ("gross_margin_pct", "Gross margin", margin(period), margin(prior)),
-            ("operating_profit", "Operating profit", figure("operating_profit", period), figure("operating_profit", prior)),
+            (
+                "operating_profit",
+                "Operating profit",
+                figure("operating_profit", period),
+                figure("operating_profit", prior),
+            ),
             ("net_income", "Net income", figure("net_income", period), figure("net_income", prior)),
             ("cash", "Cash", figure("cash", period), figure("cash", prior)),
-            ("accounts_receivable", "Accounts receivable", figure("accounts_receivable", period), figure("accounts_receivable", prior)),
-            ("accounts_payable", "Accounts payable", figure("accounts_payable", period), figure("accounts_payable", prior)),
-            ("total_assets", "Total assets", figure("total_assets", period), figure("total_assets", prior)),
-            ("total_equity", "Total equity", figure("total_equity", period), figure("total_equity", prior)),
+            (
+                "accounts_receivable",
+                "Accounts receivable",
+                figure("accounts_receivable", period),
+                figure("accounts_receivable", prior),
+            ),
+            (
+                "accounts_payable",
+                "Accounts payable",
+                figure("accounts_payable", period),
+                figure("accounts_payable", prior),
+            ),
+            (
+                "total_assets",
+                "Total assets",
+                figure("total_assets", period),
+                figure("total_assets", prior),
+            ),
+            (
+                "total_equity",
+                "Total equity",
+                figure("total_equity", period),
+                figure("total_equity", prior),
+            ),
             ("receivable_days", "Receivable days", receivable_days(period), receivable_days(prior)),
             (
                 "exception_count",
@@ -207,7 +241,9 @@ class LedgerfabAdapter:
                 "label": label,
                 "value": value,
                 "prior_value": prior_value,
-                "delta": (value - prior_value) if value is not None and prior_value is not None else None,
+                "delta": (value - prior_value)
+                if value is not None and prior_value is not None
+                else None,
                 "delta_pct": pct_change(value, prior_value),
             }
             for key, label, value, prior_value in metrics
@@ -245,8 +281,15 @@ class LedgerfabAdapter:
         return frame_from_dicts(
             rows,
             columns=(
-                "txn_id", "rule_id", "label", "message", "severity",
-                "severity_rank", "amount", "counterparty", "evidence",
+                "txn_id",
+                "rule_id",
+                "label",
+                "message",
+                "severity",
+                "severity_rank",
+                "amount",
+                "counterparty",
+                "evidence",
             ),
             source=self.name,
             dataset="exceptions",
@@ -271,8 +314,11 @@ class LedgerfabAdapter:
             for inv in world.invoices
         ]
         return frame_from_dicts(
-            rows, source=self.name, dataset="invoices",
-            schema_version=self.SCHEMA_VERSION, meta={"period": period},
+            rows,
+            source=self.name,
+            dataset="invoices",
+            schema_version=self.SCHEMA_VERSION,
+            meta={"period": period},
         )
 
     def _gl_expense_lines(self, period: str) -> Frame:
@@ -296,8 +342,10 @@ class LedgerfabAdapter:
         return frame_from_dicts(
             rows,
             columns=("account_code", "account_name", "date", "amount", "invoice_id", "memo"),
-            source=self.name, dataset="gl_expense_lines",
-            schema_version=self.SCHEMA_VERSION, meta={"period": period},
+            source=self.name,
+            dataset="gl_expense_lines",
+            schema_version=self.SCHEMA_VERSION,
+            meta={"period": period},
         )
 
     # -- dispatch ------------------------------------------------------------

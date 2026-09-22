@@ -18,22 +18,29 @@ def _table(content: dict[str, Any]) -> list[str]:
         return ["_No columns._"]
 
     header = "| " + " | ".join(c["label"] or " " for c in columns) + " |"
-    align = "| " + " | ".join(
-        {"right": "---:", "center": ":---:"}.get(c.get("align", "left"), ":---") for c in columns
-    ) + " |"
+    align = (
+        "| "
+        + " | ".join(
+            {"right": "---:", "center": ":---:"}.get(c.get("align", "left"), ":---")
+            for c in columns
+        )
+        + " |"
+    )
     lines = [header, align]
 
     for row in content.get("rows", []):
         lines.append(
-            "| " + " | ".join(str(row.get(c["field"], {}).get("display", "")) for c in columns) + " |"
+            "| "
+            + " | ".join(str(row.get(c["field"], {}).get("display", "")) for c in columns)
+            + " |"
         )
 
     total = content.get("total")
     if total:
         lines.append(
-            "| " + " | ".join(
-                f"**{total.get(c['field'], {}).get('display', '')}**" for c in columns
-            ) + " |"
+            "| "
+            + " | ".join(f"**{total.get(c['field'], {}).get('display', '')}**" for c in columns)
+            + " |"
         )
 
     if content.get("truncated_from"):

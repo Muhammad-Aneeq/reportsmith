@@ -41,9 +41,7 @@ def verify(
         # "no figure matches 27.9%" sends a reviewer hunting, while "closest: gross
         # margin 27.86%" ends the question.
         same_unit = [r for r in ref_list if r.unit == token.unit]
-        closest = (
-            min(same_unit, key=lambda r: abs(r.value - token.value)) if same_unit else None
-        )
+        closest = min(same_unit, key=lambda r: abs(r.value - token.value)) if same_unit else None
         detail = (
             f"; closest same-unit figure: {closest.label or closest.ref_id} = {closest.value}"
             if closest

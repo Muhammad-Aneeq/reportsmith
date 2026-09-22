@@ -1,0 +1,35 @@
+# docker compose up  →  API on :8000, SPA on :5173.
+#
+# Runs in mock mode by default, so `docker compose up` on a fresh clone gives a working
+# product with no API key. Set REPORTSMITH_LLM=live in a .env to draft with a real model.
+
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      REPORTSMITH_LLM: ${REPORTSMITH_LLM:-mock}
+      REPORTSMITH_DATABASE_URL: sqlite:////data/reportsmith.db
+      REPORTSMITH_ARCHIVE_DIR: /data/archive
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports: ['8000:8000']
+    volumes:
+      # The archive is the product's durable output. A bind mount rather than an anonymous
+      # volume, so an issued pack survives `docker compose down` — an archive that a
+      # container teardown can delete is not an archive.
+      - ./archive:/data/archive
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE: http://api:8000
+    ports: ['5173:5173']
+    depends_on:
+      api:
+        condition: service_healthy

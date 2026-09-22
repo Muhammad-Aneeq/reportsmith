@@ -5,10 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from app import service
 from app.issue.archive import archive_dir, verify_archive
 from app.issue.edits import make_diff, word_diff
-
 
 # --------------------------------------------------------------------- edits --
 
@@ -90,7 +90,8 @@ def _issue(db, period):
         service.approve_section(db, section["id"], "A. Controller")
     waivers = [
         {"section_key": g["section_key"], "reason": "Accepted for this period."}
-        for g in data["gaps"] if g["required"]
+        for g in data["gaps"]
+        if g["required"]
     ]
     return service.signoff(db, pack.id, "A. Controller", waivers)
 

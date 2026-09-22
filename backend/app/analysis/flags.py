@@ -76,7 +76,9 @@ def _resolve(
     """
     kind, _, key = selector.partition(".")
     if not key:
-        raise RuleError(f"selector {selector!r} must be 'ratio.<id>', 'line.<code>' or 'delta.<id>'")
+        raise RuleError(
+            f"selector {selector!r} must be 'ratio.<id>', 'line.<code>' or 'delta.<id>'"
+        )
     if kind == "ratio":
         comp = computations.get(key)
         if comp is None:
@@ -164,7 +166,9 @@ def load_rules(directory: Path | None = None) -> list[Rule]:
         for entry in raw.get("rules", []):
             unknown = set(entry) - {"rule_id", "label", "severity", "message", "when", "evidence"}
             if unknown:
-                raise RuleError(f"{path.name}: rule {entry.get('rule_id')} has unknown keys {sorted(unknown)}")
+                raise RuleError(
+                    f"{path.name}: rule {entry.get('rule_id')} has unknown keys {sorted(unknown)}"
+                )
             if entry.get("severity") not in SEVERITY_RANK:
                 raise RuleError(
                     f"{path.name}: rule {entry.get('rule_id')} has severity "
@@ -208,8 +212,10 @@ def evaluate_rules(
             kind, _, key = selector.partition(".")
             comp = by_id.get(key)
             label = comp.label if kind == "ratio" and comp else key
-            evidence[label] = comp.display if kind == "ratio" and comp else (
-                "n/a" if value is None else str(value)
+            evidence[label] = (
+                comp.display
+                if kind == "ratio" and comp
+                else ("n/a" if value is None else str(value))
             )
         fired.append(
             Flag(

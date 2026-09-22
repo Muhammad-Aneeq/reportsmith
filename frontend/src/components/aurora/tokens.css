@@ -1,0 +1,169 @@
+/**
+ * aurora design tokens — spec 00 A2, at its stated values.
+ *
+ *   "Tokens: dark navy #0B1E3B, emerald #10B981, frosted-glass surfaces,
+ *    Space Grotesk / Inter."
+ *
+ * A sibling console (LedgerGuard) retuned this palette to slate/cyan, with a good reason:
+ * its whole surface is a review *queue*, and an emerald accent reads as "success" on every
+ * row of it. ReportSmith is the opposite shape. Here emerald means one specific thing —
+ * **this section is approved** — and it appears on a minority of the surface at any moment,
+ * so the spec palette carries its intended meaning rather than fighting it. Spec 00 A2's
+ * point is that ten repos should be recognisably the same product family; deviating needs a
+ * reason, and this repo does not have one.
+ *
+ * Both naming schemes are defined. The semantic names (`--aurora-bg`, `--aurora-accent`) are
+ * what components use; the literal `--aurora-navy*` / `--aurora-emerald*` names are kept so
+ * a component lifted from a sibling keeps rendering rather than falling back to unset.
+ *
+ * Fonts come from the local stack, never a CDN. A page that needs the network to look right
+ * looks wrong in an offline screenshot — and the strict CSP on published artifacts would
+ * block it anyway.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- palette -- */
+  --aurora-navy: #0b1e3b;
+  --aurora-navy-deep: #071429;
+  --aurora-navy-raised: #12294c;
+
+  --aurora-bg: var(--aurora-navy);
+  --aurora-bg-deep: var(--aurora-navy-deep);
+  --aurora-bg-raised: var(--aurora-navy-raised);
+
+  /* Emerald. Reserved: approved, verified, improving. Never decorative. */
+  --aurora-emerald: #10b981;
+  --aurora-emerald-dim: #047857;
+  --aurora-emerald-glow: rgba(16, 185, 129, 0.16);
+
+  --aurora-accent: var(--aurora-emerald);
+  --aurora-accent-dim: var(--aurora-emerald-dim);
+  --aurora-accent-glow: var(--aurora-emerald-glow);
+
+  /* Status. Amber and rose rather than a second green, so that colour-blind readers can
+     separate them — and every badge carries a text label as well, for the same reason.
+     Nothing in this product signals by colour alone. */
+  --aurora-amber: #f59e0b;
+  --aurora-rose: #f43f5e;
+  --aurora-slate: #64748b;
+  --aurora-positive: var(--aurora-emerald);
+
+  /* --------------------------------------------------------------- surfaces -- */
+  /* Frosted glass: a translucent fill over a blurred backdrop, with a hairline border
+     doing the edge work instead of a heavy shadow. */
+  --aurora-surface: rgba(255, 255, 255, 0.045);
+  --aurora-surface-raised: rgba(255, 255, 255, 0.075);
+  --aurora-border: rgba(255, 255, 255, 0.1);
+  --aurora-border-strong: rgba(255, 255, 255, 0.2);
+  --aurora-blur: 14px;
+
+  --aurora-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+  --aurora-shadow-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+
+  /* ------------------------------------------------------------------ text -- */
+  --aurora-text: #eef2f8;
+  --aurora-text-dim: #9fb0c9;
+  --aurora-text-faint: #6b7f9e;
+
+  /* ----------------------------------------------------------------- shape -- */
+  --aurora-radius: 14px;
+  --aurora-radius-sm: 9px;
+  --aurora-radius-pill: 999px;
+
+  /* ----------------------------------------------------------------- type -- */
+  /* Space Grotesk for display, Inter for body — per spec, with a local fallback stack so
+     the page is correct without either installed. `tabular-nums` is applied wherever a
+     figure appears: a column of money that shifts width as digits change is unreadable,
+     and this product is mostly columns of money. */
+  --aurora-font-display: "Space Grotesk", "Segoe UI Variable Display", "Inter", system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --aurora-font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --aurora-font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, "SF Mono", Menlo,
+    Consolas, monospace;
+}
+
+/**
+ * Light mode.
+ *
+ * Deliberate, not inherited. A controller reviewing a pack at a desk in daylight, and a
+ * viewer with `prefers-color-scheme: light`, both get a design that was actually looked at
+ * — the frosted surfaces invert to white-on-paper rather than staying translucent over a
+ * light background, which is where naive dark-first systems fall apart.
+ */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --aurora-bg: #f4f7fb;
+    --aurora-bg-deep: #e8eef7;
+    --aurora-bg-raised: #ffffff;
+
+    --aurora-surface: rgba(255, 255, 255, 0.86);
+    --aurora-surface-raised: #ffffff;
+    --aurora-border: rgba(11, 30, 59, 0.12);
+    --aurora-border-strong: rgba(11, 30, 59, 0.24);
+
+    --aurora-shadow: 0 18px 40px -24px rgba(11, 30, 59, 0.28);
+    --aurora-shadow-sm: 0 6px 16px -12px rgba(11, 30, 59, 0.22);
+
+    --aurora-text: #0b1e3b;
+    --aurora-text-dim: #47597a;
+    --aurora-text-faint: #7386a3;
+
+    /* Emerald at full brightness fails contrast on white. Darkened for text use while the
+       badge fills keep the brand value. */
+    --aurora-emerald: #047857;
+    --aurora-emerald-dim: #065f46;
+    --aurora-amber: #b45309;
+    --aurora-rose: #be123c;
+  }
+}
+
+/* The explicit toggle wins over the media query, in both directions. */
+:root[data-theme="light"] {
+  --aurora-bg: #f4f7fb;
+  --aurora-bg-deep: #e8eef7;
+  --aurora-bg-raised: #ffffff;
+  --aurora-surface: rgba(255, 255, 255, 0.86);
+  --aurora-surface-raised: #ffffff;
+  --aurora-border: rgba(11, 30, 59, 0.12);
+  --aurora-border-strong: rgba(11, 30, 59, 0.24);
+  --aurora-shadow: 0 18px 40px -24px rgba(11, 30, 59, 0.28);
+  --aurora-shadow-sm: 0 6px 16px -12px rgba(11, 30, 59, 0.22);
+  --aurora-text: #0b1e3b;
+  --aurora-text-dim: #47597a;
+  --aurora-text-faint: #7386a3;
+  --aurora-emerald: #047857;
+  --aurora-emerald-dim: #065f46;
+  --aurora-amber: #b45309;
+  --aurora-rose: #be123c;
+}
+
+:root[data-theme="dark"] {
+  --aurora-bg: #0b1e3b;
+  --aurora-bg-deep: #071429;
+  --aurora-bg-raised: #12294c;
+  --aurora-surface: rgba(255, 255, 255, 0.045);
+  --aurora-surface-raised: rgba(255, 255, 255, 0.075);
+  --aurora-border: rgba(255, 255, 255, 0.1);
+  --aurora-border-strong: rgba(255, 255, 255, 0.2);
+  --aurora-text: #eef2f8;
+  --aurora-text-dim: #9fb0c9;
+  --aurora-text-faint: #6b7f9e;
+  --aurora-emerald: #10b981;
+  --aurora-emerald-dim: #047857;
+  --aurora-amber: #f59e0b;
+  --aurora-rose: #f43f5e;
+}
+
+/* Respect a reader who has asked for less motion. Transitions are how this UI shows that a
+   state changed; removing them entirely would lose that signal, so they are shortened to
+   near-instant rather than deleted. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

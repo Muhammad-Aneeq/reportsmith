@@ -1,0 +1,466 @@
+/**
+ * aurora component styles.
+ *
+ * Plain CSS driven by the tokens, not Tailwind utilities. The split is deliberate: the design
+ * system owns its own appearance so that lifting this directory into a shared `aurora-ui`
+ * package (spec 00 A2) is a move rather than a rewrite, while the screens use Tailwind for
+ * layout. A component whose look depended on utility classes in its call sites could not be
+ * packaged.
+ */
+
+/* ------------------------------------------------------------------- card -- */
+
+.au-card {
+  background: var(--aurora-surface);
+  border: 1px solid var(--aurora-border);
+  border-radius: var(--aurora-radius);
+  /* The frosting. Layered behind a translucent fill rather than applied to it, so text stays
+     crisp — a blurred surface with blurred text on it is unreadable at 14px. */
+  backdrop-filter: blur(var(--aurora-blur));
+  -webkit-backdrop-filter: blur(var(--aurora-blur));
+  box-shadow: var(--aurora-shadow);
+  overflow: hidden;
+}
+
+.au-card--raised {
+  background: var(--aurora-surface-raised);
+  border-color: var(--aurora-border-strong);
+}
+
+.au-card--flat {
+  box-shadow: none;
+}
+
+.au-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--aurora-border);
+}
+
+.au-card__title {
+  font-family: var(--aurora-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.au-card__subtitle {
+  color: var(--aurora-text-dim);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.au-card__body {
+  padding: 18px;
+}
+
+.au-card__body--tight {
+  padding: 0;
+}
+
+/* --------------------------------------------------------- confidence pill -- */
+
+.au-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 11px 3px 8px;
+  border-radius: var(--aurora-radius-pill);
+  border: 1px solid currentColor;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  /* The colour is set inline from the band; `currentColor` on the border and dot means one
+     value drives all three, so a new band cannot end up half-styled. */
+}
+
+.au-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.au-pill__value {
+  font-family: var(--aurora-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.au-pill__label {
+  color: var(--aurora-text);
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------- stat badge -- */
+
+.au-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px;
+  border-radius: var(--aurora-radius-sm);
+  border: 1px solid var(--aurora-border-strong);
+  background: rgba(11, 30, 59, 0.6);
+  color: var(--aurora-text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Green, not the cyan accent: this badge sits in a row with --warn and --danger, and a status
+   triad reads faster when its "good" is the colour everything else already means by "good". */
+.au-badge--good {
+  color: var(--aurora-positive);
+  border-color: var(--aurora-positive);
+  background: rgba(52, 211, 153, 0.14);
+}
+
+.au-badge--warn {
+  color: var(--aurora-amber);
+  border-color: var(--aurora-amber);
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.au-badge--bad {
+  color: var(--aurora-rose);
+  border-color: var(--aurora-rose);
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.au-badge--mock {
+  /* A dashed border for anything that is not a real measurement. The whole repo turns on this
+     distinction being visible at a glance (BLOCKERS.md B2), and a colour alone is too subtle
+     next to a green PASS. */
+  border-style: dashed;
+  color: var(--aurora-text-dim);
+}
+
+/* ---------------------------------------------------------------- risk tag -- */
+
+.au-risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--aurora-radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid currentColor;
+}
+
+.au-risk__glyph {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+/* -------------------------------------------------------------- metric tile -- */
+
+.au-tile {
+  padding: 16px 18px;
+  border-radius: var(--aurora-radius);
+  border: 1px solid var(--aurora-border);
+  background: var(--aurora-surface);
+  backdrop-filter: blur(var(--aurora-blur));
+  -webkit-backdrop-filter: blur(var(--aurora-blur));
+}
+
+.au-tile__label {
+  color: var(--aurora-text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.au-tile__value {
+  font-family: var(--aurora-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.au-tile__hint {
+  color: var(--aurora-text-dim);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.au-tile--accent .au-tile__value {
+  color: var(--aurora-accent);
+}
+
+.au-tile--warn .au-tile__value {
+  color: var(--aurora-amber);
+}
+
+.au-tile--bad .au-tile__value {
+  color: var(--aurora-rose);
+}
+
+/* ------------------------------------------------------------ evidence panel -- */
+
+.au-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.au-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: var(--aurora-radius-pill);
+  border: 1px solid var(--aurora-border-strong);
+  background: rgba(11, 30, 59, 0.55);
+  font-family: var(--aurora-font-mono);
+  font-size: 12px;
+  color: var(--aurora-text);
+}
+
+.au-chip__kind {
+  color: var(--aurora-text-faint);
+  font-family: var(--aurora-font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.au-chip--target {
+  /* The cited id that *is* the conclusion. Highlighted because "the evidence includes the
+     thing concluded" is a check-3 property, and a reviewer should be able to see it holds. */
+  border-color: var(--aurora-accent);
+  background: var(--aurora-accent-glow);
+}
+
+.au-chip--ungrounded {
+  border-color: var(--aurora-rose);
+  color: var(--aurora-rose);
+}
+
+/* ---------------------------------------------------------- trace timeline -- */
+
+.au-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.au-timeline__row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: start;
+  gap: 12px;
+  padding: 9px 0;
+  position: relative;
+}
+
+/* The connecting rail. Drawn on the row rather than as a separate element so it cannot fall
+   out of alignment with the dots when a row wraps. */
+.au-timeline__row:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 22px;
+  bottom: -9px;
+  width: 1px;
+  background: var(--aurora-border-strong);
+}
+
+.au-timeline__dot {
+  width: 9px;
+  height: 9px;
+  margin: 6px 0 0 6px;
+  border-radius: 50%;
+  background: var(--aurora-accent);
+  box-shadow: 0 0 0 3px var(--aurora-accent-glow);
+  flex: none;
+  z-index: 1;
+}
+
+.au-timeline__dot--decision {
+  background: var(--aurora-amber);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.au-timeline__dot--event {
+  background: var(--aurora-rose);
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
+}
+
+.au-timeline__name {
+  font-family: var(--aurora-font-mono);
+  font-size: 12.5px;
+}
+
+.au-timeline__attrs {
+  color: var(--aurora-text-dim);
+  font-size: 11.5px;
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.au-timeline__duration {
+  color: var(--aurora-text-faint);
+  font-family: var(--aurora-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+
+.au-timeline__event {
+  margin-top: 4px;
+  color: var(--aurora-rose);
+  font-size: 11.5px;
+}
+
+/* -------------------------------------------------------------- empty state -- */
+
+.au-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 24px;
+  text-align: center;
+  color: var(--aurora-text-dim);
+}
+
+.au-empty__glyph {
+  font-size: 26px;
+  opacity: 0.5;
+}
+
+.au-empty__title {
+  font-family: var(--aurora-font-display);
+  font-size: 15px;
+  color: var(--aurora-text);
+}
+
+.au-empty__hint {
+  font-size: 12.5px;
+  max-width: 46ch;
+}
+
+.au-empty__action {
+  margin-top: 6px;
+}
+
+/* ------------------------------------------------------ synthetic banner -- */
+
+.au-synthetic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.32);
+  color: var(--aurora-amber);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.au-synthetic__detail {
+  color: var(--aurora-text-dim);
+  font-weight: 400;
+}
+
+/* ------------------------------------------------------------------ buttons -- */
+
+.au-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--aurora-radius-sm);
+  border: 1px solid var(--aurora-border-strong);
+  background: rgba(11, 30, 59, 0.7);
+  color: var(--aurora-text);
+  font-family: var(--aurora-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.au-btn:hover:not(:disabled) {
+  background: var(--aurora-bg-raised);
+  border-color: var(--aurora-accent);
+}
+
+.au-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.au-btn--primary {
+  background: var(--aurora-accent-dim);
+  border-color: var(--aurora-accent);
+  /* Near-black with a cyan cast rather than pure black: on a saturated cyan fill it holds
+     >12:1 contrast while still reading as part of the button, not printed on top of it. */
+  color: #032a33;
+}
+
+.au-btn--primary:hover:not(:disabled) {
+  background: var(--aurora-accent);
+}
+
+.au-btn--danger {
+  color: var(--aurora-rose);
+  border-color: var(--aurora-rose);
+}
+
+.au-btn--danger:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.16);
+  border-color: var(--aurora-rose);
+}
+
+/* -------------------------------------------------------------------- table -- */
+
+.au-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.au-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: var(--aurora-text-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--aurora-border);
+  white-space: nowrap;
+}
+
+.au-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(148, 178, 219, 0.08);
+  vertical-align: top;
+}
+
+.au-table tbody tr:hover {
+  background: rgba(148, 178, 219, 0.05);
+}
+
+.au-table tbody tr.au-row--clickable {
+  cursor: pointer;
+}
+
+.au-num {
+  font-family: var(--aurora-font-mono);
+  font-variant-numeric: tabular-nums;
+}

@@ -11,6 +11,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+
 from app.adapters.frame import frame_from_dicts
 from app.adapters.selector import apply_selector
 from app.assemble.engine import assemble
@@ -29,7 +30,9 @@ def _canonical(pack) -> str:
             "value_digest": pack.value_digest,
             "sections": [s.as_row() for s in pack.sections],
         },
-        indent=2, sort_keys=True, default=str,
+        indent=2,
+        sort_keys=True,
+        default=str,
     )
 
 
@@ -70,7 +73,9 @@ def test_structure_is_stable_across_periods_but_values_are_not(
 def test_narrative_rewording_does_not_change_the_value_digest():
     """Editing prose must not look, to the diff view, like the numbers moved."""
     base = {
-        "section_key": "n", "type": "narrative", "order_index": 0,
+        "section_key": "n",
+        "type": "narrative",
+        "order_index": 0,
         "content_json": {
             "text": "Revenue was £3.8m.",
             "figure_refs": [{"ref_id": "r", "value": "3815070.61"}],
@@ -85,7 +90,9 @@ def test_narrative_rewording_does_not_change_the_value_digest():
 
 def test_figure_change_does_change_the_value_digest():
     base = {
-        "section_key": "n", "type": "narrative", "order_index": 0,
+        "section_key": "n",
+        "type": "narrative",
+        "order_index": 0,
         "content_json": {"text": "x", "figure_refs": [{"ref_id": "r", "value": "1.00"}]},
     }
     moved = {
@@ -138,8 +145,7 @@ def test_where_on_none_excludes_rather_than_compares():
     rows = [{"v": Decimal(5)}, {"v": None}]
     out = apply_selector(
         frame_from_dicts(rows),
-        Selector(source="ledgerfab", select="x",
-                 where=[Condition(field="v", op="lt", value=10)]),
+        Selector(source="ledgerfab", select="x", where=[Condition(field="v", op="lt", value=10)]),
     )
     assert len(out.rows) == 1
 

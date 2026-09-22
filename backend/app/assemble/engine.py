@@ -129,7 +129,7 @@ def assemble(
             )
             continue
 
-        assert isinstance(result, Bound)  # noqa: S101 — the sum type has two arms
+        assert isinstance(result, Bound)
         frame = result.frame
         snapshot[spec.id] = frame.to_json()
 
@@ -139,14 +139,17 @@ def assemble(
         except KeyError as exc:
             # The frame bound but the template asked for a field it does not publish.
             # A rendering failure is still a gap, not a traceback.
-            content, gaps = {}, [
-                {
-                    "reason": "selector_invalid",
-                    "detail": str(exc).strip("'"),
-                    "source": frame.source,
-                    "dataset": frame.dataset,
-                }
-            ]
+            content, gaps = (
+                {},
+                [
+                    {
+                        "reason": "selector_invalid",
+                        "detail": str(exc).strip("'"),
+                        "source": frame.source,
+                        "dataset": frame.dataset,
+                    }
+                ],
+            )
 
         sections.append(
             AssembledSection(

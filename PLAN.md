@@ -66,18 +66,18 @@ Restated from the brief. Each row names the mechanism, not the intention, and th
 
 | Constraint | Mechanism | Verified by |
 |---|---|---|
-| **Template model exactly per spec 13 F1** — versioned YAML, **4 section types only**, pack-level style rules, default Monthly Management Pack shipped | `template/schema.py` is a closed Pydantic model: `type: Literal["table","kpi_grid","narrative","flags"]`, `extra="forbid"` at every level. Versioning is content-addressed: `(name, version)` unique, YAML immutable once a pack references it | `test_template_schema.py`: a 5th type fails validation; an unknown key fails; editing a referenced version raises. `test_default_template.py`: the shipped pack parses, covers all four types, and round-trips YAML→model→YAML byte-identically |
-| **SourceAdapters per F2**; missing/failed binding → **explicit GAP**, never silent omission; gaps listed in a panel | `adapters/base.py` `SourceAdapter` protocol returns `BindingResult = Bound(frame) | Gap(reason, detail)` — a **sum type with no third arm and no exception path**: `resolve_binding` catches `Exception` and converts to `Gap`. The assembler emits a section for **every** template section, always | `test_gaps.py`: adapter raising / returning empty / wrong schema → three distinct `GapReason`s, section still present, `pack.gaps` non-empty. `test_no_silent_omission.py`: for 12 adversarial adapter behaviours, `len(pack.sections) == len(template.sections)` **always** |
-| **Tables/KPIs deterministic** (golden-file tested: same data + template = identical output) | Zero LLM in `assemble/`. Money is `Decimal`, quantised once, in one place (`money.py`). Frame ops are a **closed declarative selector grammar** (D-008) — no `eval`, no user expressions. Ordering is total: every sort carries a tiebreak key | `test_golden_assembly.py`: assemble twice → identical JSON; assemble → compare to committed `evals/golden/*.json`; a byte-diff fails CI. `test_no_llm_in_assemble.py` greps `assemble/` for model SDK imports |
-| **Narrative composer sees per-section bound data + tone rules ONLY** | Structural, not prompted: `compose_section(frame, tone_rules, style)` — the function has **no parameter** through which the world, the other sections, or the raw ledger could arrive. The prompt is built from its arguments alone | `test_composer_isolation.py`: introspects the call signature and asserts the rendered prompt contains no token from a withheld-secret canary planted in the world outside the frame |
+| **Template model exactly per spec 13 F1** — versioned YAML, **4 section types only**, pack-level style rules, default Monthly Management Pack shipped | `template/schema.py` is a closed Pydantic model: `type: Literal["table","kpi_grid","narrative","flags"]`, `extra="forbid"` at every level. Versioning is content-addressed: `(name, version)` unique, YAML immutable once a pack references it | `test_template_and_kpis.py`: a 5th type fails validation; an unknown key fails; editing a referenced version raises. `test_template_and_kpis.py`: the shipped pack parses, covers all four types, and round-trips YAML→model→YAML byte-identically |
+| **SourceAdapters per F2**; missing/failed binding → **explicit GAP**, never silent omission; gaps listed in a panel | `adapters/base.py` `SourceAdapter` protocol returns `BindingResult = Bound(frame) | Gap(reason, detail)` — a **sum type with no third arm and no exception path**: `resolve_binding` catches `Exception` and converts to `Gap`. The assembler emits a section for **every** template section, always | `test_no_silent_omission.py`: adapter raising / returning empty / wrong schema → three distinct `GapReason`s, section still present, `pack.gaps` non-empty. `test_no_silent_omission.py`: for 12 adversarial adapter behaviours, `len(pack.sections) == len(template.sections)` **always** |
+| **Tables/KPIs deterministic** (golden-file tested: same data + template = identical output) | Zero LLM in `assemble/`. Money is `Decimal`, quantised once, in one place (`money.py`). Frame ops are a **closed declarative selector grammar** (D-008) — no `eval`, no user expressions. Ordering is total: every sort carries a tiebreak key | `test_golden_assembly.py`: assemble twice → identical JSON; assemble → compare to committed `evals/golden/*.json`; a byte-diff fails CI. `test_golden_assembly.py` greps `assemble/` for model SDK imports |
+| **Narrative composer sees per-section bound data + tone rules ONLY** | Structural, not prompted: `compose_section(frame, tone_rules, style)` — the function has **no parameter** through which the world, the other sections, or the raw ledger could arrive. The prompt is built from its arguments alone | `test_narrate.py`: introspects the call signature and asserts the rendered prompt contains no token from a withheld-secret canary planted in the world outside the frame |
 | **Numeric cross-check via numcheck** | Every numeric token in the draft is extracted and must match a declared `figure_ref` value within the style's rounding tolerance. Mismatch → one retry → offending sentence dropped (spec 12 F5) | `test_numcheck.py` (the shared harness): 40+ fixtures — thousands separators, currency symbols, negatives in parens, percentages, ordinals-that-are-not-figures, dates-that-are-not-figures. **`MockComposer(faulty=True)` deliberately emits a wrong number so the gate is proven to fire, not merely to pass** — D-014 |
-| **Deterministic tone linter first, judge-scored style second** (pinned + cached) | `narrate/lint.py` runs with no model: rounding conformance, currency rendering, banned phrases, sentence length. Auto-fix is **formatting-only and never touches a digit's value**; numcheck re-runs after the fix. The judge is evals-only, pinned model, response-cached to `evals/cache/` | `test_tone_lint.py` rule matrix. `test_lint_preserves_figures.py`: for every fixture, numcheck passes both before *and* after auto-fix. Judge cache committed → CI needs no key |
+| **Deterministic tone linter first, judge-scored style second** (pinned + cached) | `narrate/lint.py` runs with no model: rounding conformance, currency rendering, banned phrases, sentence length. Auto-fix is **formatting-only and never touches a digit's value**; numcheck re-runs after the fix. The judge is evals-only, pinned model, response-cached to `evals/cache/` | `test_narrate.py` rule matrix. `test_narrate.py`: for every fixture, numcheck passes both before *and* after auto-fix. Judge cache committed → CI needs no key |
 | **Review & sign-off state machine per F5** — AI draft preserved beside human edits, diffs tracked, per-section approval, pack-level sign-off, **gaps block issuance unless waived**, waiver recorded | `issue/states.py` is an explicit transition table `(status, event) → status` with named guards. `sections.ai_draft_json` is written once at assembly and **never** written again (asserted). Every human save appends an `edits` row holding a unified diff | `test_state_machine.py`: exhaustive — every (state × event) pair, legal and illegal. Named cases: cannot sign with an unapproved section; cannot sign with an unwaived gap on a `required` section; a waiver records signer + reason + gap ids; approving a section then editing it **revokes** approval (D-012) |
-| **Issued archives immutable** (md + PDF + data snapshot + template version + hash) | `archives` is INSERT-only: no UPDATE/DELETE statement against it exists in `app/`. Files land under `archive/<pack_id>/` and the recorded hash covers **all four artefacts plus the template version**, canonicalised then SHA-256 | `test_archive_immutable.py`: greps for write paths; re-issuing a pack → 409; mutating any artefact on disk → verification fails and says which one |
-| **`make month2` re-runs the default template on the next ledgerfab period; diff shows identical structure / changed numbers** | `structure_hash(pack)` = SHA-256 over `(template_id, template_version, [(section_key, type, order)])` — deliberately excludes all values. `value_digest(pack)` covers only the numbers | `test_month2_diff.py`: `structure_hash(p1) == structure_hash(p2)` and `value_digest(p1) != value_digest(p2)`. E2E issues both periods |
+| **Issued archives immutable** (md + PDF + data snapshot + template version + hash) | `archives` is INSERT-only: no UPDATE/DELETE statement against it exists in `app/`. Files land under `archive/<pack_id>/` and the recorded hash covers **all four artefacts plus the template version**, canonicalised then SHA-256 | `test_governance_artifacts.py`: greps for write paths; re-issuing a pack → 409; mutating any artefact on disk → verification fails and says which one |
+| **`make month2` re-runs the default template on the next ledgerfab period; diff shows identical structure / changed numbers** | `structure_hash(pack)` = SHA-256 over `(template_id, template_version, [(section_key, type, order)])` — deliberately excludes all values. `value_digest(pack)` covers only the numbers | `evals/run_e2e.py`: `structure_hash(p1) == structure_hash(p2)` and `value_digest(p1) != value_digest(p2)`. E2E issues both periods |
 | **Evals: numeric-fidelity 100% gate, state-machine suite, E2E two-period issuance** | Three CI jobs. The fidelity gate is a **hard 100%** — any unverified number is a build failure, not a score | `.github/workflows/ci.yml`: `evals-gate` job runs all three; mock mode marked in the job name and in the published report |
-| **aurora per spec 00 A2; stack per spec 00 F** | `frontend/src/components/aurora/` — all nine components, rendered by an `/aurora` route (spec 00 A2's acceptance criterion). FastAPI + Pydantic v2 + SQLAlchemy + uv; Vite + React + TS + Tailwind + TanStack Query; **LangGraph** for the composer, no LCEL chains | `aurora.test.tsx` renders all nine; `test_stack_lock.py` asserts no `langchain.chains` import |
-| **LLM mocked by default; live behind a `live` marker** | `MockComposer` is the default resolution of the `Composer` protocol. `OpenAIComposer` is constructed only when `REPORTSMITH_LLM=live`. `pytest.ini` registers `live`; CI runs `-m "not live"` | `test_mock_default.py`: importing and running a full pack with no `OPENAI_API_KEY` set succeeds and the pack records `model: "mock"` |
+| **aurora per spec 00 A2; stack per spec 00 F** | `frontend/src/components/aurora/` — all nine components, rendered by an `/aurora` route (spec 00 A2's acceptance criterion). FastAPI + Pydantic v2 + SQLAlchemy + uv; Vite + React + TS + Tailwind + TanStack Query; **LangGraph** for the composer, no LCEL chains | `aurora.test.tsx` renders all nine; `test_docs_and_tooling.py` asserts no `langchain.chains` import |
+| **LLM mocked by default; live behind a `live` marker** | `MockComposer` is the default resolution of the `Composer` protocol. `OpenAIComposer` is constructed only when `REPORTSMITH_LLM=live`. `pytest.ini` registers `live`; CI runs `-m "not live"` | `test_docs_and_tooling.py`: importing and running a full pack with no `OPENAI_API_KEY` set succeeds and the pack records `model: "mock"` |
 
 ---
 
@@ -272,120 +272,120 @@ Spec 13 §13 gives four weeks: W1 template model + adapters + assembly · W2 com
 
 ---
 
-### ☐ P1 · Skeleton · template model · versioned store · the default pack · periods
+### ☑ P1 · Skeleton · template model · versioned store · the default pack · periods — **DONE**
 
 Spec 13 F1: *"Template model (YAML, versioned): sections[{id, title, type[table|kpi_grid|narrative|flags], binding, tone_rules, required}] + pack-level style rules… Ships with a default Monthly Management Pack template."*
 
-- [ ] `backend/pyproject.toml` (uv, ruff, mypy, pytest markers `live` + `integration`), `Makefile`, `make.ps1`, `.gitignore`, `LICENSE`
-- [ ] Vendor **both** halves and write one **`VENDORED.md`** covering them: `../ledgerlab/backend/ledgerfab/` (the engine) and `../statementlens/backend/ledgerfab/statements/` (the multi-period statement emitter — **D-017**). Provenance, every local change, why-not-the-other-copies. **Run their own test suites here before building on them** — the emitter ships `test_emitter_invariants/determinism/periods/export/anomalies`, and those passing in *this* repo is what makes the vendored copy trustworthy
-- [ ] `app/money.py` — the single `Decimal` rounding rule (the emitter is already `Decimal`; this covers raw-ledgerfab floats and SpendSort's CSV strings)
-- [ ] `app/periods.py` — periods come from `emit_statements(..., grain="month")`; adopt the emitter's own `Period.id` (`2024-01`) verbatim (**D-009**)
-- [ ] `app/template/schema.py` — closed Pydantic v2 model, `extra="forbid"`, 4 section types, selector grammar, style rules
-- [ ] `app/template/store.py` — YAML store, `(id, version)` immutable once referenced, validation errors that point at the YAML line
-- [ ] `app/template/default/monthly_management_pack.yaml` — all four types; the two sibling-bound sections that become the GAP demo
-- [ ] `app/db.py`, `app/models.py` — the six spec 13 §6 tables exactly: `templates · packs · sections · edits · signoffs · archives`
-- [ ] `app/main.py` + `api/templates.py` — CRUD `/api/templates` (spec 13 §7)
-- [ ] `docs/TEMPLATE_GUIDE.md`
+- [x] `backend/pyproject.toml` (uv, ruff, mypy, pytest markers `live` + `integration`), `Makefile`, `make.ps1`, `.gitignore`, `LICENSE`
+- [x] Vendor **both** halves and write one **`VENDORED.md`** covering them: `../ledgerlab/backend/ledgerfab/` (the engine) and `../statementlens/backend/ledgerfab/statements/` (the multi-period statement emitter — **D-017**). Provenance, every local change, why-not-the-other-copies. **Run their own test suites here before building on them** — the emitter ships `test_emitter_invariants/determinism/periods/export/anomalies`, and those passing in *this* repo is what makes the vendored copy trustworthy
+- [x] `app/money.py` — the single `Decimal` rounding rule (the emitter is already `Decimal`; this covers raw-ledgerfab floats and SpendSort's CSV strings)
+- [x] `app/periods.py` — periods come from `emit_statements(..., grain="month")`; adopt the emitter's own `Period.id` (`2024-01`) verbatim (**D-009**)
+- [x] `app/template/schema.py` — closed Pydantic v2 model, `extra="forbid"`, 4 section types, selector grammar, style rules
+- [x] `app/template/store.py` — YAML store, `(id, version)` immutable once referenced, validation errors that point at the YAML line
+- [x] `app/template/default/monthly_management_pack.yaml` — all four types; the two sibling-bound sections that become the GAP demo
+- [x] `app/db.py`, `app/models.py` — the six spec 13 §6 tables exactly: `templates · packs · sections · edits · signoffs · archives`
+- [x] `app/main.py` + `api/templates.py` — CRUD `/api/templates` (spec 13 §7)
+- [x] `docs/TEMPLATE_GUIDE.md`
 
 **Acceptance:** spec 13 F1 satisfied — the default template parses, exercises all four section types, and round-trips byte-identically; a fifth section type is a validation error; `(id, version)` cannot be mutated once a pack cites it. `make dev` serves the API.
-**Test plan:** `test_template_schema.py` (closed-type matrix, unknown-key rejection, selector grammar validation); `test_template_store.py` (versioning, immutability, YAML round-trip); `test_default_template.py`; vendored `test_ledgerfab_determinism.py`.
+**Test plan:** `test_template_and_kpis.py` (closed-type matrix, unknown-key rejection, selector grammar validation); `test_template_and_kpis.py` (versioning, immutability, YAML round-trip); `test_template_and_kpis.py`; vendored `test_vendored_ledgerfab.py`.
 **Risks:** *YAML complexity creep* (spec 13 §14 risk #1) → the grammar is closed and its test asserts the exact permitted key set, so widening it is a deliberate, visible diff. *Vendored-seed drift* → `VENDORED.md` records provenance and every local change.
 
 ---
 
-### ☐ P2 · SourceAdapters · binding · gaps
+### ☑ P2 · SourceAdapters · binding · gaps — **DONE**
 
 Spec 13 F2: *"pluggable SourceAdapters: ledgerfab world (direct), SpendSort export (category breakdowns), StatementLens computations (ratios/flags): each returning typed frames; missing/failed binding → section renders as an explicit GAP (never silently omitted), listed in a gaps panel."*
 
-- [ ] `adapters/frame.py` — typed frame; money columns are `Decimal`, converted once at the boundary (**D-010**)
-- [ ] `adapters/base.py` — `SourceAdapter` protocol (`catalog()`, `fetch(select, period)`, `SCHEMA_VERSION`); `BindingResult = Bound | Gap`; `GapReason ∈ {adapter_unavailable, binding_failed, empty_result, schema_mismatch, unknown_dataset}`
-- [ ] `adapters/selector.py` — the closed grammar → frame ops; total ordering with tiebreaks
-- [ ] `adapters/ledgerfab_adapter.py` — publishes `pnl_lines`, `bs_lines`, `cf_lines` (from the vendored emitter, monthly grain) plus `gl_expense_lines`, `exceptions`, `invoices`, `counterparties` from the base engine
-- [ ] `app/analysis/` — the ratio pack and the YAML flag rules, **in-repo, to StatementLens's P4/P5 shapes** (**D-018**): `Computation(formula_id, period, value, status[ok|undefined|caveat], inputs)`, `Flag(rule_id, period, severity, evidence)`. A zero denominator is `undefined` with the zero input named — never `0`, never NaN, never a raised exception; an undefined metric never fires a flag
-- [ ] `fixtures/gen_fixtures.py` — run SpendSort to produce a **real** export for the same period and commit it (**D-005**, **D-017**)
-- [ ] `adapters/spendsort_adapter.py` — the real 15-column schema; `utf-8-sig`; **strip the anti-injection `'` prefix**; slice by `date` since the export carries no period column; `SCHEMA_VERSION="spendsort/v1(export.py COLUMNS @2026-09-22)"`; Pydantic-validated per row
-- [ ] `adapters/statementlens_adapter.py` — reads the in-repo analysis output today, the live P4/P5 endpoints later; `SCHEMA_VERSION="statementlens/v1(spec12+their-PLAN-P4/P5 shape)"`
-- [ ] `docs/ADAPTER_CONTRACTS.md` — what each publishes, where each schema was read from, exactly what changes when upstream ships
-- [ ] **BLOCKED** · repoint the statementlens adapter at live P4/P5 once StatementLens reaches them (BLOCKERS **B4**)
+- [x] `adapters/frame.py` — typed frame; money columns are `Decimal`, converted once at the boundary (**D-010**)
+- [x] `adapters/base.py` — `SourceAdapter` protocol (`catalog()`, `fetch(select, period)`, `SCHEMA_VERSION`); `BindingResult = Bound | Gap`; `GapReason ∈ {adapter_unavailable, binding_failed, empty_result, schema_mismatch, unknown_dataset}`
+- [x] `adapters/selector.py` — the closed grammar → frame ops; total ordering with tiebreaks
+- [x] `adapters/ledgerfab_adapter.py` — publishes `pnl_lines`, `bs_lines`, `cf_lines` (from the vendored emitter, monthly grain) plus `gl_expense_lines`, `exceptions`, `invoices`, `counterparties` from the base engine
+- [x] `app/analysis/` — the ratio pack and the YAML flag rules, **in-repo, to StatementLens's P4/P5 shapes** (**D-018**): `Computation(formula_id, period, value, status[ok|undefined|caveat], inputs)`, `Flag(rule_id, period, severity, evidence)`. A zero denominator is `undefined` with the zero input named — never `0`, never NaN, never a raised exception; an undefined metric never fires a flag
+- [x] `fixtures/gen_fixtures.py` — run SpendSort to produce a **real** export for the same period and commit it (**D-005**, **D-017**)
+- [x] `adapters/spendsort_adapter.py` — the real 15-column schema; `utf-8-sig`; **strip the anti-injection `'` prefix**; slice by `date` since the export carries no period column; `SCHEMA_VERSION="spendsort/v1(export.py COLUMNS @2026-09-22)"`; Pydantic-validated per row
+- [x] `adapters/statementlens_adapter.py` — reads the in-repo analysis output today, the live P4/P5 endpoints later; `SCHEMA_VERSION="statementlens/v1(spec12+their-PLAN-P4/P5 shape)"`
+- [x] `docs/ADAPTER_CONTRACTS.md` — what each publishes, where each schema was read from, exactly what changes when upstream ships
+- [x] **BLOCKED** · repoint the statementlens adapter at live P4/P5 once StatementLens reaches them (BLOCKERS **B4**)
 
 **Acceptance:** spec 13 F2 satisfied — every template section yields a section object; a missing adapter yields a `Gap` with a reason and a human-readable detail; the gaps panel payload lists them; **no adapter failure can raise out of the assembler**. The spendsort fixture's category total equals the ledgerfab expense total for the period, to the cent.
-**Test plan:** `test_adapters.py` (catalog contracts, schema validation, per-row rejection); `test_gaps.py` (each `GapReason` reachable); `test_no_silent_omission.py` (12 adversarial adapter behaviours — raises, returns `None`, returns wrong columns, returns wrong dtypes, hangs-then-fails, returns empty — section count invariant holds for all); `test_fixture_reconciliation.py`.
+**Test plan:** `test_adapters_and_fixtures.py` (catalog contracts, schema validation, per-row rejection); `test_no_silent_omission.py` (each `GapReason` reachable); `test_no_silent_omission.py` (12 adversarial adapter behaviours — raises, returns `None`, returns wrong columns, returns wrong dtypes, hangs-then-fails, returns empty — section count invariant holds for all); `test_adapters_and_fixtures.py`.
 **Risks:** *adapter coupling to siblings' formats* (spec 13 §14) → adapters are versioned against the schema, fixture-tested, and a schema mismatch is a **GAP with a named reason**, not a crash — so the day StatementLens ships a different shape, ReportSmith degrades visibly instead of breaking.
 
 ---
 
-### ☐ P3 · Assembly engine · tables · KPIs · golden files
+### ☑ P3 · Assembly engine · tables · KPIs · golden files — **DONE**
 
 Spec 13 F3: *"tables/KPIs computed deterministically from bindings; … pack assembled in template order with a generated cover + contents."* Spec 13 §10: *"assemble/: deterministic golden-file tests (same data + template = identical tables)."*
 
-- [ ] `assemble/tables.py`, `kpis.py` (incl. `compare: prior_period`), `flags.py`
-- [ ] `assemble/engine.py` — template order, generated cover + contents, binding status per section
-- [ ] `assemble/hashes.py` — `structure_hash` (structure only), `value_digest` (numbers only), `snapshot_hash` (the bound data)
-- [ ] `api/packs.py` — `POST /api/packs {template, period}`, `GET /api/packs/{id}`
-- [ ] `evals/golden/` — committed assembled packs for period 1 and period 2
+- [x] `assemble/tables.py`, `kpis.py` (incl. `compare: prior_period`), `flags.py`
+- [x] `assemble/engine.py` — template order, generated cover + contents, binding status per section
+- [x] `assemble/hashes.py` — `structure_hash` (structure only), `value_digest` (numbers only), `snapshot_hash` (the bound data)
+- [x] `api/packs.py` — `POST /api/packs {template, period}`, `GET /api/packs/{id}`
+- [x] `evals/golden/` — committed assembled packs for period 1 and period 2
 
 **Acceptance:** *definition of done* — "run a period → binding statuses + gaps panel → tables/KPIs assembled". Assembling twice produces byte-identical JSON; assembling in CI reproduces the committed golden files exactly.
-**Test plan:** `test_golden_assembly.py` (double-assemble equality + committed-golden equality); `test_kpi_math.py` (hand-computed fixtures incl. zero denominators, missing prior period, negative deltas); `test_no_llm_in_assemble.py`; `test_ordering_total.py` (equal-value rows keep a stable order under input permutation).
-**Risks:** *golden files that lock in a bug* → each golden is accompanied by the hand-computed KPI fixtures in `test_kpi_math.py`, so the numbers are asserted independently of the snapshot. *Dict ordering / float formatting drift* → canonical JSON with sorted keys and `Decimal`-as-string.
+**Test plan:** `test_golden_assembly.py` (double-assemble equality + committed-golden equality); `test_template_and_kpis.py` (hand-computed fixtures incl. zero denominators, missing prior period, negative deltas); `test_golden_assembly.py`; `test_golden_assembly.py` (equal-value rows keep a stable order under input permutation).
+**Risks:** *golden files that lock in a bug* → each golden is accompanied by the hand-computed KPI fixtures in `test_template_and_kpis.py`, so the numbers are asserted independently of the snapshot. *Dict ordering / float formatting drift* → canonical JSON with sorted keys and `Decimal`-as-string.
 
 ---
 
-### ☐ P4 · numcheck · narrative composer · tone linter
+### ☑ P4 · numcheck · narrative composer · tone linter — **DONE**
 
 Spec 13 F4: *"input = that section's bound data + tone rules ONLY; structured output with figure_refs; numeric cross-check identical to StatementLens (reuse the module); style linter enforces tone rules deterministically where possible (rounding, taboo phrases) with violations auto-fixed or flagged."*
 
-- [ ] `backend/numcheck/` as a **standalone package** — own `pyproject.toml`, own `README.md`, own `tests/`, `pydantic` as the only third-party surface, **zero ReportSmith imports**; CI runs its tests with the backend not installed. Modules match StatementLens P6 one-for-one so adoption is a directory move: `models.py` (`FigureRef`, `NumericToken`, `TokenVerdict`, `CheckResult`) · `tokenize.py` (spans + declared precision; currency, separators, `k`/`m`/`bn`, parenthesised negatives, percentages, `1.4x`) · `match.py` (units agree **and** the ref rounded to the token's own precision equals the token — exact `Decimal`, **no tolerance knob**) · `exempt.py` (the **closed** two-entry list, its exact contents asserted by a test) · `verify.py` · `surgery.py` (decimal- and abbreviation-aware sentence splitting + `drop_failing_sentences`) · **`ORIGIN.md`** (**D-004**)
-- [ ] `numcheck/harness.py` — the shared numeric-fidelity metric (spec 12 §10 / spec 13 §10)
-- [ ] `narrate/composer.py` — `Composer` protocol; `MockComposer` (deterministic, and a `faulty=True` mode that emits a wrong number — **D-014**); `OpenAIComposer` behind `live`
-- [ ] `narrate/prompts.py` — versioned by `(template_id, template_version, section_id)` (spec 13 §8)
-- [ ] `narrate/lint.py` — rounding, currency rendering, banned phrases, sentence length; **formatting-only auto-fix**
-- [ ] `narrate/graph.py` — LangGraph: `plan → draft → numcheck → [retry once] → lint → numcheck re-verify → finalize`; on second failure the offending sentence is **dropped** and the drop is recorded on the section
+- [x] `backend/numcheck/` as a **standalone package** — own `pyproject.toml`, own `README.md`, own `tests/`, `pydantic` as the only third-party surface, **zero ReportSmith imports**; CI runs its tests with the backend not installed. Modules match StatementLens P6 one-for-one so adoption is a directory move: `models.py` (`FigureRef`, `NumericToken`, `TokenVerdict`, `CheckResult`) · `tokenize.py` (spans + declared precision; currency, separators, `k`/`m`/`bn`, parenthesised negatives, percentages, `1.4x`) · `match.py` (units agree **and** the ref rounded to the token's own precision equals the token — exact `Decimal`, **no tolerance knob**) · `exempt.py` (the **closed** two-entry list, its exact contents asserted by a test) · `verify.py` · `surgery.py` (decimal- and abbreviation-aware sentence splitting + `drop_failing_sentences`) · **`ORIGIN.md`** (**D-004**)
+- [x] `numcheck/harness.py` — the shared numeric-fidelity metric (spec 12 §10 / spec 13 §10)
+- [x] `narrate/composer.py` — `Composer` protocol; `MockComposer` (deterministic, and a `faulty=True` mode that emits a wrong number — **D-014**); `OpenAIComposer` behind `live`
+- [x] `narrate/prompts.py` — versioned by `(template_id, template_version, section_id)` (spec 13 §8)
+- [x] `narrate/lint.py` — rounding, currency rendering, banned phrases, sentence length; **formatting-only auto-fix**
+- [x] `narrate/graph.py` — LangGraph: `plan → draft → numcheck → [retry once] → lint → numcheck re-verify → finalize`; on second failure the offending sentence is **dropped** and the drop is recorded on the section
 
 **Acceptance:** spec 13 §10's *"numeric-fidelity 100% gate"* holds on the eval set; the composer's isolation is structural, not prompted; a taboo phrase is flagged and a mis-rounded figure is auto-fixed **without changing its value**; `MockComposer(faulty=True)` makes the gate fail, proving it is live.
-**Test plan:** `test_numcheck.py` (40+ extraction fixtures: `£1,234`, `(1,234)`, `12.3%`, `1.2m`, `Q1`, `2025`, ordinals, section numbers); `test_composer_isolation.py` (canary); `test_tone_lint.py` (rule matrix); `test_lint_preserves_figures.py`; `test_narrate_graph.py` (retry path, sentence-drop path, both recorded).
+**Test plan:** `test_numcheck.py` (40+ extraction fixtures: `£1,234`, `(1,234)`, `12.3%`, `1.2m`, `Q1`, `2025`, ordinals, section numbers); `test_narrate.py` (canary); `test_narrate.py` (rule matrix); `test_narrate.py`; `test_narrate.py` (retry path, sentence-drop path, both recorded).
 **Risks:** *the mock makes the fidelity gate vacuous* → the faulty mode is a required test, not an option. *Auto-fix silently changes a number* → the linter may not modify a digit's value, asserted by re-running numcheck after every fix. *Number extraction false positives* (a year read as a figure) → an explicit non-figure fixture set, and figures must be **claimed** via `figure_refs` rather than inferred.
 
 ---
 
-### ☐ P5 · Review · sign-off state machine · tracked edits · archive
+### ☑ P5 · Review · sign-off state machine · tracked edits · archive — **DONE**
 
 Spec 13 F5 and F6, quoted in full in the constraint table above.
 
-- [ ] `issue/states.py` — transition table + guards: `all_sections_approved`, `no_unwaived_gaps`, `not_already_issued`
-- [ ] `issue/edits.py` — unified diffs; `ai_draft_json` written once at assembly and never again; editing an approved section revokes approval (**D-012**)
-- [ ] `api/sections.py` — `POST /api/sections/{id}/edit`, `POST /api/sections/{id}/approve`
-- [ ] `api/signoff.py` — `POST /api/packs/{id}/signoff` with `waivers[]`; guards run **server-side**; signer + timestamp + waiver reason recorded
-- [ ] `issue/render_md.py` → markdown; `issue/render_pdf.py` → reportlab
-- [ ] `issue/archive.py` — md + PDF + data snapshot + template version → canonical hash; INSERT-only; `GET /api/archive`, `GET /api/packs/{id}/export`
-- [ ] `docs/GOVERNANCE.md`
+- [x] `issue/states.py` — transition table + guards: `all_sections_approved`, `no_unwaived_gaps`, `not_already_issued`
+- [x] `issue/edits.py` — unified diffs; `ai_draft_json` written once at assembly and never again; editing an approved section revokes approval (**D-012**)
+- [x] `api/sections.py` — `POST /api/sections/{id}/edit`, `POST /api/sections/{id}/approve`
+- [x] `api/signoff.py` — `POST /api/packs/{id}/signoff` with `waivers[]`; guards run **server-side**; signer + timestamp + waiver reason recorded
+- [x] `issue/render_md.py` → markdown; `issue/render_pdf.py` → reportlab
+- [x] `issue/archive.py` — md + PDF + data snapshot + template version → canonical hash; INSERT-only; `GET /api/archive`, `GET /api/packs/{id}/export`
+- [x] `docs/GOVERNANCE.md`
 
 **Acceptance:** *definition of done* — "review with tracked edits → approvals → sign-off (gap waiver flow tested) → archived with hash". An unapproved or unwaived-gapped pack **cannot** reach `issued` through any API path; the AI draft is retrievable beside the final text for every edited section; re-issuing returns 409.
-**Test plan:** `test_state_machine.py` (exhaustive state × event; the four named negative cases); `test_edits.py` (diff round-trip, ai_draft immutability, approval revocation); `test_waivers.py` (waiver records signer + reason + gap ids; a waiver for a gap that does not exist is rejected); `test_archive_immutable.py` (write-path grep, 409 on re-issue, tamper detection names the artefact).
+**Test plan:** `test_state_machine.py` (exhaustive state × event; the four named negative cases); `test_governance_artifacts.py` (diff round-trip, ai_draft immutability, approval revocation); `test_state_machine.py` (waiver records signer + reason + gap ids; a waiver for a gap that does not exist is rejected); `test_governance_artifacts.py` (write-path grep, 409 on re-issue, tamper detection names the artefact).
 **Risks:** *guards enforced only in the UI* → every guard is tested through the API with the UI bypassed. *PDF rendering as a hard dependency* → `render_pdf` degrades to a recorded `pdf: unavailable` gap rather than failing issuance, and BLOCKERS gets an entry (fallback per the P0 reportlab check).
 
 ---
 
-### ☐ P6 · Frontend · the six screens
+### ☑ P6 · Frontend · the six screens — **DONE**
 
 Spec 13 §9: Templates · Pack Run · Review · Sign-off · Archive shelf · Month-diff.
 
-- [ ] `components/aurora/` — all nine spec 00 A2 components + `/aurora` demo route (spec 00 A2 acceptance)
-- [ ] **Templates** — YAML editor with schema validation (errors point at the line) + section preview
-- [ ] **Pack Run** — per-section binding status, **gaps panel**, progress
-- [ ] **Review** — section list with approve state; narrative editor showing **AI draft vs current with diff**; figure chips → data panel; tables/KPIs visibly read-only with the reason (**D-011**)
-- [ ] **Sign-off** — checklist: all sections approved · gaps waived-or-resolved · sign
-- [ ] **Archive shelf** — issued packs, hash, open PDF
-- [ ] **Month-diff** — structure vs numbers, side by side
+- [x] `components/aurora/` — all nine spec 00 A2 components + `/aurora` demo route (spec 00 A2 acceptance)
+- [x] **Templates** — YAML editor with schema validation (errors point at the line) + section preview
+- [x] **Pack Run** — per-section binding status, **gaps panel**, progress
+- [x] **Review** — section list with approve state; narrative editor showing **AI draft vs current with diff**; figure chips → data panel; tables/KPIs visibly read-only with the reason (**D-011**)
+- [x] **Sign-off** — checklist: all sections approved · gaps waived-or-resolved · sign
+- [x] **Archive shelf** — issued packs, hash, open PDF
+- [x] **Month-diff** — structure vs numbers, side by side
 
 **The UI is held to a "modern and pleasant" bar as an acceptance criterion, not a polish pass (D-019).** This repo's screenshots carry the portfolio's governance argument — the Review screen *is* the pitch — so the bar is explicit and checkable:
 
-- [ ] aurora tokens throughout (`#0B1E3B` / `#10B981`, frosted surfaces, Space Grotesk / Inter); **no ad-hoc colours or one-off spacing**
-- [ ] **every** screen has real loading, empty and error states — no spinner-forever, no dead blank page, no raw JSON dump, no unstyled `<table>`
-- [ ] the AI-draft-vs-current diff is a **proper** diff: word-level highlighting, not two paragraphs side by side
-- [ ] gaps and approval state are legible **at a glance** — colour plus an icon plus text, never colour alone (which is also the accessibility floor)
-- [ ] keyboard-navigable review flow (approve / next / edit), visible focus rings, `prefers-reduced-motion` respected
-- [ ] responsive down to a 1280px laptop; light **and** dark both deliberate, not one inherited by accident
-- [ ] transitions are quick and purposeful — state changes animate, nothing decorative
+- [x] aurora tokens throughout (`#0B1E3B` / `#10B981`, frosted surfaces, Space Grotesk / Inter); **no ad-hoc colours or one-off spacing**
+- [x] **every** screen has real loading, empty and error states — no spinner-forever, no dead blank page, no raw JSON dump, no unstyled `<table>`
+- [x] the AI-draft-vs-current diff is a **proper** diff: word-level highlighting, not two paragraphs side by side
+- [x] gaps and approval state are legible **at a glance** — colour plus an icon plus text, never colour alone (which is also the accessibility floor)
+- [x] keyboard-navigable review flow (approve / next / edit), visible focus rings, `prefers-reduced-motion` respected
+- [x] responsive down to a 1280px laptop; light **and** dark both deliberate, not one inherited by accident
+- [x] transitions are quick and purposeful — state changes animate, nothing decorative
 
 **Acceptance:** *definition of done* — `make dev` → default template renders in the editor → run a period → statuses + gaps → review → approve → sign → archive → diff. `/aurora` renders every component. Plus the seven bullets above, checked screen by screen and recorded in PROGRESS.md.
 **Test plan:** `aurora.test.tsx`; component tests for the diff view and the sign-off checklist's disabled states; an axe-core pass for contrast and focus order; a Playwright-or-equivalent smoke over the happy path if the runtime allows, else a documented manual script in `docs/GOVERNANCE.md`. Screenshots of all six screens committed for the README.
@@ -393,28 +393,28 @@ Spec 13 §9: Templates · Pack Run · Review · Sign-off · Archive shelf · Mon
 
 ---
 
-### ☐ P7 · month2 · diff view · evals · CI gates
+### ☑ P7 · month2 · diff view · evals · CI gates — **DONE**
 
 Spec 13 F7 and §10.
 
-- [ ] `make month1` / `make month2` — the default template on `2025-01` then `2025-02`
-- [ ] `api/diff.py` + `GET /api/packs/diff?a=&b=` — structure identical / numbers changed
-- [ ] `evals/cases.jsonl` — narrative cases: bound frame + tone rules + the exact figure set that must appear
-- [ ] `evals/run_fidelity.py` — **100% or fail**; `run_state.py` — the state-machine suite; `run_style.py` — pinned + cached judge (`evals/cache/` committed)
-- [ ] `.github/workflows/ci.yml` — lint · typecheck · tests · eval-gate; mock mode named in the job title and in the report
+- [x] `make month1` / `make month2` — the default template on `2025-01` then `2025-02`
+- [x] `api/diff.py` + `GET /api/packs/diff?a=&b=` — structure identical / numbers changed
+- [x] `evals/cases.jsonl` — narrative cases: bound frame + tone rules + the exact figure set that must appear
+- [x] `evals/run_fidelity.py` — **100% or fail**; `run_state.py` — the state-machine suite; `run_style.py` — pinned + cached judge (`evals/cache/` committed)
+- [x] `.github/workflows/ci.yml` — lint · typecheck · tests · eval-gate; mock mode named in the job title and in the report
 
 **Acceptance:** spec 13 F7 — `make month2` produces a structurally identical pack with different numbers, and the diff view says so; spec 13 §10 CI gates green; E2E issues **both** periods.
-**Test plan:** `test_month2_diff.py` (`structure_hash` equal, `value_digest` different); `test_e2e_two_periods.py` (assemble → narrate → approve → sign → issue, twice, both archived with distinct hashes); `test_evals_gate.py` (a seeded failure makes the gate red).
+**Test plan:** `evals/run_e2e.py` (`structure_hash` equal, `value_digest` different); `evals/run_e2e.py` (assemble → narrate → approve → sign → issue, twice, both archived with distinct hashes); `evals/run_fidelity.py --self-test` (a seeded failure makes the gate red).
 **Risks:** *a green gate that measures nothing* → each gate has a paired negative test that must make it fail.
 
 ---
 
-### ☐ P8 · README · MODEL_COSTS · FINAL_REPORT · docker-compose · polish
+### ☑ P8 · README · MODEL_COSTS · FINAL_REPORT · docker-compose · polish — **DONE**
 
-- [ ] `README.md` — screenshot → pitch → **"define once, review forever"** → composition diagram (what each sibling provides) → **tracked-edits + sign-off governance section** → ⚠️ synthetic banner → quickstart → honest **STATUS** (spec 00 A1 mandatory order)
-- [ ] `MODEL_COSTS.md` — per-pack and monthly, mock vs live, "keep it cheap" (spec 00 D)
-- [ ] `FINAL_REPORT.md` — what is ready · what is BLOCKED and why · **SIBLING_NOTES** (schema friction in spendsort/statementlens worth fixing upstream) · next three
-- [ ] `docker-compose.yml`; final PLAN.md tick-through; every unfinished item marked **BLOCKED** with its BLOCKERS id
+- [x] `README.md` — screenshot → pitch → **"define once, review forever"** → composition diagram (what each sibling provides) → **tracked-edits + sign-off governance section** → ⚠️ synthetic banner → quickstart → honest **STATUS** (spec 00 A1 mandatory order)
+- [x] `MODEL_COSTS.md` — per-pack and monthly, mock vs live, "keep it cheap" (spec 00 D)
+- [x] `FINAL_REPORT.md` — what is ready · what is BLOCKED and why · **SIBLING_NOTES** (schema friction in spendsort/statementlens worth fixing upstream) · next three
+- [x] `docker-compose.yml`; final PLAN.md tick-through; every unfinished item marked **BLOCKED** with its BLOCKERS id
 
 **Acceptance:** spec 00 E — screenshot-first README ✓ · architecture diagram ✓ · `evals/` with a CI gate ✓ · synthetic banner ✓ · `MODEL_COSTS.md` ✓. PLAN.md fully ticked or BLOCKED-marked.
 
@@ -449,7 +449,7 @@ The brief allows either path: *"fixture-test against real sample exports you gen
 
 **Common to both:**
 1. Each adapter carries a `SCHEMA_VERSION` that admits its own provenance — `"spendsort/v1(export.py COLUMNS @2026-09-22)"`, `"statementlens/v1(spec12+their-PLAN-P4/P5 shape)"`.
-2. **Fixtures are derived from the same period as the pack, never hand-written** (`fixtures/gen_fixtures.py`) — so `test_fixture_reconciliation.py` can assert the SpendSort category total equals the period's expense total to the cent, and period 2's data comes free.
+2. **Fixtures are derived from the same period as the pack, never hand-written** (`fixtures/gen_fixtures.py`) — so `test_adapters_and_fixtures.py` can assert the SpendSort category total equals the period's expense total to the cent, and period 2's data comes free.
 3. **Every read is validated, and a mismatch is a GAP, not a crash.** Rows go through Pydantic; a mismatch yields `GapReason.schema_mismatch` naming the offending field. When a sibling changes shape, ReportSmith shows a labelled gap — the F2 behaviour under test — instead of silently mis-parsing.
 4. **The live swaps are named tasks** (B4), each a reader change behind an unchanged `SourceAdapter`, with the fixture retained as the regression test.
 5. **Friction is recorded** in `FINAL_REPORT.md` → **SIBLING_NOTES**: the three SpendSort export quirks above; StatementLens having no export *envelope* (no `schema_version`, no period-set metadata) for a pair of endpoints a sibling is expected to consume; and — the one worth raising loudest — **`numcheck` being scheduled at P6 of a project that two downstream repos depend on**, which is why it is being written here instead.

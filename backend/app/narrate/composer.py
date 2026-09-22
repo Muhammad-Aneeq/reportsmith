@@ -82,7 +82,8 @@ class MockComposer:
 
         lead = ranked[0]
         sentences = [
-            f"For {request.period}, {lead.label.lower()} was {display.get(lead.ref_id, lead.value)}."
+            f"For {request.period}, {lead.label.lower()} was "
+            f"{display.get(lead.ref_id, lead.value)}."
         ]
         for ref in ranked[1:3]:
             sentences.append(

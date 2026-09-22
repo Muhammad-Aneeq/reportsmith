@@ -73,7 +73,7 @@ ignore = [
 # Carried over from ../statementlens with its reasoning intact: these characters are
 # input the code must recognise (a spreadsheet's nil cell, a no-break thousands
 # separator) or are load-bearing in prose a reviewer is meant to read.
-allowed-confusables = ["−", "×", "≈", "→", "–", "—", " "]
+allowed-confusables = ["−", "×", "≈", "→", "–", "—", " "]
 
 [tool.ruff.lint.per-file-ignores]
 "app/cli.py" = ["T20"]
@@ -128,7 +128,9 @@ ignore_missing_imports = true
 # ------------------------------------------------------------------- pytest --
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# Both, so `make test` covers the application and the standalone package in one
+# command — while numcheck/tests stays runnable on its own after the lift.
+testpaths = ["tests", "numcheck/tests"]
 # Only the backend root. `numcheck` is imported package-qualified (`numcheck.tokens`)
 # and its own directory is deliberately NOT on the path — putting it there makes its
 # modules shadow same-named stdlib modules. See numcheck/ORIGIN.md.

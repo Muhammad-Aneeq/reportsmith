@@ -6,6 +6,7 @@ import inspect
 from decimal import Decimal
 
 import pytest
+
 from app.assemble.engine import assemble
 from app.narrate.composer import DraftRequest, MockComposer
 from app.narrate.graph import compose_section
@@ -16,10 +17,7 @@ from numcheck import FigureRef, verify
 
 def _narrative(template, period, adapters):
     pack = assemble(template, period, adapters)
-    section = next(
-        s for s in pack.sections
-        if s.type == "narrative" and not s.has_gap
-    )
+    section = next(s for s in pack.sections if s.type == "narrative" and not s.has_gap)
     spec = template.section(section.section_key)
     assert isinstance(spec, NarrativeSection)
     return spec, section
@@ -41,15 +39,24 @@ def test_the_prompt_contains_nothing_but_the_section(template, period, adapters)
 
     spec, section = _narrative(template, period, adapters)
     refs = [
-        FigureRef(ref_id=r["ref_id"], value=Decimal(str(r["value"])),
-                  unit=r.get("unit", "bare"), label=r.get("label", ""))
+        FigureRef(
+            ref_id=r["ref_id"],
+            value=Decimal(str(r["value"])),
+            unit=r.get("unit", "bare"),
+            label=r.get("label", ""),
+        )
         for r in section.content_json["figure_refs"]
     ]
     request = DraftRequest(
-        section_key=spec.id, title=spec.title, period=period, figure_refs=refs,
+        section_key=spec.id,
+        title=spec.title,
+        period=period,
+        figure_refs=refs,
         display_by_ref={r["ref_id"]: r["display"] for r in section.content_json["figure_refs"]},
-        tone_rules=list(spec.tone_rules), style=template.style,
-        max_words=spec.max_words, prompt_version="test",
+        tone_rules=list(spec.tone_rules),
+        style=template.style,
+        max_words=spec.max_words,
+        prompt_version="test",
     )
     system, human = build_messages(request)
     combined = system + human

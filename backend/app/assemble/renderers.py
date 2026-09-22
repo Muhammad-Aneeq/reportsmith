@@ -132,7 +132,11 @@ def render_kpi_grid(section: KpiGridSection, frame: Frame, style: PackStyle) -> 
                 "prior_value": str(prior) if isinstance(prior, Decimal) else prior,
                 "prior_display": format_value(prior, spec.format, style),
                 "delta_pct": str(delta_pct) if isinstance(delta_pct, Decimal) else None,
-                "delta_display": format_delta(delta_pct, style) if spec.compare != "none" else "",
+                "delta_display": (
+                    format_delta(delta_pct if isinstance(delta_pct, Decimal) else None, style)
+                    if spec.compare != "none"
+                    else ""
+                ),
                 "direction": direction,
                 "sentiment": sentiment,
                 "format": spec.format,
@@ -158,7 +162,9 @@ def render_flags(section: FlagsSection, frame: Frame, style: PackStyle) -> dict[
             "message": str(row.get("message") or ""),
             "evidence": row.get("evidence"),
             "amount_display": (
-                format_value(row["amount"], "money", style) if row.get("amount") is not None else None
+                format_value(row["amount"], "money", style)
+                if row.get("amount") is not None
+                else None
             ),
             "reference": row.get("txn_id") or row.get("counterparty"),
         }
@@ -166,7 +172,8 @@ def render_flags(section: FlagsSection, frame: Frame, style: PackStyle) -> dict[
     ]
     counts: dict[str, int] = {}
     for item in items:
-        counts[item["severity"]] = counts.get(item["severity"], 0) + 1
+        severity = str(item["severity"])
+        counts[severity] = counts.get(severity, 0) + 1
     return {
         "items": items,
         "counts": counts,
@@ -193,9 +200,7 @@ def build_figure_refs(
     )
 
     numeric_fields = [
-        f
-        for f in frame.columns
-        if any(isinstance(row.get(f), Decimal) for row in frame.rows)
+        f for f in frame.columns if any(isinstance(row.get(f), Decimal) for row in frame.rows)
     ]
 
     for index, row in enumerate(frame.rows):
@@ -217,7 +222,11 @@ def build_figure_refs(
                     "label": _ref_label(label, field_name),
                     "value": str(value),
                     "display": format_value(value, fmt, style),
-                    "unit": "percent" if fmt == "percent" else "money" if fmt == "money" else "count",
+                    "unit": "percent"
+                    if fmt == "percent"
+                    else "money"
+                    if fmt == "money"
+                    else "count",
                 }
             )
     return refs

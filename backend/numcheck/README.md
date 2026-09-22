@@ -9,10 +9,10 @@ from numcheck import FigureRef, verify, drop_failing_sentences
 
 refs = [FigureRef(ref_id="rev", value=Decimal("3815070.61"), unit="money", label="Revenue")]
 
-verify("Revenue was £3.8m.", refs).ok          # True  — 3.8m, to the 1 dp the author wrote
-verify("Revenue was £3,815,071.", refs).ok     # True  — same figure, more precisely stated
-verify("Revenue was £3.9m.", refs).ok          # False — no supplied figure supports it
-verify("Margin was 3.8%.", refs).ok            # False — right digits, wrong unit
+verify("Revenue was £3.8m.", refs).ok  # True  — 3.8m, to the 1 dp the author wrote
+verify("Revenue was £3,815,071.", refs).ok  # True  — same figure, more precisely stated
+verify("Revenue was £3.9m.", refs).ok  # False — no supplied figure supports it
+verify("Margin was 3.8%.", refs).ok  # False — right digits, wrong unit
 ```
 
 When a draft fails, remove the offending sentence rather than the draft:
@@ -41,9 +41,10 @@ that conflation is the hole most worth keeping shut.
 
 ```python
 from numcheck import score
+
 report = score([(key, text, refs, periods), ...])
-report.summary()        # "PASS numeric-fidelity 100.00% (34/34 figures across 3 section(s))"
-report.passed()         # 100% AND at least one figure actually checked
+report.summary()  # "PASS numeric-fidelity 100.00% (34/34 figures across 3 section(s))"
+report.passed()  # 100% AND at least one figure actually checked
 ```
 
 `passed()` requires both, so a composer cannot score 100% by writing nothing.

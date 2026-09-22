@@ -23,15 +23,13 @@ _LINE_DELTAS = {
 def figures_for(period: str, profile: str, seed: int) -> dict[str, Decimal | None]:
     """Every statement line for a period, as line_code → amount."""
     st = statements_for(profile, seed)
-    return {
-        line.line_code: to_money(line.amount)
-        for line in st.lines
-        if line.period_id == period
-    }
+    return {line.line_code: to_money(line.amount) for line in st.lines if line.period_id == period}
 
 
 @lru_cache(maxsize=32)
-def analyse(period: str, profile: str, seed: int) -> tuple[tuple[Computation, ...], tuple[Flag, ...]]:
+def analyse(
+    period: str, profile: str, seed: int
+) -> tuple[tuple[Computation, ...], tuple[Flag, ...]]:
     """The ratio pack and the flags for one period.
 
     Cached on the same reasoning as the statement set: pure function of seeded inputs.
@@ -49,9 +47,7 @@ def analyse(period: str, profile: str, seed: int) -> tuple[tuple[Computation, ..
     deltas: dict[str, Decimal | None] = {}
     for comp in computations:
         prior = prior_by_id.get(comp.formula_id)
-        deltas[comp.formula_id] = (
-            pct_change(comp.value, prior.value) if prior is not None else None
-        )
+        deltas[comp.formula_id] = pct_change(comp.value, prior.value) if prior is not None else None
     for alias, line_code in _LINE_DELTAS.items():
         deltas[alias] = pct_change(figures.get(line_code), prior_figures.get(line_code))
 

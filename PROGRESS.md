@@ -50,3 +50,93 @@ The user pushed back: *"no spendsort and statementlens has code working."* They 
 **Also added:** the UI is now held to an explicit *modern and pleasant* bar as a P6 acceptance criterion rather than a polish pass (**D-019**) — real empty/loading/error states on every screen, a word-level draft-vs-current diff, glanceable approval and gap state, keyboard-navigable review, light and dark both deliberate. This repo's screenshots carry the governance argument, so the Review screen is the pitch.
 
 Still no application code. PLAN.md, BLOCKERS.md and this file now say what is actually on disk.
+
+---
+
+## P1–P8 · built — **DONE**
+
+`make demo` runs the product end to end. 377 backend tests, 38 frontend tests, lint clean,
+mypy strict clean, all three eval gates green, golden files unchanged.
+
+### What the seed gave, and what it cost
+
+Vendoring `../statementlens/backend/ledgerfab/` brought the engine **and** the statement
+emitter in one move, byte-identical, with its own 169 tests running here before anything was
+built on top. Those tests are the reason the copy is trustworthy rather than merely present —
+including the strong one, where the operating cash-flow section rebuilt from cash postings
+must equal the indirect build-up from the statements. Two independent routes, same number.
+
+The cost was one honest fork: the vendored manifest test excluded `statements/`, commented
+*"THIS project's extension, not vendored code."* True upstream, false here. Left alone it
+would have put the code every figure comes from outside the drift check — so the exclusion is
+removed, marked `LOCAL CHANGE`, and explained in `VENDORED.md`. That assumption being true in
+exactly one repo is also the argument for the emitter graduating into the shared engine, which
+is now SIBLING_NOTES #7.
+
+### The SpendSort fixture took three attempts, and the third is the interesting one
+
+The brief prefers *"real sample exports you generate from them if runnable."* SpendSort is
+runnable, so:
+
+1. **Import it and call its services.** Failed immediately — both repos name their package
+   `app`, so importing SpendSort permanently shadows ours. Moved to a subprocess, which also
+   means it runs against *its own* installed dependencies, which is what "we ran the real
+   thing" has to mean.
+2. **Feed it our GL lines.** It ran, and every row came back blank and queued. Its
+   `MockCategorizer` matches a fixed table of consumer and SaaS descriptors — Amazon, Uber,
+   Zoom — and the shared engine's counterparties are synthetic B2B names. Two portfolio
+   projects on the same data engine could not be composed offline.
+3. **Use the product as designed.** SpendSort's signature feature is memory-first: a mapping
+   a human has confirmed bypasses the model entirely. The GL already records which account
+   each vendor's invoices were booked to — that *is* the trained state. Seeding
+   `vendor_memory` from it, and passing a chart of accounts built from the same world (its
+   `6000` is *Advertising & Marketing*; the shared engine's is *Professional fees*), gives
+   100% memory-hit, **zero LLM calls**, deterministic output that reconciles to the pack's
+   expense total to the cent.
+
+The third attempt is the one worth keeping, because the property it produces — the category
+table adding up to the P&L cost line — is the one that still matters after the fixture is
+replaced by live data.
+
+### Four bugs the test suite caught that review would not have
+
+- Signing an already-issued pack surfaced as a **SQLite UNIQUE violation**: the signoff row
+  was inserted before the transition guard ran, so a database constraint was standing in for a
+  governance decision.
+- `edit_section` returned a **stale edits collection** under `expire_on_commit=False`, so a
+  section reported zero edits immediately after recording one — and the edit history is the
+  feature.
+- The no-recommendations lint rule matched **one exact phrase** and silently did nothing for
+  the shipped pack's actual wording. A rule that quietly never fires is worse than no rule.
+- Per-test archive isolation: pack ids restart at 1, so a shared archive directory made the
+  second test collide with the first — and the collision *looked like the immutability guard
+  working*.
+
+### numcheck: one rename, verified liftable
+
+`numcheck/tokenize.py` shadows the stdlib `tokenize`, which `linecache` imports, which
+`inspect` imports — crashing at import with `partially initialized module 'inspect' has no
+attribute 'signature'`. StatementLens's P6 design specifies that filename and its current
+`pythonpath` would trigger it. Renamed to `tokens.py`, and a test now asserts no module in the
+package collides with `sys.stdlib_module_names`.
+
+The lift was then **tested rather than claimed**: the package was copied into an empty
+directory with no ReportSmith code present, and its 46 tests run from the parent with only
+`pydantic` and `pytest` installed. CI does the same on every push.
+
+### The UI bar
+
+Held as an acceptance criterion rather than a polish pass (**D-019**): real loading, empty and
+error states on every screen; the AI-draft diff is word-level because a line diff on a
+one-paragraph section shows a reviewer nothing; status is colour **plus** icon **plus** text
+everywhere; `j`/`k`/`a`/`e` drive the review without a mouse; both themes are designed rather
+than one inherited. Thirteen component tests hold the claims that would otherwise quietly rot
+— including that a "verified" badge refuses to claim a pass when nothing was checked.
+
+### Not done
+
+- **Demo video** — the only outstanding launch requirement (spec 00 E).
+- **The live model path** — implemented and `live`-marked, never run. No API key was used, so
+  "it works with a real model" is an argument this repo makes but does not evidence.
+- **Browser-driven UI verification** — the Chrome extension was not connected, so the screens
+  were verified through the API and a manual script is written up in `docs/GOVERNANCE.md`.

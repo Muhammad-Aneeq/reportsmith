@@ -23,6 +23,11 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# Not typography — these are characters the tokenizer must RECOGNISE. A real minus sign,
+# a no-break thousands separator and a multiplication sign all appear in prose a model
+# writes and in figures a spreadsheet emits. Refusing to name them would mean refusing to
+# parse them.
+allowed-confusables = ["−", "×", "–", "—", " "]
 
 [tool.mypy]
 python_version = "3.12"

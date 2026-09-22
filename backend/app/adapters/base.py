@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from app.adapters.frame import Frame
 from app.template.schema import Selector
@@ -119,7 +119,7 @@ def resolve_binding(
 
     try:
         catalog = adapter.catalog()
-    except Exception as exc:  # noqa: BLE001 — an adapter that cannot list is unavailable
+    except Exception as exc:
         return Gap(
             reason=GapReason.ADAPTER_UNAVAILABLE,
             detail=f"{selector.source} could not list its datasets: {exc}",
@@ -138,6 +138,7 @@ def resolve_binding(
             dataset=selector.select,
         )
 
+    frame: Any
     try:
         frame = adapter.fetch(selector.select, period)
     except SchemaMismatch as exc:
@@ -147,7 +148,7 @@ def resolve_binding(
             source=selector.source,
             dataset=selector.select,
         )
-    except Exception as exc:  # noqa: BLE001 — see module docstring; this is the point
+    except Exception as exc:
         return Gap(
             reason=GapReason.BINDING_FAILED,
             detail=f"{type(exc).__name__}: {exc}",
@@ -155,6 +156,10 @@ def resolve_binding(
             dataset=selector.select,
         )
 
+    # `fetch` is *declared* to return a Frame, but an adapter is code this module does
+    # not control and the whole contract here is that no adapter behaviour escapes as an
+    # exception. `frame` is therefore held as Any at this boundary, which keeps the
+    # runtime check honest instead of letting the annotation argue it away.
     if not isinstance(frame, Frame):
         # An adapter that returns None or a list is a programming error, but it must
         # still surface as a gap rather than an AttributeError three layers up.
@@ -177,7 +182,7 @@ def resolve_binding(
             source=selector.source,
             dataset=selector.select,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return Gap(
             reason=GapReason.BINDING_FAILED,
             detail=f"selector failed: {type(exc).__name__}: {exc}",

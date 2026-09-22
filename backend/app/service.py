@@ -52,11 +52,14 @@ def template_is_locked(db: Session, row: TemplateRow) -> bool:
     If so it is frozen: re-running it must reproduce what the archive attests to, and a
     version that can change after the fact makes `template_version` decorative.
     """
-    return db.scalar(
-        select(PackRow).where(
-            PackRow.template_id == row.template_id, PackRow.template_version == row.version
-        ).limit(1)
-    ) is not None
+    return (
+        db.scalar(
+            select(PackRow)
+            .where(PackRow.template_id == row.template_id, PackRow.template_version == row.version)
+            .limit(1)
+        )
+        is not None
+    )
 
 
 def save_template(db: Session, yaml_text: str) -> TemplateRow:
@@ -204,9 +207,7 @@ def get_pack(db: Session, pack_id: int) -> PackRow:
 
 
 def pack_view(db: Session, pack: PackRow) -> PackView:
-    waived = {
-        w["section_key"] for w in (pack.signoff.waivers_json if pack.signoff else [])
-    }
+    waived = {w["section_key"] for w in (pack.signoff.waivers_json if pack.signoff else [])}
     return PackView(
         status=Status(pack.status),
         sections=[
@@ -436,8 +437,12 @@ def signoff(
             # which is exactly what the waiver mechanism exists to rule out.
             raise ServiceError(f"a waiver for {key!r} needs a reason")
         recorded.append(
-            {"section_key": key, "reason": reason, "signer": signer,
-             "at": datetime.now(UTC).isoformat()}
+            {
+                "section_key": key,
+                "reason": reason,
+                "signer": signer,
+                "at": datetime.now(UTC).isoformat(),
+            }
         )
 
     # Persist the waivers before the guard runs, because the guard reads them.

@@ -1,0 +1,126 @@
+# CI — lint · typecheck · tests · the eval gate (spec 00 A1).
+#
+# Everything runs in MOCK mode: no OPENAI_API_KEY, no spend, no network. That is stated in
+# the job names as well as here, so a green badge cannot be mistaken for evidence that a
+# real model was exercised.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  REPORTSMITH_LLM: mock
+
+jobs:
+  backend:
+    name: backend · lint, typecheck, tests (mock LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        working-directory: backend
+        run: uv venv && uv pip install -e ".[dev]"
+
+      - name: Lint
+        working-directory: backend
+        run: |
+          .venv/bin/python -m ruff check app tests
+          .venv/bin/python -m ruff check numcheck
+
+      - name: Typecheck
+        working-directory: backend
+        run: .venv/bin/python -m mypy app
+
+      - name: Tests
+        working-directory: backend
+        run: .venv/bin/python -m pytest -q -m "not live"
+
+  numcheck-standalone:
+    name: numcheck · its own tests, with the application NOT installed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # The point of this job: numcheck must be liftable into StatementLens as a directory
+      # move (numcheck/ORIGIN.md). Installing only its own dependencies is what proves the
+      # one-way dependency actually holds.
+      - name: Install numcheck alone
+        run: pip install "pydantic>=2.13,<3.0" pytest
+      # Copied out of the repo entirely, so nothing on the path can satisfy an accidental
+      # import of the application. This is the lift procedure in numcheck/ORIGIN.md, run
+      # for real on every push.
+      - name: Lift it out and run its suite alone
+        run: |
+          mkdir -p /tmp/lift && cp -r backend/numcheck /tmp/lift/numcheck
+          cd /tmp/lift && python -m pytest numcheck/tests -q
+
+  frontend:
+    name: frontend · typecheck, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm run typecheck
+      - working-directory: frontend
+        run: npm run test
+      - working-directory: frontend
+        run: npm run build
+
+  eval-gate:
+    name: eval gate · numeric fidelity, state machine, E2E (mock LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - working-directory: backend
+        run: uv venv && uv pip install -e ".[dev]"
+
+      - name: Numeric fidelity — 100% or fail
+        run: backend/.venv/bin/python evals/run_fidelity.py
+
+      # The gate has to be seen failing before a green one means anything. This runs the
+      # deliberately faulty composer and REQUIRES the cross-check to fire (PLAN.md D-014).
+      - name: Gate self-test — the faulty composer must be caught
+        run: backend/.venv/bin/python evals/run_fidelity.py --self-test
+
+      - name: State machine — cannot issue unapproved or gapped packs
+        working-directory: backend
+        run: .venv/bin/python -m pytest -q tests/test_state_machine.py tests/test_no_silent_omission.py
+
+      - name: E2E — two periods, both issued, diff correct
+        run: backend/.venv/bin/python evals/run_e2e.py
+
+      - name: Golden files unchanged
+        run: |
+          backend/.venv/bin/python evals/make_golden.py
+          git diff --exit-code evals/golden/ || {
+            echo "::error::Assembly output drifted from the committed golden files."
+            echo "If the change is intended, run 'make golden' and commit the diff."
+            exit 1
+          }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: evals/results/

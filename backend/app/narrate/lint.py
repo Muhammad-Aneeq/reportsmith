@@ -59,7 +59,9 @@ _SPACE_BEFORE_PUNCT = re.compile(r"\s+([,.;:%])")
 _RECOMMENDATION_BAN = re.compile(r"(no|not|never|avoid)[^.]{0,24}?recommend", re.I)
 
 
-def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tuple[str, list[Violation]]:
+def lint(
+    text: str, style: PackStyle, tone_rules: list[str] | None = None
+) -> tuple[str, list[Violation]]:
     """Return (possibly-fixed text, violations).
 
     Fixes applied here are recorded with ``fixed=True`` so the Review screen can show the
@@ -71,6 +73,7 @@ def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tu
 
     # -- auto-fixable: presentation only ------------------------------------
     if style.currency.negative == "parens":
+
         def _parenthesise(match: re.Match[str]) -> str:
             return f"({match.group(1)})"
 
@@ -80,7 +83,10 @@ def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tu
                 Violation(
                     rule="currency.negative",
                     severity="warning",
-                    message=f"rendered {count} negative amount(s) in parentheses, per the pack style",
+                    message=(
+                        f"rendered {count} negative amount(s) in parentheses, "
+                        f"per the pack style"
+                    ),
                     excerpt="",
                     fixed=True,
                 )
@@ -137,13 +143,21 @@ def lint(text: str, style: PackStyle, tone_rules: list[str] | None = None) -> tu
     # recommend, forecast, or speculate"; an earlier exact-string check silently did
     # nothing for it, which is the worst outcome for a rule of this kind.
     if _RECOMMENDATION_BAN.search(style.voice):
-        for pattern in (r"\bshould\b", r"\bmust\b", r"\brecommend(?:ed|s|ation)?\b", r"\bwe suggest\b"):
+        for pattern in (
+            r"\bshould\b",
+            r"\bmust\b",
+            r"\brecommend(?:ed|s|ation)?\b",
+            r"\bwe suggest\b",
+        ):
             for match in re.finditer(pattern, lowered):
                 violations.append(
                     Violation(
                         rule="voice.no_recommendations",
                         severity="error",
-                        message="this pack's voice forbids recommendations; state what the figures show",
+                        message=(
+                            "this pack's voice forbids recommendations; "
+                            "state what the figures show"
+                        ),
                         excerpt=out[max(0, match.start() - 30) : match.end() + 30].strip(),
                     )
                 )

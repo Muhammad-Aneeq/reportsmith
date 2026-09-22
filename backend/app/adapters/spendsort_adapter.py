@@ -33,8 +33,21 @@ from app.settings import settings
 
 # Exactly the tuple in SpendSort's services/export.py, as of the date in SCHEMA_VERSION.
 EXPECTED_COLUMNS = (
-    "date", "vendor_raw", "vendor_norm", "amount", "currency", "account", "account_name",
-    "confidence", "source", "reason", "status", "learned", "coa_valid", "cost_usd", "memo",
+    "date",
+    "vendor_raw",
+    "vendor_norm",
+    "amount",
+    "currency",
+    "account",
+    "account_name",
+    "confidence",
+    "source",
+    "reason",
+    "status",
+    "learned",
+    "coa_valid",
+    "cost_usd",
+    "memo",
 )
 
 # SpendSort's own `_DANGEROUS_PREFIXES`; a cell starting with one of these was quoted.
@@ -137,8 +150,14 @@ class SpendSortAdapter:
         out: list[dict[str, Value]] = []
         for account, members in groups.items():
             decided = [m for m in members if m["decided"]]
-            amount = sum((m["amount"] for m in decided), Decimal(0))  # type: ignore[misc]
-            confidences = [m["confidence"] for m in decided if m["confidence"] is not None]
+            # Narrowed explicitly rather than ignored: these columns are built by _read
+            # above and are always Decimal, but the Frame value type cannot say so, and
+            # an ignore here would also hide a genuine future change to that builder.
+            amounts = [m["amount"] for m in decided if isinstance(m["amount"], Decimal)]
+            amount = sum(amounts, Decimal(0))
+            confidences = [
+                m["confidence"] for m in decided if isinstance(m["confidence"], Decimal)
+            ]
             out.append(
                 {
                     "account": account,
@@ -146,11 +165,9 @@ class SpendSortAdapter:
                     "amount": amount,
                     "txn_count": len(decided),
                     "queued_count": len(members) - len(decided),
-                    "auto_rate": quantize(
-                        Decimal(len(decided)) / Decimal(len(members)) * 100, 4
-                    ),
+                    "auto_rate": quantize(Decimal(len(decided)) / Decimal(len(members)) * 100, 4),
                     "avg_confidence": (
-                        quantize(sum(confidences, Decimal(0)) / Decimal(len(confidences)), 4)  # type: ignore[arg-type]
+                        quantize(sum(confidences, Decimal(0)) / Decimal(len(confidences)), 4)
                         if confidences
                         else None
                     ),
@@ -159,8 +176,13 @@ class SpendSortAdapter:
         return frame_from_dicts(
             out,
             columns=(
-                "account", "account_name", "amount", "txn_count",
-                "queued_count", "auto_rate", "avg_confidence",
+                "account",
+                "account_name",
+                "amount",
+                "txn_count",
+                "queued_count",
+                "auto_rate",
+                "avg_confidence",
             ),
             source=self.name,
             dataset="categories",
@@ -172,8 +194,10 @@ class SpendSortAdapter:
         rows = self._read(period)
         return frame_from_dicts(
             rows,
-            source=self.name, dataset="transactions",
-            schema_version=self.SCHEMA_VERSION, meta={"period": period},
+            source=self.name,
+            dataset="transactions",
+            schema_version=self.SCHEMA_VERSION,
+            meta={"period": period},
         )
 
     def _review_queue(self, period: str) -> Frame:
@@ -182,11 +206,19 @@ class SpendSortAdapter:
         return frame_from_dicts(
             rows,
             columns=(
-                "date", "vendor_raw", "amount", "account",
-                "account_name", "confidence", "reason", "status",
+                "date",
+                "vendor_raw",
+                "amount",
+                "account",
+                "account_name",
+                "confidence",
+                "reason",
+                "status",
             ),
-            source=self.name, dataset="review_queue",
-            schema_version=self.SCHEMA_VERSION, meta={"period": period},
+            source=self.name,
+            dataset="review_queue",
+            schema_version=self.SCHEMA_VERSION,
+            meta={"period": period},
         )
 
     def fetch(self, dataset: str, period: str) -> Frame:
