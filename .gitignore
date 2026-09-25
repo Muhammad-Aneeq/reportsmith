@@ -23,3 +23,11 @@ archive/
 docs/demo.webm
 docs/screenshots/
 frontend/.video-tmp/
+
+# Generated demo media. Regenerable with `make capture` / `make record`, and a
+# multi-megabyte binary in git is weight every future clone pays for. The one
+# exception is docs/screenshot-review.png — the README hero, which spec 00 A1
+# requires and which is kept small deliberately.
+docs/demo.webm
+docs/screenshots/
+frontend/.video-tmp/
