@@ -95,7 +95,7 @@ SHA-256 (first 12 hex) of every vendored `.py`. `tests/test_vendored_ledgerfab.p
 2FF4617F77CE  __init__.py
 6A1F1C42AEFE  __main__.py
 EE0162A70281  cli.py
-A83120B6BA93  export.py
+BE1982E6A764  export.py
 8482EA7B8011  generators/__init__.py
 D02D5088CABF  generators/accruals.py
 70484036A6A8  generators/companies.py

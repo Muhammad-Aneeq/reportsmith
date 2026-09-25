@@ -1,0 +1,36 @@
+# Line endings are LF everywhere — in the repository AND in the working tree, on every
+# platform.
+#
+# This is not a style preference. Two things in this repo hash file *bytes*:
+#
+#   1. `ledgerfab/VENDORED.md` carries a SHA-256 manifest of every vendored file, and
+#      `test_vendored_ledgerfab.py` recomputes it to prove the fork surface is still zero.
+#   2. `evals/golden/` holds byte-compared snapshots of assembled packs.
+#
+# Without this file, git checks the same commit out as CRLF on Windows and LF on Linux, so
+# those hashes differ by platform and the tests fail on a machine where nothing is wrong.
+# That is exactly what happened: CI went red on `export.py` while the identical commit was
+# green locally. A cross-platform hash has to be over cross-platform bytes.
+*               text=auto eol=lf
+
+# Binary, so git must never touch them.
+*.png           binary
+*.jpg           binary
+*.webm          binary
+*.mp4           binary
+*.pdf           binary
+*.ico           binary
+*.woff          binary
+*.woff2         binary
+
+# `.env` is never committed (see .gitignore) but mark it anyway, so a stray
+# `git add -f` cannot mangle a key that happens to contain a CR.
+.env            -text
+
+# Generated and vendored files are excluded from GitHub's language stats and diffs, so the
+# repo's language breakdown reflects what was actually written here rather than what was
+# copied in. `linguist-vendored` keeps them reviewable; it does not hide them.
+backend/ledgerfab/**    linguist-vendored
+evals/golden/*.json     linguist-generated
+fixtures/spendsort/*.csv linguist-generated
+frontend/package-lock.json linguist-generated
