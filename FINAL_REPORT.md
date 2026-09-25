@@ -32,7 +32,7 @@ Against the definition of done, item by item:
 | CI gates green, mock mode marked | ✅ named in the job titles |
 | README, MODEL_COSTS, PLAN ticked | ✅ |
 | Screens verified headless, both themes | ✅ `make capture` |
-| Demo video | ✅ `docs/demo.webm`, 60s, recorded from the real app (`make record`) |
+| Demo video | ✅ reproducible — `make record`, 60s, driven through the real app. Not committed (binary) |
 
 ---
 
@@ -88,7 +88,7 @@ reading about it, which is the same lesson applied.
 | **B4 · StatementLens P4/P5** | Its computations and flags are not built upstream (it is at P3 of P11). Computed in-repo to its own PLAN's shapes, so the swap is one reader change. |
 | **B4 · `numcheck` upstream** | It belongs in StatementLens (its P6) and is written here because that phase has not arrived. If upstream writes its own, spec 13 §10's *"shared harness with Spec 12"* stops being true and one of the two has to go. |
 | **Live LLM** | ✅ **Closed.** Run against `gpt-5.6-luna`: 87/87 figures verified, one retry in twelve drafts. Evidence committed. |
-| **Demo video** | ✅ **Closed.** `docs/demo.webm` — 60 seconds, VP8, recorded by driving the real app end to end. Un-narrated; `docs/DEMO_SCRIPT.md` is the voiceover script, timed to it. |
+| **Demo video** | ✅ **Closed.** `make record` produces a 60-second VP8 capture by driving the real app end to end — verified as a real run (pack issued, 11/11 approved, 3 waivers, a 19-op tracked diff). Not committed: ~6 MB that regenerates in a minute. `docs/DEMO_SCRIPT.md` is the voiceover script, timed to it. |
 | **Browser automation** | The Chrome extension never connected (B6). Resolved with headless Playwright, which turned out better — it **asserts** rather than photographs, and caught three real defects. |
 
 ---

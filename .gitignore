@@ -15,3 +15,11 @@ archive/
 
 # Never commit a real key.
 .env
+
+# Generated demo artefacts. Reproducible in one command each — `make record` and
+# `make capture` — so versioning ~12 MB of binaries would trade a permanent cost in every
+# clone for something a contributor can regenerate in under a minute. The README hero is
+# the one exception: a screenshot-first README (spec 00 A1) has to work on GitHub.
+docs/demo.webm
+docs/screenshots/
+frontend/.video-tmp/

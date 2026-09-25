@@ -13,7 +13,7 @@ cd backend && python -m app.cli demo                              # packs 1 and 
 cd backend && python -m app.cli month1 --period 2024-06 --no-signoff   # pack 3, mid-review
 ```
 
-That is the state every screenshot in `docs/screenshots/` was taken from, so the recording
+That is the state `make capture` and `make record` both assume, so the recording
 and the README agree.
 
 ---

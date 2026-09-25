@@ -7,31 +7,14 @@
 
 ![Review — the AI draft beside the current text, the figures the section was allowed to cite, and the verified badge](docs/screenshot-review.png)
 
-**▶ [60-second demo](docs/demo.webm)** — the full governance flow, recorded by driving the
-real app (`make record`). Assemble, review, edit with a tracked diff, watch it *refuse* to
-issue, waive the gaps with a reason, sign, verify the archive, and diff against the next
-month. The header badge in the recording reads `live · gpt-5.6-luna` — that is real model
-output, every figure cross-checked.
+*The badge reads `live · gpt-5.6-luna` — that is real model output, every figure
+cross-checked against the bound data.*
 
-<details>
-<summary>The other five screens, in both themes</summary>
-
-| | dark | light |
-|---|---|---|
-| **Templates** — YAML editor, validated as you type | [png](docs/screenshots/templates-dark.png) | [png](docs/screenshots/templates-light.png) |
-| **Pack run** — binding status per section, gaps panel | [png](docs/screenshots/pack-run-dark.png) | [png](docs/screenshots/pack-run-light.png) |
-| **Review** — tracked edits, figure chips | [png](docs/screenshots/review-dark.png) | [png](docs/screenshots/review-light.png) |
-| **Sign-off** — the checklist, blocked on three gaps | [png](docs/screenshots/signoff-dark.png) | [png](docs/screenshots/signoff-light.png) |
-| **Archive** — hashes and a live integrity check | [png](docs/screenshots/archive-dark.png) | [png](docs/screenshots/archive-light.png) |
-| **Month diff** — identical structure, changed numbers | [png](docs/screenshots/month-diff-dark.png) | [png](docs/screenshots/month-diff-light.png) |
-| **/aurora** — all nine spec 00 A2 components | [png](docs/screenshots/aurora-dark.png) | [png](docs/screenshots/aurora-light.png) |
-
-These are produced by `make capture`, which does not just screenshot — it **fails** if a
-screen renders empty, shows an error state, scrolls horizontally, logs a console error, or
-is missing a claim the README makes about it. A screenshot of a broken page is worse than
-no screenshot.
-
-</details>
+**Want the full flow?** `make record` drives the real app end to end and writes a 60-second
+`docs/demo.webm`: assemble, review, edit with a tracked diff, watch it *refuse* to issue,
+waive the gaps with a reason, sign, verify the archive, diff against next month. `make
+capture` does the same for all six screens in both themes. Neither artefact is committed —
+they are ~12 MB of binaries that regenerate in under a minute, and a clone should be cheap.
 
 ---
 
@@ -260,8 +243,8 @@ now passes **against a real model** as well as the mock.
 | **Live LLM path** | ✅ **run and measured** against `gpt-5.6-luna`: **87/87 figures verified, 100% fidelity**, one retry across twelve drafts, $0.0028 per pack. Evidence: `evals/results/fidelity-live-gpt-5.6-luna.json`. Mock remains the default and the only path CI runs |
 | **StatementLens ratios/flags** | ⚠️ computed in-repo to upstream's P4/P5 shapes; the live swap is one reader change — BLOCKERS **B4** |
 | **`numcheck` upstream** | ⚠️ belongs in StatementLens (its P6). If it writes its own, one of the two has to go — BLOCKERS **B4** |
-| Screens verified headless, both themes | ✅ `make capture` — 7 screens × 2 themes, asserted, not just photographed |
-| Demo video | ✅ `docs/demo.webm` — 60s, recorded from the real app via `make record`. Un-narrated; the voiceover script is `docs/DEMO_SCRIPT.md` |
+| Screens verified headless, both themes | ✅ `make capture` — 7 screens × 2 themes, asserted rather than photographed; run it to regenerate |
+| Demo video | ✅ reproducible via `make record` — 60s, driven through the real app. Not committed (binary); the voiceover script is `docs/DEMO_SCRIPT.md` |
 
 Read [`BLOCKERS.md`](BLOCKERS.md) for the full list, including the Phase 0 mistake that
 shaped a day of planning and how it was corrected.

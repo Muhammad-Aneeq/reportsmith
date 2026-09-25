@@ -110,6 +110,7 @@ make demo                 # both periods end to end, then the month diff
 make test                 # 383 backend + 38 frontend
 make evals-gate           # the three CI gates + the self-test that proves one can fail
 make capture              # screenshot AND verify all six screens, both themes
+make record               # 60s demo video, driven through the real app
 ```
 
 For the live model: copy `.env.example` to `.env`, add `OPENAI_API_KEY`, set
@@ -127,7 +128,7 @@ For the live model: copy `.env.example` to `.env`, add `OPENAI_API_KEY`, set
 | Eval gates | fidelity 100% · gate self-test · state machine · E2E · golden files |
 | Live model | **87/87 figures verified** against `gpt-5.6-luna`, one retry in twelve drafts |
 | Cost to build | **$0.00** mock · **$0.0056** for the one live two-period run |
-| Not done | the demo **video** (footage recordable via `node frontend/record-demo.mjs`; shot list in `docs/DEMO_SCRIPT.md`) |
+| Demo artefacts | `make record` (60s video) and `make capture` (14 screenshots) regenerate them; deliberately not committed |
 
 ---
 
